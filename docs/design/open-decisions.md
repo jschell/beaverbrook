@@ -8,6 +8,12 @@ The [gameplay design review](../reviews/gameplay-design-review.md) adds G01–G2
 
 Resolve G01–G07 first: successful-path decision sequence, B/C strategy payoff, work and seasonal timing, resource purpose, required goal evidence, observable victory, and a complete recovery path. The existing tables below remain useful rule questions, but answering numerical costs alone will not establish engaging choices.
 
+## Resolution options now available
+
+The [core scenario options](riverbank-refuge-resolution-options.md) and [supporting gameplay options](supporting-gameplay-options.md) cover all G01–G21 findings with alternatives, tradeoffs, recommendations and required evidence. They provide the next decision material; all findings remain open.
+
+Recommended candidate: fixed preparation/event stages, free inspection, authored placement slots, setup-versus-route effort at B/C, minimal resources, checklist victory and an explicit salvage/relocation recovery path. This package is proposed, not selected. A shorter single-decision tutorial is the fallback if extra choices feel forced.
+
 ## Resolve before a playable experiment
 
 | Question | Current proposal | Needed design output |

@@ -21,6 +21,13 @@ The [2026-11-09 gameplay design review](reviews/gameplay-design-review.md) audit
 
 These are review findings and recommendations; they do not replace the baseline rules or claim player-test evidence. Start with G01–G07 before treating Riverbank Refuge as a coherent paper-playable scenario.
 
+## Resolving the gaps
+
+- [Core scenario options](design/riverbank-refuge-resolution-options.md) — G01–G10 and G15: choices, economy, evidence, victory and recovery.
+- [Supporting gameplay options](design/supporting-gameplay-options.md) — G11–G14 and G16–G21: opening, family, transfer, difficulty, ecology and later modes.
+
+Each includes alternatives, tradeoffs, a recommended candidate and required follow-up artifacts. Recommendations remain unselected; the imported baseline is unchanged.
+
 ## Supporting material
 
 | Document | Status and use |

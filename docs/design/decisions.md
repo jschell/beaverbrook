@@ -50,6 +50,12 @@ The [gameplay design review](../reviews/gameplay-design-review.md) records 21 op
 
 No new gameplay mechanics have been selected by the review. The [five-packet design work plan](../reviews/gameplay-design-work-plan.md) is recommended follow-up. Inherited directions and the A/B experiment split above remain proposed.
 
+## Resolution options — 2026-11-09
+
+Added [core scenario options](riverbank-refuge-resolution-options.md) and [supporting gameplay options](supporting-gameplay-options.md). They document candidate packages rather than changing the baseline. In particular, fewer resources, fixed novice capability and staged time are recommendations that would require reconciliation with the inherited rules if selected.
+
+Status: alternatives documented for G01–G21; selection, scenario specification and paper walkthroughs pending. No gap is closed and no additional gameplay subsystem is committed.
+
 ## Current authorization boundary
 
 Continue documentation review and design refinement. Do not create a playable prototype, scaffold a project, choose dependencies through implementation, or configure deployment until the user explicitly authorizes building. No design completeness or implementation readiness is claimed.

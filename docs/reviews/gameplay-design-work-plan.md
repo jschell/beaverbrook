@@ -117,4 +117,6 @@ Family generations, detailed skills, sandbox and a full campaign stay deferred. 
 
 For each packet, record proposed choices, rejected alternatives with reasons, remaining assumptions and whether findings are still open. Update the decision register only when a proposal is actually selected. Link the relevant finding IDs rather than copying a second competing gap list.
 
-Current state: **all five packets pending; all G01–G21 findings open.**
+Current state: **options documented; all five packets still require selected rules/artifacts and all G01–G21 findings remain open.**
+
+See [core options](../design/riverbank-refuge-resolution-options.md) and [supporting options](../design/supporting-gameplay-options.md). These supply alternatives and recommendations for the packets; completed rule sheets and verified walkthroughs are still pending.

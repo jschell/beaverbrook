@@ -48,3 +48,7 @@ No gameplay implementation, balancing exercise, external research verification o
 Added [gameplay design review](reviews/gameplay-design-review.md) and [design work plan](reviews/gameplay-design-work-plan.md), based on the Beaverbrook repository at [89c067b](https://github.com/jschell/beaverbrook/commit/89c067b51598f9a280a90e7fe212d559cec2d3cf). Updated navigation, the decision register and open-decision backlog to point to the review.
 
 This is an internal documentation synthesis. No new external gameplay or ecology sources were verified, no playtest or balance simulation was performed, and no rules were silently adopted. Original imported design and reference text was retained.
+
+## Gap resolution options — 2026-11-09
+
+Added [core scenario options](design/riverbank-refuge-resolution-options.md) and [supporting gameplay options](design/supporting-gameplay-options.md), based on the [review baseline](https://github.com/jschell/beaverbrook/commit/4759112b41462fc85c3367ee7c25de9a62b439da). These are original design proposals synthesized from existing gaps, not external research findings. Updated navigation, status and work-plan links. No trial budgets, scenario rules, implementation or playtest results were adopted.
