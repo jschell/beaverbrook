@@ -39,3 +39,7 @@ Eight rule tests cover both successful shelter paths, reserve/shortcut outcomes,
 ## Known simplifications
 
 Water levels change immediately rather than using fluid simulation. Scene heights and visual footprint are illustrative; authored site properties decide outcomes. Feedback panels show all essential evidence. The compatibility renderer favors broad device support over exact GPU shading. Primitive beavers and shelters are placeholders.
+
+## Water clarity update
+
+Low water now stays above the visible bed/terrain instead of disappearing underneath it. A blue channel and pond persist at every stage; tan margins show exposed bank. Labeled low/normal/high water stakes and free preview controls support comparison without changing work, supplies or the game stage. Entrance text distinguishes shallow and deep placements. These are authored visual reference levels, not measured river elevations. Eleven tests pass, including regression checks for visible low-water placement. Browser checks used the compatibility view; GPU rendering remains unverified in this environment.
