@@ -120,3 +120,9 @@ For each packet, record proposed choices, rejected alternatives with reasons, re
 Current state: **options documented; all five packets still require selected rules/artifacts and all G01–G21 findings remain open.**
 
 See [core options](../design/riverbank-refuge-resolution-options.md) and [supporting options](../design/supporting-gameplay-options.md). These supply alternatives and recommendations for the packets; completed rule sheets and verified walkthroughs are still pending.
+
+## Candidate progress — 2026-11-09
+
+Packets 1–3 now have a concrete proposed [rule sheet](../design/riverbank-refuge-paper-candidate.md) and [worked paths](../design/riverbank-refuge-paper-walkthroughs.md). Their budgets were checked at the desk; this is not independent playtesting or confirmation of fun. Rules remain a candidate, not selected production scope.
+
+The earlier completion record describes the options stage. Current status: candidate artifacts drafted for packets 1–3; review/iteration pending. Packets 4–5 still need a full storyboard, contrasting reach and observation/experiment plan. All G findings remain open.

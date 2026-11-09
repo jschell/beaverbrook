@@ -14,6 +14,12 @@ The [core scenario options](riverbank-refuge-resolution-options.md) and [support
 
 Recommended candidate: fixed preparation/event stages, free inspection, authored placement slots, setup-versus-route effort at B/C, minimal resources, checklist victory and an explicit salvage/relocation recovery path. This package is proposed, not selected. A shorter single-decision tutorial is the fallback if extra choices feel forced.
 
+## Concrete candidate now available
+
+The [v0.1 rule sheet](riverbank-refuge-paper-candidate.md) and [walkthroughs](riverbank-refuge-paper-walkthroughs.md) supply a proposed cost/stage/site contract and concrete success/recovery paths. Previously listed questions now have trial answers within this candidate; these are not final decisions.
+
+Next priorities: examine whether nook/reserve outcomes justify the timing tradeoff, storyboard actual choices and feedback, create a contrasting reach, and review novice understanding. Do not close gaps based on arithmetic alone.
+
 ## Resolve before a playable experiment
 
 | Question | Current proposal | Needed design output |

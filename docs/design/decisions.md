@@ -56,6 +56,14 @@ Added [core scenario options](riverbank-refuge-resolution-options.md) and [suppo
 
 Status: alternatives documented for G01–G21; selection, scenario specification and paper walkthroughs pending. No gap is closed and no additional gameplay subsystem is committed.
 
+## Paper candidate v0.1 — 2026-11-09
+
+Created [concrete candidate rules](riverbank-refuge-paper-candidate.md) and [walkthroughs](riverbank-refuge-paper-walkthroughs.md). This instantiates the recommended package for design evaluation; it does not assert user selection or production approval.
+
+Within this candidate only: finite preparation/recovery stages; W/S resource abstraction; fixed novice; authored entrance slots; checklist victory; bounded relocation-only tutorial aid. New optional early nook/later reserve outcomes make timing matter and remain especially provisional.
+
+The candidate rule sheet governs its named walkthroughs. Earlier baseline and options remain available for comparison. G01–G10/G15 now have candidate specification evidence; all findings remain open pending review and appropriate testing.
+
 ## Current authorization boundary
 
 Continue documentation review and design refinement. Do not create a playable prototype, scaffold a project, choose dependencies through implementation, or configure deployment until the user explicitly authorizes building. No design completeness or implementation readiness is claimed.

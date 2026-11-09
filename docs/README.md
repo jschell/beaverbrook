@@ -28,6 +28,12 @@ These are review findings and recommendations; they do not replace the baseline 
 
 Each includes alternatives, tradeoffs, a recommended candidate and required follow-up artifacts. Recommendations remain unselected; the imported baseline is unchanged.
 
+## Concrete paper candidate
+
+[Riverbank Refuge v0.1](design/riverbank-refuge-paper-candidate.md) instantiates the recommended options with trial rules, site/evidence tables, stage budgets and action costs. [Walkthroughs and desk checks](design/riverbank-refuge-paper-walkthroughs.md) document B/C success, A recovery, C entrance correction and invalid advances.
+
+This is a named proposal for review, not adopted production rules. It includes explicitly new optional nook/reserve outcomes to test the timing tradeoff. Existing alternatives remain available; no player testing has occurred.
+
 ## Supporting material
 
 | Document | Status and use |
