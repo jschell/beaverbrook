@@ -2,7 +2,7 @@
 
 A proposed browser strategy game about guiding a beaver family to a safe home by reading river clues, choosing a suitable shelter, and adapting to seasonal change.
 
-**Current phase: design and documentation only. No implementation has started or is authorized by this documentation import.** The working name, rules, scope and technology preferences remain subject to review and playtesting.
+**Current phase: first basic playable experiment.** The user authorized the first Three.js/vanilla-JS test on 2026-11-09. The working name, rules, scope and technology preferences remain subject to review and playtesting.
 
 The design targets curious players around ages 8–10+ and adults, with short, approachable scenarios and optional depth. Building a dam is one possible response to a river; choosing a bank den, a sheltered lodge or another reach can be the better decision.
 
@@ -11,7 +11,7 @@ The design targets curious players around ages 8–10+ and adults, with short, a
 - [Documentation guide](docs/README.md) — reading order and document status.
 - [Design brief](docs/design/design-brief.md) — promise, pillars and proposed format.
 - [Decision register](docs/design/decisions.md) — inherited direction, scope boundaries and conflicts resolved for planning.
-- [Riverbank Refuge](docs/design/first-scenario.md) — recommended first playable experiment, pending authorization to build.
+- [Riverbank Refuge](docs/design/first-scenario.md) — original first-scenario design.
 - [Gameplay design review](docs/reviews/gameplay-design-review.md) — gaps in choices, pacing, recovery and progression.
 - [Open decisions](docs/design/open-decisions.md) — what still needs design work.
 - [Source provenance](docs/sources.md) — import mapping and pinned source revision.
@@ -26,7 +26,7 @@ River Sense improves interpretation and forecasting; it does not change physical
 
 The design proposes two independent experiments: **River Sense and shelter choice** first, and **dam placement with readable water effects** separately. An integrated MVP remains conditional on those experiments being useful and enjoyable.
 
-Future platform preferences are an offline-first desktop/mobile browser game, static hosting, local saves and simple HTML/CSS/JavaScript. Rendering, save details and deployment choices are unresolved. There is no runnable game or setup procedure yet.
+The first test uses Three.js and vanilla HTML/CSS/JavaScript, with a deterministic rules module and static hosting. Run `npm ci`, `npm test`, and `npm run build`; serve `dist/` over HTTP and open `/playtest/`. See [playtest instructions](playtest/README.md). This first slice has fixed supplies and shelter selection; materials gathering and dam building are deferred. There is no PWA or persistent save yet.
 
 ## Origin
 

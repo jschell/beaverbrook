@@ -1,0 +1,12 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {initial,act,advance,goals} from '../playtest/rules.mjs';
+const run=(s,actions)=>actions.reduce((s,a)=>{const r=a==='advance'?advance(s):act(s,a);assert.equal(r.ok,true,`${a}: ${r.message}`);return r.state;},s);
+test('bank nook survives and provides food',()=>{const s=run(initial(),['build:B','nook','advance','food','advance']);assert.equal(s.stage,'complete');assert.equal(s.s,2);assert.equal(s.w,1);assert.ok(s.nook);});
+test('deep pocket supports reserve without disturbing reeds',()=>{const s=run(initial(),['build:C','advance','food','reserve','advance']);assert.equal(s.stage,'complete');assert.equal(s.w,0);assert.equal(s.s,2);assert.ok(!s.shortcut);});
+test('exposed lodge salvages to bank with restricted credit',()=>{const s=run(initial(),['build:A','advance','salvage','build:B','food','advance']);assert.equal(s.stage,'complete');assert.equal(s.w,0);assert.equal(s.s,3);assert.equal(s.credit,0);});
+test('repair changes condition but cannot fix exposure',()=>{const s=run(initial(),['build:A','advance','repair']);assert.equal(s.damaged,false);assert.equal(advance(s).ok,false);assert.equal(goals(s)[1].ok,false);});
+test('shallow entrance must be adjusted',()=>{let s=run(initial(),['build:Cs','advance','food']);assert.equal(advance(s).ok,false);s=run(s,['adjust','advance']);assert.equal(s.stage,'complete');});
+test('invalid actions leave budget and state untouched',()=>{const s=initial();assert.deepEqual(act(s,'reserve').state,s);assert.equal(advance(s).ok,false);const c=run(s,['build:C']);assert.equal(act(c,'nook').ok,false);assert.equal(c.w,2);});
+test('bank shortcut allows reserve but disturbs reeds',()=>{const s=run(initial(),['build:B','shortcut','advance','food','reserve','advance']);assert.ok(s.shortcut&&s.reserve);assert.equal(s.s,2);});
+test('salvage cannot be repeated for profit',()=>{const s=run(initial(),['build:A','advance','salvage','build:B']);assert.equal(act(s,'salvage').ok,false);});

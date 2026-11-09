@@ -1,12 +1,11 @@
 # Beaverbrook repository guidance
 
-This repository is in design and documentation only mode, as requested on 2026-11-09.
+The user authorized the first basic Three.js/vanilla JavaScript playtest on 2026-11-09, superseding the earlier documentation-only boundary for this experiment.
 
-- Do not begin implementation unless the user explicitly authorizes building.
-- Allowed work: review, migrate, organize and refine Markdown design documents, research registers, acceptance criteria and design questions.
-- Do not add application code, project scaffolding, package manifests, build tooling, deployment workflows, executable prototypes or generated game assets during this phase.
-- Start with README.md, docs/README.md and docs/design/decisions.md.
-- Preserve the distinction between inherited design direction, proposals, illustrative examples, verified facts and open decisions.
-- Keep earlier explorations as references; do not silently expand MVP scope from them.
-- Preserve source attribution and update docs/sources.md when importing or adapting material.
-- Check relative links and documentation consistency for documentation changes. No implementation tests are needed for this documentation phase.
+- Scope: Riverbank Refuge shelter choice, clues, authored water-stage changes, work/supplies, recovery and local test export.
+- Keep gameplay rules separate from rendering and HTML controls.
+- Materials gathering, dam hydrology, procedural maps, family AI and a broader game remain deferred unless requested.
+- Start with README.md, playtest/README.md and docs/design/riverbank-refuge-paper-candidate.md.
+- Preserve the distinction between proposals, implemented test behavior and verified findings. No claim of enjoyable gameplay or biological fidelity without evidence.
+- Run npm test and npm run build for relevant changes. Browser verification must disclose WebGL/compatibility limits.
+- Keep Pages deployment limited to static playtest output. Do not upload player logs automatically.
