@@ -26,7 +26,7 @@ function render(){
  $('restart').onclick=()=>{record('restart');state=initial();snapshot=initial();history=[];preview=null;waterView=null;say('A new visit. Explore the evidence and choose where to settle.');render();};
  $('advance').onclick=()=>{if(state.stage==='prepare'&&state.home==='A'&&!window.confirm('The driftwood and current warn of flood damage here. Try this exposed site anyway?'))return;const r=advance(state);record('advance',{accepted:r.ok});if(r.ok){state=r.state;snapshot=structuredClone(state);history=[];preview=null;waterView=null;}say(r.message);render();};
  $('hint').onclick=()=>{const hints=selected==='A'?['Look for debris above today’s water.','The current crosses this lodge site. Stronger flow will strike it.','Compare Willow Bank or the sheltered pocket before building.']:selected==='B'?['Compare the chamber to the old flood line.','The bank is stable, but the food route is longer.','Keep 2 work after the flood for food, or plan a shortcut before it.']:['Look at the low-water mark beside the entrance.','The shallow slot will not keep the entrance underwater.','Choose the deep entrance, or spend 1 work to adjust a shallow one.'];say(hints[Math.min(hintLevel++,2)]);record('hint',{site:selected,level:hintLevel});};
- $('export').onclick=()=>{const blob=new Blob([JSON.stringify({version:'0.1.0',scenario:'Riverbank Refuge',state,events:log},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='beaverbrook-playtest.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);};
+ $('export').onclick=()=>{const blob=new Blob([JSON.stringify({version:'0.1.1',scenario:'Riverbank Refuge',state,events:log},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='beaverbrook-playtest.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);};
 // Rendering is a view of authored state. Water animation never decides game rules.
 const container=$('scene'),scene=new THREE.Scene();scene.background=new THREE.Color('#e6e9dc');
 const camera=new THREE.OrthographicCamera(-15,15,12,-12,.1,100);camera.position.set(19,23,26);camera.lookAt(0,0,0);
@@ -71,9 +71,6 @@ function drawCompatibility(){
  container.innerHTML=`<svg viewBox="0 0 ${w} ${h}" width="100%" height="100%" role="img" aria-label="River diorama compatibility view">${html}</svg>`;
  container.querySelector('svg').onclick=e=>{const marker=e.target.closest('[data-site]');if(marker)select(marker.dataset.site);};
 }
-if(renderer){renderer.setPixelRatio(Math.min(window.devicePixelRatio,1.7));renderer.setClearColor('#e6e9dc');renderer.outputColorSpace=THREE.SRGBColorSpace;container.append(renderer.domElement);scene.add(new THREE.HemisphereLight('#fffbe5','#69725c',2.5));const light=new THREE.DirectionalLight('#fff3d4',3);light.position.set(-8,18,8);scene.add(light);
- const resize=()=>{const w=container.clientWidth,h=container.clientHeight;renderer.setSize(w,h,false);const aspect=w/h;const span=12.5;camera.left=-span*aspect;camera.right=span*aspect;camera.top=span;camera.bottom=-span;camera.updateProjectionMatrix();draw();};new ResizeObserver(resize).observe(container);
- const ray=new THREE.Raycaster();renderer.domElement.addEventListener('pointerup',e=>{const r=renderer.domElement.getBoundingClientRect();ray.setFromCamera(new THREE.Vector2((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1),camera);const hit=ray.intersectObjects(markers);if(hit[0])select(hit[0].object.userData.site);});resize();}
 
 const overlay=document.createElement('div');overlay.className='water-overlays';overlay.setAttribute('aria-hidden','true');container.after(overlay);
 function referencePosition(){const [x,z]=loc[selected];return [x+1.6,z-1.2];}
@@ -83,6 +80,10 @@ function drawWaterLabels(){const w=container.clientWidth,h=container.clientHeigh
 }
 for(const b of document.querySelectorAll('[data-water]'))b.onclick=()=>{waterView=b.dataset.water;record('water-preview',{view:waterView});render();};
 $('water-current').onclick=()=>{waterView=null;render();};
+
+if(renderer){renderer.setPixelRatio(Math.min(window.devicePixelRatio,1.7));renderer.setClearColor('#e6e9dc');renderer.outputColorSpace=THREE.SRGBColorSpace;container.append(renderer.domElement);scene.add(new THREE.HemisphereLight('#fffbe5','#69725c',2.5));const light=new THREE.DirectionalLight('#fff3d4',3);light.position.set(-8,18,8);scene.add(light);
+ const resize=()=>{const w=container.clientWidth,h=container.clientHeight;renderer.setSize(w,h,false);const aspect=w/h;const span=12.5;camera.left=-span*aspect;camera.right=span*aspect;camera.top=span;camera.bottom=-span;camera.updateProjectionMatrix();draw();};new ResizeObserver(resize).observe(container);
+ const ray=new THREE.Raycaster();renderer.domElement.addEventListener('pointerup',e=>{const r=renderer.domElement.getBoundingClientRect();ray.setFromCamera(new THREE.Vector2((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1),camera);const hit=ray.intersectObjects(markers);if(hit[0])select(hit[0].object.userData.site);});resize();}
 
 if(!renderer)new ResizeObserver(()=>draw()).observe(container);
 record('start');render();

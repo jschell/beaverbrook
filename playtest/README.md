@@ -43,3 +43,7 @@ Water levels change immediately rather than using fluid simulation. Scene height
 ## Water clarity update
 
 Low water now stays above the visible bed/terrain instead of disappearing underneath it. A blue channel and pond persist at every stage; tan margins show exposed bank. Labeled low/normal/high water stakes and free preview controls support comparison without changing work, supplies or the game stage. Entrance text distinguishes shallow and deep placements. These are authored visual reference levels, not measured river elevations. Eleven tests pass, including regression checks for visible low-water placement. Browser checks used the compatibility view; GPU rendering remains unverified in this environment.
+
+## WebGL startup correction
+
+Moved renderer startup after water-overlay creation and preview control binding. Previously, a successful WebGL renderer could draw before the overlay existed, throwing a ReferenceError and leaving Low/Normal/High controls disconnected. A new app-entrypoint regression test reproduces the former failure with a successful-renderer double and checks all three actual water mesh transforms and unchanged game budgets. Twelve tests pass. The regression test verifies startup/control wiring, not GPU pixels; browser visual verification remains on the compatibility path.
