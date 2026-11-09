@@ -2,12 +2,13 @@
 
 A proposed browser strategy game about guiding a beaver family to a safe home by reading river clues, choosing a suitable shelter, and adapting to seasonal change.
 
-**Current phase: first basic playable experiment.** The user authorized the first Three.js/vanilla-JS test on 2026-11-09. The working name, rules, scope and technology preferences remain subject to review and playtesting.
+**Current phase: First Creek building experiment (0.2.0).** The user authorized the first Three.js/vanilla-JS test on 2026-11-09. The working name, rules, scope and technology preferences remain subject to review and playtesting.
 
 The design targets curious players around ages 8–10+ and adults, with short, approachable scenarios and optional depth. Building a dam is one possible response to a river; choosing a bank den, a sheltered lodge or another reach can be the better decision.
 
 ## Start here
 
+- [First Creek playtest](playtest/creek.html) — gather, haul, build a dam and lodge; [instructions](playtest/FIRST-CREEK.md).
 - [Documentation guide](docs/README.md) — reading order and document status.
 - [Design brief](docs/design/design-brief.md) — promise, pillars and proposed format.
 - [Decision register](docs/design/decisions.md) — inherited direction, scope boundaries and conflicts resolved for planning.
@@ -24,9 +25,9 @@ River Sense improves interpretation and forecasting; it does not change physical
 
 ## Scope
 
-The design proposes two independent experiments: **River Sense and shelter choice** first, and **dam placement with readable water effects** separately. An integrated MVP remains conditional on those experiments being useful and enjoyable.
+The default First Creek experiment now connects material gathering and hauling with a functional dam, a source-connected pond, a lodge, food caching and repair supplies. Riverbank Refuge remains a separate shelter-choice experiment. Both are trial gameplay, not an approved full-game MVP.
 
-The first test uses Three.js and vanilla HTML/CSS/JavaScript, with a deterministic rules module and static hosting. Run `npm ci`, `npm test`, and `npm run build`; serve `dist/` over HTTP and open `/playtest/`. See [playtest instructions](playtest/README.md). This first slice has fixed supplies and shelter selection; materials gathering and dam building are deferred. There is no PWA or persistent save yet.
+The tests use Three.js and vanilla HTML/CSS/JavaScript, deterministic rule modules and static hosting. Run `npm ci`, `npm test`, and `npm run build`; serve `dist/` over HTTP and open `/playtest/creek.html`. See [First Creek instructions](playtest/FIRST-CREEK.md) and [shelter-test instructions](playtest/README.md). There is no PWA or persistent save yet.
 
 ## Origin
 

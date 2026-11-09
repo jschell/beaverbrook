@@ -69,3 +69,9 @@ The candidate rule sheet governs its named walkthroughs. Earlier baseline and op
 The user authorized the basic playable experiment on 2026-11-09; Riverbank Refuge is implemented. The earlier documentation-only boundary is superseded for that experiment.
 
 The user subsequently directed initial gameplay toward material collection, dam building, an associated lodge and useful supporting items. [First Creek gathering/building design](first-creek-gathering-and-building.md) develops this next-slice direction. Treat source yields, transport formulas and recipes as proposals; the existing playtest is unchanged by this design update. River Sense supports the building loop, and unsuitable-river/no-dam scenarios remain later content.
+
+## First Creek implementation — 0.2.0
+
+The user explicitly requested building the next slice. [First Creek](../../playtest/FIRST-CREEK.md) now implements finite wood/mud/food sources, local cargo and job inventories, two-unit loads, two dam crossings, framework/seal construction, connected terrain filling, two lodge sites, food cache, repair pile, optional rain and reversible crest changes.
+
+Trial implementation choices: no hard work budget; per-load cutting costs; a small weighted-grid route solver instead of authored route polylines; instantaneous connected basin changes; flat low/high crest levels; full action undo. This is a bounded transport query, not family AI. The implementation guide governs these trials; earlier route and cost examples are not silently promoted to facts. No player enjoyment or GPU rendering validation is claimed.

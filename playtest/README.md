@@ -1,4 +1,4 @@
-# Riverbank Refuge — test area
+# Riverbank Refuge — shelter test
 
 Version 0.1.0. Three.js 0.187.0 plus native HTML/CSS/JavaScript. No UI framework, backend, accounts or automatic telemetry.
 
@@ -47,3 +47,8 @@ Low water now stays above the visible bed/terrain instead of disappearing undern
 ## WebGL startup correction
 
 Moved renderer startup after water-overlay creation and preview control binding. Previously, a successful WebGL renderer could draw before the overlay existed, throwing a ReferenceError and leaving Low/Normal/High controls disconnected. A new app-entrypoint regression test reproduces the former failure with a successful-renderer double and checks all three actual water mesh transforms and unchanged game budgets. Twelve tests pass. The regression test verifies startup/control wiring, not GPU pixels; browser visual verification remains on the compatibility path.
+
+
+## First Creek 0.2.0
+
+The default playtest is now [First Creek](creek.html): gather and haul materials, seal a dam, establish a lodge and cache, and repair rain damage. See [FIRST-CREEK.md](FIRST-CREEK.md) for recipes, controls, and test steps. This shelter test remains available at `playtest/index.html`.

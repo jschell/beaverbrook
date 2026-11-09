@@ -60,3 +60,7 @@ Added [Riverbank Refuge v0.1](design/riverbank-refuge-paper-candidate.md) and [w
 ## First playable experiment — 2026-11-09
 
 The user authorized a basic Three.js/vanilla JavaScript test. Added the Riverbank Refuge shelter loop under playtest/, a static build, eight rule tests and an automatic Pages workflow. Materials gathering and dam building remain deferred. The private test site deployed successfully. GitHub Actions tests/build passed; Pages deployment returned 404 and requested repository Pages enablement. Browser verification completed the bank/nook/food path through the compatibility renderer because WebGL is disabled in the cloud browser. No player testing or full-GPU rendering verification is claimed.
+
+## First Creek implementation — 0.2.0
+
+Implemented the user-requested next slice from first-creek-gathering-and-building.md. Added original vanilla JavaScript rules/UI and a Three.js scene, finite local resource handling, deterministic connected basin filling and weighted-grid haul routes. No third-party art was used; Three.js remains version-pinned with its license copied into the build. The [implementation guide](../playtest/FIRST-CREEK.md) records trial rules and verification limits. Existing Riverbank Refuge remains available.
