@@ -12,6 +12,7 @@ The design targets curious players around ages 8–10+ and adults, with short, a
 - [Design brief](docs/design/design-brief.md) — promise, pillars and proposed format.
 - [Decision register](docs/design/decisions.md) — inherited direction, scope boundaries and conflicts resolved for planning.
 - [Riverbank Refuge](docs/design/first-scenario.md) — recommended first playable experiment, pending authorization to build.
+- [Gameplay design review](docs/reviews/gameplay-design-review.md) — gaps in choices, pacing, recovery and progression.
 - [Open decisions](docs/design/open-decisions.md) — what still needs design work.
 - [Source provenance](docs/sources.md) — import mapping and pinned source revision.
 

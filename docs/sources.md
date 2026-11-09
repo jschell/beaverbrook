@@ -42,3 +42,9 @@ Treat this repository as the proposed home for ongoing Beaverbrook design refine
 ## Review limitations
 
 No gameplay implementation, balancing exercise, external research verification or player testing was performed. Relative links and document inventory are checked as part of this documentation import. Earlier hour estimates remain speculative historical notes and are not a schedule.
+
+## Gameplay review — 2026-11-09
+
+Added [gameplay design review](reviews/gameplay-design-review.md) and [design work plan](reviews/gameplay-design-work-plan.md), based on the Beaverbrook repository at [89c067b](https://github.com/jschell/beaverbrook/commit/89c067b51598f9a280a90e7fe212d559cec2d3cf). Updated navigation, the decision register and open-decision backlog to point to the review.
+
+This is an internal documentation synthesis. No new external gameplay or ecology sources were verified, no playtest or balance simulation was performed, and no rules were silently adopted. Original imported design and reference text was retained.

@@ -44,6 +44,12 @@
 | Mature beavers interpret clues better, yet tutorial needs fair warnings | Baseline clues and essential risk feedback remain available; advanced support must not solve the whole choice |
 | Side-channel success has an “optional” low-water check | Low-water access is a base success requirement; its evaluation cannot be optional if claiming success. Exact placement/stage rules remain open |
 
+## Gameplay audit status — 2026-11-09
+
+The [gameplay design review](../reviews/gameplay-design-review.md) records 21 open gaps in the imported baseline. It finds that the intended B/C tradeoff, successful-path decision sequence, turn economy and recovery rules are not specified sufficiently to evaluate gameplay. This is a documentation assessment, not a playtest result.
+
+No new gameplay mechanics have been selected by the review. The [five-packet design work plan](../reviews/gameplay-design-work-plan.md) is recommended follow-up. Inherited directions and the A/B experiment split above remain proposed.
+
 ## Current authorization boundary
 
 Continue documentation review and design refinement. Do not create a playable prototype, scaffold a project, choose dependencies through implementation, or configure deployment until the user explicitly authorizes building. No design completeness or implementation readiness is claimed.

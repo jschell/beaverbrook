@@ -15,6 +15,12 @@
 | [MVP and playtesting](design/mvp-and-playtesting.md) | Separate experiments and integration gates |
 | [Open decisions](design/open-decisions.md) | Unresolved rules and next design work |
 
+## Gameplay review
+
+The [2026-11-09 gameplay design review](reviews/gameplay-design-review.md) audits the imported baseline and records 21 open findings. Its [design work plan](reviews/gameplay-design-work-plan.md) groups the proposed follow-up into five documentation packets.
+
+These are review findings and recommendations; they do not replace the baseline rules or claim player-test evidence. Start with G01–G07 before treating Riverbank Refuge as a coherent paper-playable scenario.
+
 ## Supporting material
 
 | Document | Status and use |

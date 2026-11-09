@@ -2,6 +2,12 @@
 
 **Status:** unresolved. Completing these documents does not authorize implementation.
 
+## Gameplay review priorities
+
+The [gameplay design review](../reviews/gameplay-design-review.md) adds G01–G21 as stable finding IDs. The [work plan](../reviews/gameplay-design-work-plan.md) is the detailed follow-up; all findings remain open.
+
+Resolve G01–G07 first: successful-path decision sequence, B/C strategy payoff, work and seasonal timing, resource purpose, required goal evidence, observable victory, and a complete recovery path. The existing tables below remain useful rule questions, but answering numerical costs alone will not establish engaging choices.
+
 ## Resolve before a playable experiment
 
 | Question | Current proposal | Needed design output |
