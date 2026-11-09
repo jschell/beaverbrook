@@ -64,6 +64,8 @@ Within this candidate only: finite preparation/recovery stages; W/S resource abs
 
 The candidate rule sheet governs its named walkthroughs. Earlier baseline and options remain available for comparison. G01–G10/G15 now have candidate specification evidence; all findings remain open pending review and appropriate testing.
 
-## Current authorization boundary
+## Current direction and authorization
 
-Continue documentation review and design refinement. Do not create a playable prototype, scaffold a project, choose dependencies through implementation, or configure deployment until the user explicitly authorizes building. No design completeness or implementation readiness is claimed.
+The user authorized the basic playable experiment on 2026-11-09; Riverbank Refuge is implemented. The earlier documentation-only boundary is superseded for that experiment.
+
+The user subsequently directed initial gameplay toward material collection, dam building, an associated lodge and useful supporting items. [First Creek gathering/building design](first-creek-gathering-and-building.md) develops this next-slice direction. Treat source yields, transport formulas and recipes as proposals; the existing playtest is unchanged by this design update. River Sense supports the building loop, and unsuitable-river/no-dam scenarios remain later content.

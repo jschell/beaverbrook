@@ -2,6 +2,10 @@
 
 **Phase:** first basic playable experiment, authorized on 2026-11-09. The [playtest](../playtest/README.md) implements the Riverbank Refuge candidate for testing. Other design documents remain proposals, not a finished implementation specification.
 
+## Next gameplay target
+
+[First Creek: gathering, hauling, dam and lodge](design/first-creek-gathering-and-building.md) records the user's requested building-first direction. Riverbank Refuge remains the existing shelter test. New source traits, recipes and transport costs are proposals awaiting a complete scenario budget.
+
 ## Read in this order
 
 | Document | Purpose |
