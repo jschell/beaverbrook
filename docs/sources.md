@@ -56,3 +56,7 @@ Added [core scenario options](design/riverbank-refuge-resolution-options.md) and
 ## Paper candidate — 2026-11-09
 
 Added [Riverbank Refuge v0.1](design/riverbank-refuge-paper-candidate.md) and [walkthroughs](design/riverbank-refuge-paper-walkthroughs.md), developed from the options at [5b43140](https://github.com/jschell/beaverbrook/commit/5b43140e6a482720fbcf4f940acf458228063dfc). These introduce fictional trial budgets and explicitly proposed optional projects for desk evaluation. Arithmetic and rule paths were reviewed; no implementation, external ecology verification or player testing occurred. Updated navigation/status while preserving the original imported design documents.
+
+## First playable experiment — 2026-11-09
+
+The user authorized a basic Three.js/vanilla JavaScript test. Added the Riverbank Refuge shelter loop under playtest/, a static build, eight rule tests and an automatic Pages workflow. Materials gathering and dam building remain deferred. The private test site deployed successfully. GitHub Actions tests/build passed; Pages deployment returned 404 and requested repository Pages enablement. Browser verification completed the bank/nook/food path through the compatibility renderer because WebGL is disabled in the cloud browser. No player testing or full-GPU rendering verification is claimed.

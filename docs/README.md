@@ -1,6 +1,6 @@
 # Documentation guide
 
-**Phase:** documentation only. These documents describe proposed behavior, not a finished implementation specification or an instruction to start building.
+**Phase:** first basic playable experiment, authorized on 2026-11-09. The [playtest](../playtest/README.md) implements the Riverbank Refuge candidate for testing. Other design documents remain proposals, not a finished implementation specification.
 
 ## Read in this order
 
