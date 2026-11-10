@@ -4,11 +4,11 @@
 
 ## First Creek implementation
 
-Version 0.2.0 implements the gathering → hauling → dam → pond → lodge loop. See [controls, recipes and verification](../playtest/FIRST-CREEK.md). Earlier cost/route proposals below remain historical context; the implementation record names the adopted trial choices and limitations.
+Version 0.3.0 adds one forecast dry spell, a deepened entrance, feeding route, and an explicit outcome to the gathering → hauling → dam → pond → lodge loop. [Scenario rules and human-playtest questions](design/first-dry-spell.md) explain the two demonstrated approaches. See [controls, recipes and verification](../playtest/FIRST-CREEK.md). Earlier cost/route proposals below remain historical context; the implementation record names the adopted trial choices and limitations.
 
-## Next gameplay target
+## Earlier building proposal
 
-[First Creek: gathering, hauling, dam and lodge](design/first-creek-gathering-and-building.md) records the user's requested building-first direction. Riverbank Refuge remains the existing shelter test. New source traits, recipes and transport costs are proposals awaiting a complete scenario budget.
+[First Creek: gathering, hauling, dam and lodge](design/first-creek-gathering-and-building.md) records the user's requested building-first direction. Riverbank Refuge remains the existing shelter test. Its illustrative values remain historical proposals; the implementation guide records the adopted trial rules.
 
 ## Read in this order
 
@@ -60,3 +60,4 @@ This is a named proposal for review, not adopted production rules. It includes e
 The decision register records how this import reconciles the sources. The six dedicated design documents provide the proposed baseline. Earlier references preserve alternatives and background; they do not add requirements to the first experiment.
 
 “Proposed” is not “approved.” Illustrative game units are not balance values. Acceptance criteria describe future verification; no playtests or simulation checks have been performed. Research links are leads, not claims newly verified by this import.
+

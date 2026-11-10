@@ -75,3 +75,8 @@ The user subsequently directed initial gameplay toward material collection, dam 
 The user explicitly requested building the next slice. [First Creek](../../playtest/FIRST-CREEK.md) now implements finite wood/mud/food sources, local cargo and job inventories, two-unit loads, two dam crossings, framework/seal construction, connected terrain filling, two lodge sites, food cache, repair pile, optional rain and reversible crest changes.
 
 Trial implementation choices: no hard work budget; per-load cutting costs; a small weighted-grid route solver instead of authored route polylines; instantaneous connected basin changes; flat low/high crest levels; full action undo. This is a bounded transport query, not family AI. The implementation guide governs these trials; earlier route and cost examples are not silently promoted to facts. No player enjoyment or GPU rendering validation is claimed.
+
+
+## First dry spell implementation — 0.3.0
+
+The user requested proceeding from the compelling-gameplay assessment. [The first dry spell](first-dry-spell.md) now adds a forecasted, player-paced water change, deepened entrance, feeding route, food/vegetation tradeoff and explicit settlement outcome. The construction sandbox is preserved separately. Scope is one authored trial, with reversible weather/undo and finite sources; no campaign, hunger or new family AI. Automated/browser developer checks establish functioning paths, not enjoyment, ecological accuracy or validated balance. Human replay interest remains the next evidence gap.
