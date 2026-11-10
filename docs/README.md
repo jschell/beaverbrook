@@ -2,6 +2,10 @@
 
 **Phase:** first basic playable experiment, authorized on 2026-11-09. The [playtest](../playtest/README.md) implements the Riverbank Refuge candidate for testing. Other design documents remain proposals, not a finished implementation specification.
 
+## Proposed opening chapter
+
+[Learning at Willow Cove](design/willow-cove-tutorial.md) describes the family-lodge tutorial and its handoff to founding a home.
+
 ## First Creek implementation
 
 Version 0.4.0 adds [hauling channels and corrected food access](design/hauling-channels-demo.md). The header **Channel demo** opens a prebuilt finite-source settlement for quick digging/hauling/weather tests. This record supersedes the earlier food-flooding restriction and integer effort totals.
