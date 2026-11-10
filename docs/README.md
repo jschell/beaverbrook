@@ -4,6 +4,9 @@
 
 ## First Creek implementation
 
+Version 0.4.0 adds [hauling channels and corrected food access](design/hauling-channels-demo.md). The header **Channel demo** opens a prebuilt finite-source settlement for quick digging/hauling/weather tests. This record supersedes the earlier food-flooding restriction and integer effort totals.
+
+
 Version 0.3.0 adds one forecast dry spell, a deepened entrance, feeding route, and an explicit outcome to the gathering → hauling → dam → pond → lodge loop. [Scenario rules and human-playtest questions](design/first-dry-spell.md) explain the two demonstrated approaches. See [controls, recipes and verification](../playtest/FIRST-CREEK.md). Earlier cost/route proposals below remain historical context; the implementation record names the adopted trial choices and limitations.
 
 ## Earlier building proposal

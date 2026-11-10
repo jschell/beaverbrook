@@ -17,3 +17,17 @@ test('completed lodge keeps controls, forecast and scene synchronized through re
  await find('season-actions','Finish settlement trial').onclick();assert.equal(drawn.season,'complete');assert.match(el('outcome').text,/Low pond.*feeding route/);
  el('undo').onclick();assert.equal(drawn.season,'dry');assert.equal(el('outcome').children.length,0);
 });
+
+test('channel controls preview without spending, update the scene, and undo dry-spell deepening',async()=>{
+ class Element{constructor(){this.textContent='';this.children=[];this.disabled=false;this.dataset={};}append(...xs){this.children.push(...xs);}replaceChildren(...xs){this.children=xs;}setAttribute(){}get text(){return this.textContent+this.children.map(x=>x.text).join('');}}
+ const elements=new Map(),el=id=>{if(!elements.has(id))elements.set(id,new Element());return elements.get(id);};let drawn,options;
+ const context=vm.createContext({...rules,structuredClone,URLSearchParams,location:{search:'?mode=channels'},document:{getElementById:el,createElement:()=>new Element(),querySelectorAll:()=>[]},createCreekScene:()=>({mode:'test',update:(s,o)=>{drawn=structuredClone(s);options=o;},animateDelivery:async()=>{}})});
+ const src=(await readFile(new URL('../playtest/creek-app.mjs',import.meta.url),'utf8')).replace(/^import .*;\n/gm,'');vm.runInContext(src,context);
+ const find=(id,name)=>{const walk=e=>[e,...e.children.flatMap(walk)];const b=walk(el(id)).find(e=>e.textContent.startsWith(name));assert.ok(b,`${name} present`);assert.equal(b.disabled,false);return b;};
+ assert.equal(drawn.demo,true);assert.match(el('channel-details').text,/2.9 → 2.3/);const initial=structuredClone(drawn);
+ await find('channel-actions','Preview channel route').onclick();assert.deepEqual(drawn,initial);assert.equal(options.channelPreview,'east');
+ await find('channel-actions','Dig selected channel').onclick();assert.equal(drawn.channels.east,1);assert.equal(drawn.work,35);assert.equal(options.channelPreview,null);assert.match(el('channel-details').text,/0.55/);
+ await find('season-actions','Advance to dry spell').onclick();assert.match(el('channel-details').text,/too shallow/);
+ await find('channel-actions','Deepen selected channel').onclick();assert.equal(drawn.channels.east,2);assert.equal(rules.channelStatus(drawn,'east').usable,true);
+ el('undo').onclick();assert.equal(drawn.channels.east,1);assert.equal(rules.channelStatus(drawn,'east').usable,false);assert.match(el('channel-details').text,/too shallow/);
+});

@@ -80,3 +80,7 @@ Trial implementation choices: no hard work budget; per-load cutting costs; a sma
 ## First dry spell implementation — 0.3.0
 
 The user requested proceeding from the compelling-gameplay assessment. [The first dry spell](first-dry-spell.md) now adds a forecasted, player-paced water change, deepened entrance, feeding route, food/vegetation tradeoff and explicit settlement outcome. The construction sandbox is preserved separately. Scope is one authored trial, with reversible weather/undo and finite sources; no campaign, hunger or new family AI. Automated/browser developer checks establish functioning paths, not enjoyment, ecological accuracy or validated balance. Human replay interest remains the next evidence gap.
+
+## Hauling channel demo — 0.4.0
+
+The requested demo now includes authored channel excavation, connected water, before/after hauling previews, dry-spell depth loss and one deepening per cut. [Current rules and evidence](hauling-channels-demo.md) also remove the blanket flooded-food prohibition and feeding-route building-wood cost. High pond/live feeding is valid; the forced high-pond/cache pairing is superseded. Effort uses tenths to expose local route savings. Quick-demo setup replays legal actions and retains finite sources; no family AI or broader campaign is added. Passing developer checks do not establish balance or enjoyment.

@@ -1,5 +1,7 @@
 # First Creek: the first dry spell — 0.3.0
 
+**Historical version record:** [0.4.0 channel/food rules](hauling-channels-demo.md) supersede the flooded-food restriction, feeding-route wood cost and integer hauling totals below. High ponds can now support live feeding.
+
 Status: implemented trial scenario, authorized by the user's request to continue making the building loop interesting. This record governs the new scenario; the original 0.2.0 construction sandbox remains separately accessible. Numbers are fictional game units, not ecological predictions. Successful developer walkthroughs do not establish that the game is enjoyable.
 
 ## The question this slice tests
