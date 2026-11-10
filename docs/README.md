@@ -2,6 +2,10 @@
 
 **Phase:** first basic playable experiment, authorized on 2026-11-09. The [playtest](../playtest/README.md) implements the Riverbank Refuge candidate for testing. Other design documents remain proposals, not a finished implementation specification.
 
+## Repeatable gameplay scenarios
+
+[Scenario patterns and outcome rules](design/scenario-patterns-and-outcomes.md) defines outcome predicates, pattern composition, strategic alternatives, feasibility witnesses and story triggers. This remains a design proposal.
+
 ## Environment and resource regeneration
 
 [Vegetation, materials and wetland succession](design/vegetation-and-resource-succession.md) proposes environmental fields, plant traits, recruitment, recovery, succession and scalable state artifacts. This remains a design proposal.
