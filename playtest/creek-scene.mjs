@@ -56,12 +56,18 @@ export function createCreekScene(container,overlay,onSelect){
   for(const [barrierId,barrier] of barriers){const cross=CROSSINGS[barrierId];barrier.sections.forEach((n,i)=>{const cell=[cross.columns[i],cross.row];if(!n){const marker=mesh(new THREE.TorusGeometry(.25,.035,5,16),'#d8c58e',cell,1);marker.rotation.x=-Math.PI/2;return;}const top=(barrier.raised?2.65:2.05)*.65;for(let j=0;j<4;j++){const b=box(.98,.10,.13,'#785435',cell,top-.30+j*.13);b.rotation.y=(j%2?.1:-.1);}if(n===2)box(.98,.40,.48,'#978163',cell,top-.16);});}
   const lodge=lodgeDefinition(state);
   const shelters=state.shelters?Object.entries(state.shelters):[[state.lodgeSite,{stage:state.lodge,deep:state.deepEntrance}]];
-  for(const [id,shelter] of shelters){if(!shelter.stage)continue;const site=lodgeDefinition(state,id),y=terrainHeight(state,...site.cell)*.65;
+  for(const [id,shelter] of shelters){if(!shelter.stage)continue;const site=lodgeDefinition(state,id),y=(terrainHeight(state,...site.cell)+(shelter.elevated?.6:0))*.65;
+   if(shelter.elevated)mesh(new THREE.CylinderGeometry(.65,.9,.4,10),'#a18a62',site.cell,y-.2);
    mesh(new THREE.ConeGeometry(id==='bank'?.55:.8,1.3,10),shelter.stage===2?'#81603e':'#bd9d6c',site.cell,y+.65);
    if(shelter.stage===2){const inlet=mesh(new THREE.TorusGeometry(.24,.07,8,16),'#ead9ac',site.entrance,(terrainHeight(state,...site.entrance)-(shelter.deep?.35:0))*.65+.1);inlet.rotation.y=Math.PI/2;}
   }
   if(state.foodRoute){const cell=lodgeDefinition(state).cell;for(let i=0;i<3;i++)box(.18,.07,.25,'#d8c58e',[cell[0]+1+i*.35,cell[1]+.7],surface(cell)+.1);}
-  for(const [job,stock] of Object.entries(state.stock)){const cell=job==='dam'?cross.cell:lodge.cell;const off=job==='cache'?1.1:job==='reserve'?-1.1:.5;for(let i=0;i<Math.min(stock.wood,6);i++)box(.12,.12,.55,'#a47c47',[cell[0]+off,cell[1]+i*.13],surface(cell)+.2+i*.03);if(stock.mud)mesh(new THREE.SphereGeometry(.25,8,6),'#765a39',[cell[0]+off,cell[1]-.6],surface(cell)+.1);if(stock.food||job==='cache'&&state.cache)mesh(new THREE.SphereGeometry(.35,8,6),'#759049',[cell[0]+1.2,cell[1]+.5],surface(cell)+.2);}
+  for(const [job,stock] of Object.entries(state.stock)){if(state.dams&&job!=='cache')continue;const cell=job==='dam'?cross.cell:lodge.cell;const off=job==='cache'?1.1:job==='reserve'?-1.1:.5;for(let i=0;i<Math.min(stock.wood,6);i++)box(.12,.12,.55,'#a47c47',[cell[0]+off,cell[1]+i*.13],surface(cell)+.2+i*.03);if(stock.mud)mesh(new THREE.SphereGeometry(.25,8,6),'#765a39',[cell[0]+off,cell[1]-.6],surface(cell)+.1);if(stock.food||job==='cache'&&state.cache)mesh(new THREE.SphereGeometry(.35,8,6),'#759049',[cell[0]+1.2,cell[1]+.5],surface(cell)+.2);}
+  for(const depot of state.constructionDepots||[]){
+   const cell=depot.cell,y=surface(cell);
+   for(let i=0;i<Math.min(depot.stock.wood,8);i++)box(.16,.12,.6,'#bd955b',[cell[0]-.8,cell[1]+i*.15],y+.15);
+   if(depot.stock.mud)mesh(new THREE.SphereGeometry(.25,8,6),'#765a39',[cell[0]+.7,cell[1]-.5],y+.15);
+  }
   animal=new THREE.Group();world.add(animal);const pos=state.cargo?SOURCES[state.cargo.source].cell:state.lastRoute?.cells.at(-1)||[4,6];animal.position.copy(point(pos,surface(pos)+.15));
   const body=new THREE.Mesh(new THREE.SphereGeometry(.25,10,7),mat('#775337'));body.scale.set(1,1,1.45);body.position.y=.24;animal.add(body);const head=new THREE.Mesh(new THREE.SphereGeometry(.18,8,6),mat('#775337'));head.position.set(0,.35,-.32);animal.add(head);const tail=new THREE.Mesh(new THREE.SphereGeometry(.23,8,6),mat('#443d30'));tail.scale.set(.6,.25,1.4);tail.position.z=.4;animal.add(tail);if(state.cargo)box(.7,.10,.12,state.cargo.kind==='food'?'#7e9b46':state.cargo.kind==='mud'?'#644d36':'#d1ad77',[7,6],.45,animal);
  }

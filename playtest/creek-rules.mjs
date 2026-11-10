@@ -27,7 +27,7 @@ export const initialCreek=()=>({crossing:'narrows',lodgeSite:'willow',sections:[
 export const closed=s=>s.sections.every(n=>n===2);
 export const lodgeDefinition=(s,id=s.lodgeSite)=>s.siteDefinitions?.[id]||LODGES[id];
 export function waterState(s){
- const dry=s.season==='dry'||s.season==='complete',base=dry?.85:1;
+ const dry=s.season==='dry'||s.season==='complete',flood=s.season==='flood',base=flood?1.6:dry?.85:1;
  const wet=new Map();for(let z=0;z<SIZE.h;z++)wet.set(key(7,z),base);
  function fill(seeds,level,lastRow){
   level=Number(level.toFixed(2));
@@ -41,8 +41,8 @@ export function waterState(s){
  }
  if(s.terrain)fill(Array.from({length:SIZE.h},(_,z)=>[7,z]),base,SIZE.h);
  const dams=s.dams?Object.entries(s.dams):[[s.crossing,{sections:s.sections,raised:s.raised}]];
- for(const [id,dam] of dams)if(dam.sections.every(n=>n===2))fill([[7,0]],(dam.raised?2.65:2.05)-(dry?.3:0),CROSSINGS[id].row);
- const complete=closed(s),level=complete?(s.raised?2.65:2.05)-(dry?.3:0):base;
+ for(const [id,dam] of dams)if(dam.sections.every(n=>n===2))fill([[7,0]],(dam.raised?2.65:2.05)-(dry?.3:0)+(flood?.6:0),CROSSINGS[id].row);
+ const complete=closed(s),level=complete?(s.raised?2.65:2.05)-(dry?.3:0)+(flood?.6:0):base;
  return {wet,level:Number(level.toFixed(2)),complete,meadowFlooded:(wet.get(key(10,5))||0)>ELEVATIONS[5][10],downstream:base};
 }
 export function routeTo(s,sourceId,job){

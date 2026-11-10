@@ -70,3 +70,101 @@ test('all water surfaces derive from connected terrain and both barriers',()=>{
  assert.ok(both.creek.dams.narrows.sections.every(n=>n===2));assert.ok(both.creek.dams.bend.sections.every(n=>n===2));
  assert.ok(waterState(reachCreek(both)).wet.size>=waterState(reachCreek(meadow)).wet.size);
 });
+
+test('individual committed work steps reproduce a batch and can resume after reload',()=>{
+ let queued=apply(apply(freshReach(),queue('dam','narrows')),queue('entrance','willow'));
+ const batch=apply(queued,work);
+ let step=reachAct(queued,{type:'workStep'});
+ assert.equal(step.progressed,true);
+ assert.equal(step.state.creek.dams.narrows.sections[1],1);
+ assert.equal(step.state.depots['dam-narrows'].mud,2);
+ assert.equal(step.state.creek.sources.mudWest,18);
+ let s=loadReach(saveReach(step.state));
+ for(let i=0;i<20&&s.queue.length;i++){
+  const result=reachAct(s,{type:'workStep'});assert.equal(result.ok,true);s=result.state;
+  if(!result.progressed)break;
+ }
+ assert.deepEqual(s,batch);
+});
+test('project estimates are pure, credit deposits and use remembered source quantities',async()=>{
+ const {estimateProject}=await import('../playtest/reach-rules.mjs');
+ let s=apply(freshReach(),queue('shelter','bank'));
+ const before=saveReach(s),estimate=estimateProject(s,s.queue[0]);
+ assert.equal(saveReach(s),before);assert.equal(estimate.complete,true);
+ assert.equal(estimate.materials.wood,4);assert.equal(estimate.materials.mud,2);
+ assert.equal(estimate.work,15.2);
+ s=apply(s,{type:'workStep'});
+ const remaining=estimateProject(s,s.queue[0]);
+ assert.equal(remaining.materials.wood,2);assert.equal(remaining.deposit.wood,2);
+ assert.equal(remaining.work,estimate.work-(36-s.daylight));
+ let living=apply(freshReach(),queue('shelter','bank','trees'));
+ living.creek.sources.trees=0;living.patches.trees.biomass=0;
+ assert.equal(estimateProject(living,living.queue[0]).complete,true);
+ assert.equal(apply(living,work).harvested.wood,0);
+});
+test('reprioritizing and retargeting a blocked order preserves delivered materials',()=>{
+ let s=apply(freshReach(),queue('shelter','bank'));
+ s=apply(s,{type:'workStep'});
+ const deposit=structuredClone(s.depots['shelter-bank']);
+ s.creek.sources.fallen=0;
+ s=apply(s,queue('forage','brush'));
+ s=apply(s,{type:'prioritize',key:'forage-brush'});
+ assert.equal(s.queue[0].kind,'forage');
+ s=apply(s,{type:'source',key:'shelter-bank',source:'trees'});
+ assert.deepEqual(s.depots['shelter-bank'],deposit);
+ s=apply(s,work);
+ assert.equal(s.creek.shelters.bank.stage,2);
+ assert.equal(s.creek.stock.cache.food,12);
+ assert.equal(s.harvested.wood,4);
+ assert.equal(s.creek.sources.trees,8);
+});
+test('three settlement forms remain playable through three seasonal challenges',()=>{
+ for(const plan of Object.values(plans)){
+  let s=play(plan);
+  while(s.season<=9){
+   if(s.home==='willow'&&!s.creek.shelters.willow.elevated){s=apply(s,queue('chamber','willow'));s=apply(s,work);}
+   if(s.creek.stock.cache.food<6){
+    const c=reachCreek(s);
+    const source=['willow','brush','trees'].filter(id=>s.creek.sources[id]>=4).sort((a,b)=>s.patches[b].roots-s.patches[a].roots||routeTo(c,a,'cache').work-routeTo(c,b,'cache').work)[0];
+    assert.ok(source,'An accessible food source remains');
+    s=apply(s,queue('forage',source));s=apply(s,work);assert.equal(s.queue.length,0);
+   }
+   s=apply(s,advance);
+  }
+  assert.equal(s.season,10);assert.equal(s.consumed,18);assert.equal(s.challenge,'achieved');
+  assert.equal(s.creek.stock.cache.food,8+s.harvested.food-18);
+  assert.ok(viableHome(s));
+ }
+});
+
+test('the second challenge distinguishes a deep doorway from a dry chamber',async()=>{
+ const {chamberClearance}=await import('../playtest/reach-rules.mjs');
+ let s=play(plans.restored);
+ s=apply(s,queue('forage','brush'));s=apply(s,work);
+ s=apply(apply(s,advance),advance);
+ assert.equal(s.season,6);assert.equal(s.creek.season,'flood');
+ assert.ok(homeDepth(s)>.4);assert.ok(chamberClearance(s)<0);
+ assert.equal(reachAct(s,advance).ok,false);
+ s=apply(s,queue('chamber','willow'));s=apply(s,work);
+ assert.ok(chamberClearance(s)>=.1);assert.equal(apply(s,advance).season,7);
+ const bank=play(plans.bank);assert.ok(chamberClearance(bank,'bank',true)>=.1);
+ const meadow=play(plans.meadow);assert.ok(chamberClearance(meadow,'meadow',true)>=.1);
+});
+test('lowering a raised dam changes flood exposure without refunding spent materials',async()=>{
+ const {chamberClearance}=await import('../playtest/reach-rules.mjs');
+ let s=play([queue('dam','narrows'),queue('chamber','willow'),queue('raise','narrows'),work]);
+ const before=chamberClearance(s,'willow',true),stock=s.creek.sources.fallen;
+ s=apply(s,queue('lower','narrows'));s=apply(s,work);
+ assert.ok(chamberClearance(s,'willow',true)>before);
+ assert.equal(s.creek.sources.fallen,stock);assert.equal(s.creek.dams.narrows.raised,false);
+});
+
+test('older layout saves retain stocks and projects while adopting the higher meadow bank',()=>{
+ const old=apply(freshReach(),queue('shelter','meadow'));
+ delete old.layoutVersion;old.creek.terrain['9,9']=1.85;
+ const loaded=loadReach(saveReach(old));
+ assert.equal(loaded.layoutVersion,2);assert.equal(loaded.creek.terrain['9,9'],2.65);
+ assert.deepEqual(loaded.creek.sources,old.creek.sources);assert.deepEqual(loaded.queue,old.queue);
+ assert.equal(loaded.creek.stock.cache.food,old.creek.stock.cache.food);
+ assert.deepEqual(loadReach(saveReach(loaded)),loaded);
+});
