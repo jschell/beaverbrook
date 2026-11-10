@@ -2,6 +2,10 @@
 
 **Phase:** first basic playable experiment, authorized on 2026-11-09. The [playtest](../playtest/README.md) implements the Riverbank Refuge candidate for testing. Other design documents remain proposals, not a finished implementation specification.
 
+## Implemented resource experiment
+
+[Shrub seasons](../playtest/SHRUB-SEASONS.md) implements persistent shrub patches, root reserves, environmental recovery, seasonal demand, remembered resource observations and local autosave. Terrain remains visible and the ecological values are trial rules.
+
 ## Exploration and information
 
 [Exploration, visibility and remembered conditions](design/exploration-and-remembered-conditions.md) proposes home observation, family sight, stale map information and fair scenarios under incomplete knowledge.

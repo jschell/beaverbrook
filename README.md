@@ -2,11 +2,13 @@
 
 A proposed browser strategy game about guiding a beaver family to a safe home by reading river clues, choosing a suitable shelter, and adapting to seasonal change.
 
-**Current phase: First Creek hauling-channel demo (0.4.0).** The user authorized the first Three.js/vanilla-JS test on 2026-11-09. The working name, rules, scope and technology preferences remain subject to review and playtesting.
+**Current phase: Shrub seasons resource experiment.** The user authorized the first Three.js/vanilla-JS test on 2026-11-09. The working name, rules, scope and technology preferences remain subject to review and playtesting.
 
 The design targets curious players around ages 8–10+ and adults, with short, approachable scenarios and optional depth. Building a dam is one possible response to a river; choosing a bank den, a sheltered lodge or another reach can be the better decision.
 
 ## Start here
+
+- [Shrub seasons](playtest/patches.html) — balance three renewable patches, refresh remembered supplies and feed the lodge across a dry season; [rules and limits](playtest/SHRUB-SEASONS.md).
 
 - [Quick channel demo](playtest/creek.html?mode=channels) — preview and dig hauling cuts, then test falling water.
 - [First Creek playtest](playtest/creek.html) — gather, build a home, choose a food/water plan, and adapt to a dry spell; [instructions](playtest/FIRST-CREEK.md).
