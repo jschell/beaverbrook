@@ -15,7 +15,7 @@ export const CHANNELS={
  alder:{name:'Alder-side cut',cells:[[5,0],[5,1],[5,2],[5,3],[5,4]],source:'fallen',cost:2,note:'A short western hauling cut. Check whether the rounded trip cost actually improves for your destination.'},
  east:{name:'East feeding channel',cells:[[10,2],[9,2],[8,2]],source:'trees',cost:3,note:'Connects the upland tree approach to the pond. More loads can make the initial digging worthwhile.'}
 };
-export function terrainHeight(s,x,z){let h=ELEVATIONS[z][x];for(const [id,c] of Object.entries(CHANNELS)){if(s.channels?.[id]&&c.cells.some(([cx,cz])=>cx===x&&cz===z))h=Math.min(h,s.channels[id]===2?1.2:1.5);}return h;}
+export function terrainHeight(s,x,z){let h=s.terrain?.[key(x,z)]??ELEVATIONS[z][x];for(const [id,c] of Object.entries(CHANNELS)){if(s.channels?.[id]&&c.cells.some(([cx,cz])=>cx===x&&cz===z))h=Math.min(h,s.channels[id]===2?1.2:1.5);}return h;}
 export const ELEVATIONS=Array.from({length:SIZE.h},(_,z)=>Array.from({length:SIZE.w},(_,x)=>x===7?.4:1.05+Math.abs(x-7)*.4+(z===0?.05:0)));
 // Authored high banks prevent the retained pond from bypassing a completed crossing.
 for(const crossing of Object.values(CROSSINGS))for(let x=0;x<SIZE.w;x++)if(!crossing.columns.includes(x))ELEVATIONS[crossing.row][x]=Math.max(ELEVATIONS[crossing.row][x],3.1);
@@ -25,21 +25,34 @@ export const initialCreek=()=>({crossing:'narrows',lodgeSite:'willow',sections:[
  sources:Object.fromEntries(Object.entries(SOURCES).map(([id,s])=>[id,s.quantity])),cargo:null,
  stock:{dam:{wood:0,mud:0,food:0},lodge:{wood:0,mud:0,food:0},cache:{wood:0,mud:0,food:0},reserve:{wood:0,mud:0,food:0}},lastRoute:null});
 export const closed=s=>s.sections.every(n=>n===2);
+export const lodgeDefinition=(s,id=s.lodgeSite)=>s.siteDefinitions?.[id]||LODGES[id];
 export function waterState(s){
- const cross=CROSSINGS[s.crossing],complete=closed(s),level=complete?(s.raised?2.65:2.05):1;
- const dry=s.season==='dry'||s.season==='complete';const surface=complete?Number((level-(dry?.30:0)).toFixed(2)):(dry?.85:1);
- const base=s.season==='dry'||s.season==='complete'?.85:1;
+ const dry=s.season==='dry'||s.season==='complete',base=dry?.85:1;
  const wet=new Map();for(let z=0;z<SIZE.h;z++)wet.set(key(7,z),base);
- if(complete){const queue=[[7,0]],seen=new Set();while(queue.length){const [x,z]=queue.shift(),id=key(x,z);if(x<0||x>=SIZE.w||z<0||z>=cross.row||seen.has(id))continue;seen.add(id);if(terrainHeight(s,x,z)>=surface)continue;wet.set(id,surface);queue.push([x-1,z],[x+1,z],[x,z-1],[x,z+1]);}}
- return {wet,level:surface,complete,meadowFlooded:(wet.get(key(10,5))||0)>ELEVATIONS[5][10],downstream:base};
+ function fill(seeds,level,lastRow){
+  level=Number(level.toFixed(2));
+  const queue=[...seeds],seen=new Set();
+  while(queue.length){const [x,z]=queue.shift(),id=key(x,z);
+   if(x<0||x>=SIZE.w||z<0||z>=lastRow||seen.has(id))continue;
+   seen.add(id);if(terrainHeight(s,x,z)>=level)continue;
+   wet.set(id,Math.max(wet.get(id)||0,level));
+   queue.push([x-1,z],[x+1,z],[x,z-1],[x,z+1]);
+  }
+ }
+ if(s.terrain)fill(Array.from({length:SIZE.h},(_,z)=>[7,z]),base,SIZE.h);
+ const dams=s.dams?Object.entries(s.dams):[[s.crossing,{sections:s.sections,raised:s.raised}]];
+ for(const [id,dam] of dams)if(dam.sections.every(n=>n===2))fill([[7,0]],(dam.raised?2.65:2.05)-(dry?.3:0),CROSSINGS[id].row);
+ const complete=closed(s),level=complete?(s.raised?2.65:2.05)-(dry?.3:0):base;
+ return {wet,level:Number(level.toFixed(2)),complete,meadowFlooded:(wet.get(key(10,5))||0)>ELEVATIONS[5][10],downstream:base};
 }
 export function routeTo(s,sourceId,job){
- const source=SOURCES[sourceId],target=job==='dam'?CROSSINGS[s.crossing].cell:LODGES[s.lodgeSite].cell;if(!source||!s.stock[job])return null;
+ const source=SOURCES[sourceId],target=job==='dam'?CROSSINGS[s.crossing].cell:lodgeDefinition(s).cell;if(!source||!s.stock[job])return null;
  const water=waterState(s),start=key(...source.cell),end=key(...target),distance=new Map([[start,0]]),previous=new Map(),open=[start];
  // Bounded routing for one material trip, not autonomous colony AI.
  while(open.length){open.sort((a,b)=>distance.get(a)-distance.get(b));const id=open.shift();if(id===end)break;const [x,z]=id.split(',').map(Number);for(const [nx,nz] of [[x-1,z],[x+1,z],[x,z-1],[x,z+1]]){
   if(nx<0||nx>=SIZE.w||nz<0||nz>=SIZE.h)continue;const next=key(nx,nz);const crossing=CROSSINGS[s.crossing];
-  if(closed(s)&&nz===crossing.row&&crossing.columns.includes(nx)&&next!==end)continue;
+  const barriers=s.dams?Object.entries(s.dams):[[s.crossing,{sections:s.sections}]];
+  if(barriers.some(([id,dam])=>dam.sections.every(n=>n===2)&&nz===CROSSINGS[id].row&&CROSSINGS[id].columns.includes(nx))&&next!==end)continue;
   const swimming=(water.wet.get(next)||0)-terrainHeight(s,nx,nz)>=.3-1e-9;const cost=distance.get(id)+(swimming?.45:1);
   if(cost<(distance.get(next)??Infinity)){distance.set(next,cost);previous.set(next,id);if(!open.includes(next))open.push(next);}
  }}

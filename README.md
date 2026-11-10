@@ -2,11 +2,13 @@
 
 A proposed browser strategy game about guiding a beaver family to a safe home by reading river clues, choosing a suitable shelter, and adapting to seasonal change.
 
-**Current phase: Shrub seasons resource experiment.** The user authorized the first Three.js/vanilla-JS test on 2026-11-09. The working name, rules, scope and technology preferences remain subject to review and playtesting.
+**Current phase: First Reach settlement experiment.** The user authorized the first Three.js/vanilla-JS test on 2026-11-09. The working name, rules, scope and technology preferences remain subject to review and playtesting.
 
 The design targets curious players around ages 8–10+ and adults, with short, approachable scenarios and optional depth. Building a dam is one possible response to a river; choosing a bank den, a sheltered lodge or another reach can be the better decision.
 
 ## Start here
+
+- [First Reach](playtest/reach.html) — restore the inherited home, establish a meadow pond or settle a natural deep bend. Queue work and continue after low water; [rules and limits](playtest/FIRST-REACH.md).
 
 - [Shrub seasons](playtest/patches.html) — balance three renewable patches, refresh remembered supplies and feed the lodge across a dry season; [rules and limits](playtest/SHRUB-SEASONS.md).
 

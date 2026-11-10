@@ -2,6 +2,10 @@
 
 **Phase:** first basic playable experiment, authorized on 2026-11-09. The [playtest](../playtest/README.md) implements the Riverbank Refuge candidate for testing. Other design documents remain proposals, not a finished implementation specification.
 
+## Implemented settlement experiment
+
+[First Reach](../playtest/FIRST-REACH.md) connects simultaneous dams, three shelter sites, queued construction and supply, living resources, seasonal objectives and continued play. Sites remain authored. See the implementation record for verified strategies and limits.
+
 ## Implemented resource experiment
 
 [Shrub seasons](../playtest/SHRUB-SEASONS.md) implements persistent shrub patches, root reserves, environmental recovery, seasonal demand, remembered resource observations and local autosave. Terrain remains visible and the ecological values are trial rules.
