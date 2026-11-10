@@ -1,6 +1,6 @@
 # Learning at Willow Cove
 
-Proposed opening chapter. The playable Willow Cove currently starts with an empty larder and runs for up to three nights. This design uses the same creek as a safe place to learn before founding a home.
+The family-lodge prototype opens with a short adult haul. Players can repeat the trip, excavate the east channel, sleep through the first water drop, undo an experiment or open the construction sandbox. The three-night challenge remains available separately. The sequence below describes the broader design, including future site scouting and free movement.
 
 ## The first trip
 
