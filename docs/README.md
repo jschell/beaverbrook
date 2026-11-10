@@ -2,6 +2,10 @@
 
 **Phase:** first basic playable experiment, authorized on 2026-11-09. The [playtest](../playtest/README.md) implements the Riverbank Refuge candidate for testing. Other design documents remain proposals, not a finished implementation specification.
 
+## Exploration and information
+
+[Exploration, visibility and remembered conditions](design/exploration-and-remembered-conditions.md) proposes home observation, family sight, stale map information and fair scenarios under incomplete knowledge.
+
 ## Repeatable gameplay scenarios
 
 [Scenario patterns and outcome rules](design/scenario-patterns-and-outcomes.md) defines outcome predicates, pattern composition, strategic alternatives, feasibility witnesses and story triggers. This remains a design proposal.
