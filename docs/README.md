@@ -2,6 +2,10 @@
 
 **Phase:** first basic playable experiment, authorized on 2026-11-09. The [playtest](../playtest/README.md) implements the Riverbank Refuge candidate for testing. Other design documents remain proposals, not a finished implementation specification.
 
+## Environment and resource regeneration
+
+[Vegetation, materials and wetland succession](design/vegetation-and-resource-succession.md) proposes environmental fields, plant traits, recruitment, recovery, succession and scalable state artifacts. This remains a design proposal.
+
 ## Proposed opening chapter
 
 [Learning at Willow Cove](design/willow-cove-tutorial.md) describes the family-lodge tutorial and its handoff to founding a home.
