@@ -5,11 +5,12 @@ import vm from 'node:vm';
 import * as Three from 'three';
 import * as rules from '../playtest/explore-rules.mjs';
 import * as habitat from '../playtest/habitat-rules.mjs';
+import * as placement from '../playtest/dam-placement.mjs';
 
 test('occluding lodge fades independently, camera stays put, and scenery recovers',async()=>{
  let scene,camera;
  class Renderer{constructor(){this.domElement={};}setPixelRatio(){}setSize(){}render(s,c){scene=s;camera=c;}dispose(){}}
- const context=vm.createContext({THREE:{...Three,WebGLRenderer:Renderer},...rules,...habitat,devicePixelRatio:1,window:{matchMedia:()=>({matches:true})},ResizeObserver:class{observe(){}}});
+ const context=vm.createContext({THREE:{...Three,WebGLRenderer:Renderer},...rules,...habitat,...placement,devicePixelRatio:1,window:{matchMedia:()=>({matches:true})},ResizeObserver:class{observe(){}}});
  const code=(await readFile(new URL('../playtest/explore-scene.mjs',import.meta.url),'utf8')).replace(/^import .*;\n/gm,'').replace('export function createExploreScene','function createExploreScene');
  vm.runInContext(code,context);
  const view=context.createExploreScene({clientWidth:900,clientHeight:760,append(){}}),s={...rules.freshExplore(),z:4.5};
@@ -33,7 +34,7 @@ test('occluding lodge fades independently, camera stays put, and scenery recover
 test('habitat renderer uses the same changing pond and cut bed as movement rules',async()=>{
  let scene;
  class Renderer{constructor(){this.domElement={};}setPixelRatio(){}setSize(){}render(s){scene=s;}dispose(){}}
- const context=vm.createContext({THREE:{...Three,WebGLRenderer:Renderer},...rules,...habitat,devicePixelRatio:1,window:{matchMedia:()=>({matches:true})},ResizeObserver:class{observe(){}}});
+ const context=vm.createContext({THREE:{...Three,WebGLRenderer:Renderer},...rules,...habitat,...placement,devicePixelRatio:1,window:{matchMedia:()=>({matches:true})},ResizeObserver:class{observe(){}}});
  const code=(await readFile(new URL('../playtest/explore-scene.mjs',import.meta.url),'utf8')).replace(/^import .*;\n/gm,'').replace('export function createExploreScene','function createExploreScene');
  vm.runInContext(code,context);const view=context.createExploreScene({clientWidth:900,clientHeight:760,append(){}});
  let s=habitat.freshHabitat();s.x=-4;s.z=0;view.update(s,{yaw:0,distance:6.5},10);
@@ -46,4 +47,20 @@ test('habitat renderer uses the same changing pond and cut bed as movement rules
  const tile=water().find(o=>o.position.x===-3.5&&o.position.z===.5);assert.ok(tile);assert.equal(tile.position.y,rules.waterLevel(-3.5,.5,s));
  let cut=false;scene.traverse(o=>{if(!o.isMesh||!o.material.vertexColors)return;const p=o.geometry.getAttribute('position');for(let i=0;i<p.count;i++)if(Math.abs(p.getX(i)+4)<.01&&Math.abs(p.getZ(i))<.01&&Math.abs(p.getY(i)+.08)<.01)cut=true;});assert.ok(cut,'rendered terrain is excavated, not just recolored');
  s={...s,day:4};view.update(s,{yaw:0,distance:6.5},50);assert.ok(water().some(o=>Math.abs(o.position.y-.15)<1e-9));view.dispose();
+});
+
+test('placed dam meshes and preview water reflect arbitrary geometry without committing the preview',async()=>{
+ let scene;
+ class Renderer{constructor(){this.domElement={};}setPixelRatio(){}setSize(){}render(s){scene=s;}dispose(){}}
+ const context=vm.createContext({THREE:{...Three,WebGLRenderer:Renderer},...rules,...habitat,...placement,devicePixelRatio:1,window:{matchMedia:()=>({matches:true})},ResizeObserver:class{observe(){}}});
+ const code=(await readFile(new URL('../playtest/explore-scene.mjs',import.meta.url),'utf8')).replace(/^import .*;\n/gm,'').replace('export function createExploreScene','function createExploreScene');
+ vm.runInContext(code,context);const view=context.createExploreScene({clientWidth:900,clientHeight:760,append(){}});
+ let s=habitat.freshDamLab();s=placement.commitDam(s,placement.makeDamPlan(s,{x:-6,z:-3},{x:6,z:0},2).dam).state;s.x=0;s.z=-5;
+ const read=()=>{let level;scene.traverse(o=>{if(o.isMesh&&o.visible&&o.material.roughness===.3&&o.position.x===.5&&o.position.z===-7.5)level=o.position.y;});return level;};
+ view.update(s,{yaw:0,distance:6.5},10);assert.equal(read(),.12);
+ const before=JSON.stringify(s),preview=placement.previewDam(s,s.placedDam).state;view.update(s,{yaw:0,distance:6.5,previewState:preview},30);assert.equal(read(),.68);assert.equal(JSON.stringify(s),before);
+ let group;scene.traverse(o=>{if(o.userData.kind==='placed-dam')group=o;});assert.equal(group.children.length,7,'angled sections rendered at their own coordinates');
+ view.update(s,{yaw:0,distance:6.5},50);assert.equal(read(),.12,'closing preview restores actual water');
+ for(const p of s.placedDam.sections)p.level=2;view.update(s,{yaw:0,distance:6.5},70);assert.equal(read(),.68);
+ s.placedDam.sections[3].level=0;view.update(s,{yaw:0,distance:6.5},90);assert.equal(read(),.12,'visible water responds to an actual gap');view.dispose();
 });

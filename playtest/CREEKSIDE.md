@@ -1,5 +1,7 @@
 # Creekside — living creek test
 
+See the [flexible dam placement demo](FLEXIBLE-DAMS.md) and [quick placement lab](explore.html?mode=dam-lab) for player-chosen spans, section heights and the new stable-terrain water model.
+
 Implemented experiment: third-person movement plus an open-ended, authored harvesting and water-management sandbox. Open [explore.html](explore.html). Three.js and vanilla HTML/CSS/JavaScript; static Pages hosting. First Reach remains a separate settlement experiment. This extends the earlier movement POC rather than attempting the whole colony game.
 
 ## Starting situation and purpose
@@ -53,7 +55,7 @@ There are 12 effort per day. Travel, exploration and carrying remain possible wh
 
 A stand with growth remaining regains one unit per rest, up to capacity. A cleared stand needs three rests before its first new unit, then resumes ordinary recovery. Roots submerged more than 0.25 pause recovery, so a channel ending at a productive stand can trade regeneration for access. There is no plant mortality or recruitment simulation yet.
 
-Days 1–3 have normal flow; days 4–6 are dry, then the six-day cycle repeats. Dry flow subtracts 0.25 from the retained upstream surface. Downstream flowing water remains. A source-connected flood fill over the shared height field determines wet cells. Digging changes the same bed used by movement, water connectivity, terrain rendering and map coloring. Isolated terrain below the surface does not automatically fill. This is a bounded grid model with an authored dam line, not fluid simulation.
+Days 1–3 have normal flow; days 4–6 are dry, then the six-day cycle repeats. Dry flow subtracts 0.25 from the retained upstream surface. Downstream flowing water remains. A source-connected flood fill over the shared height field determines wet cells. Digging changes the same bed used by movement, water connectivity, terrain rendering and map coloring. Isolated terrain below the surface does not automatically fill. The Creekside UI now uses a terrain-edge barrier model for the family dam and one new player dam; see the flexible placement record. Historical rule fixtures retain the earlier authored-line calculation. Neither is fluid simulation.
 
 The willow cut connects the stream to the west-bank stand; the aspen cut connects to the east stand. Both are authored routes marked with pale stakes and ground dashes. A shallow cut with a sealed dam supports swimming in normal flow, then becomes too shallow during dry flow. Deepening can preserve that access without another dam raise. A deep cut also works with the original leaky dam. Carrying speed is 1.55 on land, 1.15 wading and 2.50 swimming, so route investment changes the actual return trip.
 
@@ -67,11 +69,11 @@ Save key: `beaverbrook-creekside-habitat-v2`. Position, knowledge, day, effort, 
 
 ## Verification and remaining limits
 
-81 automated tests pass across the repository. New rule checks cover resource conservation, local delivery, felling/drop/recovery, regrowth, effort, reversible water changes without refunds, dry-weather channel adaptation, two different supported-home approaches, shortage recovery, and an integrated route using normal movement. A Three.js renderer-stub test checks that the actual water meshes and excavated terrain change with the same rules; it does not verify native GPU pixels.
+90 automated tests pass across the repository. New rule checks cover resource conservation, local delivery, felling/drop/recovery, regrowth, effort, reversible water changes without refunds, dry-weather channel adaptation, two different supported-home approaches, shortage recovery, and an integrated route using normal movement. A Three.js renderer-stub test checks that the actual water meshes and excavated terrain change with the same rules; it does not verify native GPU pixels.
 
 Browser checks in the compatibility renderer covered harvesting, delivering/storing mixed loads, stand cutting and recovery of timber piles, hauling wood to the dam, sealing leaks, opening a visibly flooded hauling cut, entering swimming depth, resting with food consumption, and reload persistence. The native WebGL path, phone gestures, comfort, pacing and enjoyment remain unverified. The CPU renderer is slower and has coarser geometry and transparency sorting.
 
-Deferred: freeform channels, individual tree selection/felling animation, mud/sealing recipes, a newly built lodge or dam, colony workers, wildlife consumers, water plants, seasons with realistic durations, procedural terrain and additional settlements. The established lodge approach is an authored shoreline access point, not an excavated tunnel network. Background dam logs are visual geometry rather than movement obstacles. No claim of a complete ecology or colony game.
+Deferred: freeform channels, individual tree selection/felling animation, mud/sealing recipes, a newly built lodge, additional new dam projects, colony workers, wildlife consumers, water plants, seasons with realistic durations, procedural terrain and additional settlements. The established lodge approach is an authored shoreline access point, not an excavated tunnel network. Background dam logs are visual geometry rather than movement obstacles. No claim of a complete ecology or colony game.
 
 ## Human playtest questions
 

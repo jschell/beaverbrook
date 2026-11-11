@@ -1,3 +1,4 @@
+import {solveBarrierWater} from './dam-water.mjs';
 // Authored movement playground. Distances and speeds are game units.
 export const BOUNDS=24;
 export const LODGE={id:'lodge',name:'Family lodge',x:-7,z:6};
@@ -31,8 +32,14 @@ export function groundHeight(x,z,s){
 const waterCache=new Map();
 export function creekWater(s){
  if(s?.version!==2)return null;
- const dry=s.day%6>=4||s.day%6===0,key=[s.dam,s.channels.west,s.channels.east,s.entrance,dry].join(',');
+ const dry=s.day%6>=4||s.day%6===0,key=JSON.stringify([s.dam,s.channels.west,s.channels.east,s.entrance,dry,!!s.flexible,s.placedDam?.sections.map(p=>[p.a,p.b,p.level])]);
  if(waterCache.has(key))return waterCache.get(key);
+ if(s.flexible){
+  const sections=[...(s.placedDam?.sections||[])];
+  if(s.dam)sections.push({a:{x:-9,z:10},b:{x:9,z:10},level:s.dam});
+  const result={...solveBarrierWater({height:(x,z)=>groundHeight(x,z,s),baseHeight:(x,z)=>groundHeight(x,z),sections,dry}),key};
+  result.surface=result.wet.get('0,0')??0;if(waterCache.size>30)waterCache.clear();waterCache.set(key,result);return result;
+ }
  const surface=[.12,.4,.68][s.dam]-(dry?.25:0),wet=new Map(),queue=[[0,0]],seen=new Set();
  for(let i=0;i<queue.length;i++){
   const [x,z]=queue[i],k=x+','+z;if(seen.has(k))continue;seen.add(k);

@@ -2,6 +2,10 @@
 
 **Phase:** first basic playable experiment, authorized on 2026-11-09. The [playtest](../playtest/README.md) implements the Riverbank Refuge candidate for testing. Other design documents remain proposals, not a finished implementation specification.
 
+## Flexible dam placement demo
+
+[Flexible dams](../playtest/FLEXIBLE-DAMS.md) implements one player-placed span alongside the family dam, local section construction, per-section heights, extension, notching and a terrain-edge water model. Terrain changes only through excavation. The surveyed placement lab supplies finite nearby timber for quick testing.
+
 ## Third-person living creek test
 
 [Creekside](../playtest/CREEKSIDE.md) extends direct movement with three harvestable stands, mixed food/wood loads, local delivery, a food-consuming family, renewable growth, an established dam, two excavated hauling cuts and repeating dry flow. Several approaches support the lodge; there is no required task sequence or ending. The implementation record distinguishes tested behavior from ecological and gameplay limits. First Reach remains a separate experiment.

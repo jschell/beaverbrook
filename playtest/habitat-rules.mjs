@@ -1,5 +1,7 @@
 // Trial game economy; compressed days/yields are design abstractions, not biology.
 import {freshExplore,moveExplore,discover,waterDepth,canStand,OBSTACLES,LODGE,CHANNELS} from './explore-rules.mjs';
+import {nearestDamSection} from './dam-placement.mjs';
+import {validPlacedDam} from './dam-water.mjs';
 export const DAM={id:'dam',name:'Family dam',x:0,z:10};
 export const PATCHES=[
  {id:'willow',name:'Bank willow',x:-7,z:0,max:5,kind:'shrub',description:'Close to home. Prune for a mixed load, or browse for food. Leave stems for faster regrowth.'},
@@ -7,16 +9,23 @@ export const PATCHES=[
  {id:'alder',name:'Upstream alder',x:-7,z:-11,max:5,kind:'tree',description:'A second wood and food source. A longer journey can protect the nearby willow.'}
 ];
 export const DAY_WORK=12;
-export function freshHabitat(){
- const s={...freshExplore(),version:2,day:1,effort:0,food:6,wood:0,dam:0,damWood:0,channels:{west:0,east:0},entrance:0,patches:Object.fromEntries(PATCHES.map(p=>[p.id,{stock:p.max,recovery:0}])),cargo:null,loose:[],ledger:{woodHarvested:0,foodHarvested:0,woodUsed:0,foodEaten:0},nights:0,shortage:false,history:[]};
+export function freshHabitat({flexible=false,lab=false}={}){
+ const s={...freshExplore(),version:2,flexible,lab,placedDam:null,day:1,effort:0,food:6,wood:0,dam:0,damWood:0,channels:{west:0,east:0},entrance:0,patches:Object.fromEntries(PATCHES.map(p=>[p.id,{stock:p.max,recovery:0}])),cargo:null,loose:[],ledger:{woodHarvested:0,foodHarvested:0,woodUsed:0,foodEaten:0},nights:0,shortage:false,history:[]};
  s.known.dam=true;for(const p of [...PATCHES,...CHANNELS])if(Math.hypot(s.x-p.x,s.z-p.z)<5.5)s.known[p.id]=true;return discover(s);
 }
 export function weather(s){return s.day%6>=4||s.day%6===0?'dry':'normal';}
 export function habitatMove(s,input,dt){const next=moveExplore(s,input,dt,OBSTACLES);for(const p of [...PATCHES,...CHANNELS])if(Math.hypot(next.x-p.x,next.z-p.z)<5.5)next.known[p.id]=true;return next;}
+export function freshDamLab(){
+ const s=freshHabitat({flexible:true,lab:true});s.x=-5;s.z=-3;s.food=12;s.ledger.foodHarvested=6;
+ for(let i=0;i<12;i++)s.loose.push({x:-5+(i%3)*.25,z:-2+Math.floor(i/3)*.15,wood:2,food:0});s.ledger.woodHarvested=24;
+ for(let z=-24;z<24;z++)for(let x=-24;x<24;x++)s.explored[x+','+z]=true;
+ for(const p of [...PATCHES,...CHANNELS])s.known[p.id]=true;return s;
+}
 const near=(s,p,r=2.3)=>Math.hypot(s.x-p.x,s.z-p.z)<r;
 export function localPlace(s){
  if(near(s,LODGE,2.7))return {type:'lodge',point:LODGE};
  if(near(s,DAM,3.3))return {type:'dam',point:DAM};
+ const section=nearestDamSection(s);if(section)return {type:'customDam',index:section.index,point:{...section.point,id:'new-dam',name:'New dam · section '+(section.index+1)}};
  for(const p of PATCHES)if(near(s,p,2.6))return {type:'patch',point:p};
  for(const p of CHANNELS)if(near(s,p,2.5))return {type:'channel',point:p};
  return null;
@@ -58,10 +67,18 @@ export function habitatOptions(s){
   const level=s.channels[place.point.id];
   actions.push(option(s,'dig',level===0?'Dig hauling channel':level===1?'Deepen channel for dry weather':'Channel fully deepened',3,!s.cargo&&level<2,s.cargo?'Set down your load first.':'Already at test depth.'));
  }
+ if(place?.type==='customDam'){
+  const section=s.placedDam.sections[place.index];
+  if(s.cargo?.wood)actions.push(option(s,'customDeposit','Deliver wood to this section',0));
+  if(!s.cargo&&section.wood)actions.push(option(s,'customTake','Recover 1 unspent wood',0));
+  actions.push(option(s,'customBuild',section.level===0?'Build low section · 1 local wood':'Raise this section · 1 local wood',1,section.level<section.target&&section.wood>=1,section.level>=section.target?'Section has reached its planned height.':'Deliver wood to this section first.'));
+  if(section.level)actions.push(option(s,'customLower','Notch this section · no refund',1));
+  if(section.level)actions.push(option(s,'customRemove','Remove this section · no refund',1));
+ }
  if(s.cargo)actions.push(option(s,'drop','Set down load',0));
  return actions;
 }
-export function primaryHabitatAction(s){return habitatOptions(s).find(a=>a.enabled&&!['lower','drop','fell'].includes(a.id));}
+export function primaryHabitatAction(s){const options=habitatOptions(s);for(const id of ['customDeposit','store','deposit','customBuild','build','pickup','prune','browse','dig','entrance','takeWood','rest']){const action=options.find(a=>a.id===id&&a.enabled);if(action)return action;}}
 export function habitatAction(state,id){
  const available=habitatOptions(state).find(a=>a.id===id);
  if(!available?.enabled)return {state,message:available?.reason||'Move closer to a stand, lodge, dam or channel marker.'};
@@ -87,6 +104,10 @@ export function habitatAction(state,id){
  if(id==='lower'){s.dam--;message='A notch releases retained water. Construction wood is not refunded; inspect your channels before hauling.';}
  if(id==='dig'){s.channels[place.point.id]++;const status=channelStatus(s,place.point.id);message=status.swimmable?'The cut connects to the pond and is deep enough to swim a load through.':'The cut is open, but too shallow for swimming now. Retain more water or deepen the bed.';}
  if(id==='entrance'){s.entrance=1;message='The lodge approach is deeper. This is an alternative to raising the whole pond.';}
+ if(id==='customDeposit'){const section=s.placedDam.sections[place.index];section.wood+=s.cargo.wood;s.cargo.wood=0;if(!s.cargo.food)s.cargo=null;message='Wood delivered to section '+(place.index+1)+'. Only delivered wood can build this section.';}
+ if(id==='customTake'){s.placedDam.sections[place.index].wood--;s.cargo={wood:1,food:0};message='Unspent wood recovered. Built materials cannot be reclaimed.';}
+ if(id==='customBuild'){const section=s.placedDam.sections[place.index];section.wood--;section.level++;s.ledger.woodUsed++;message='Section '+(place.index+1)+' built higher. Gaps, low sections and routes around the banks still limit retention.';}
+ if(id==='customLower'||id==='customRemove'){const section=s.placedDam.sections[place.index];section.level=id==='customRemove'?0:section.level-1;message='Water can escape through the lowered section. Spent wood is not refunded.';}
  if(id==='rest'){
   const eaten=Math.min(2,s.food);s.food-=eaten;s.ledger.foodEaten+=eaten;s.shortage=eaten<2;s.nights+=eaten===2?1:0;s.day++;s.effort=(homeStatus(s).protected?0:2)+(s.shortage?4:0);
   for(const p of PATCHES){const patch=s.patches[p.id],flooded=waterDepth(p.x,p.z,s)>.25;patch.recovery++;const gain=patch.stock>0?1:(patch.recovery>=3?1:0);if(!flooded){patch.stock=Math.min(p.max,patch.stock+gain);if(gain)patch.recovery=0;}}
@@ -107,7 +128,8 @@ export function loadHabitat(text){
   if(s.cargo!==null&&!load(s.cargo))return null;
   if(!Array.isArray(s.loose)||s.loose.length>500||!s.loose.every(p=>load(p)&&[p.x,p.z].every(n=>Number.isFinite(n)&&Math.abs(n)<=24)))return null;
   if(!['woodHarvested','foodHarvested','woodUsed','foodEaten'].every(k=>integer(s.ledger?.[k])))return null;
-  if(s.wood+s.damWood+(s.cargo?.wood||0)+s.loose.reduce((n,p)=>n+p.wood,0)+s.ledger.woodUsed!==s.ledger.woodHarvested)return null;
+  if(s.flexible!==undefined&&typeof s.flexible!=='boolean'||s.lab!==undefined&&typeof s.lab!=='boolean'||!validPlacedDam(s.placedDam??null))return null;
+  if(s.wood+s.damWood+(s.placedDam?.sections.reduce((n,p)=>n+p.wood,0)||0)+(s.cargo?.wood||0)+s.loose.reduce((n,p)=>n+p.wood,0)+s.ledger.woodUsed!==s.ledger.woodHarvested)return null;
   if(s.food+(s.cargo?.food||0)+s.loose.reduce((n,p)=>n+p.food,0)+s.ledger.foodEaten!==6+s.ledger.foodHarvested)return null;
   if(!s.explored||!s.known||!Array.isArray(s.history)||!['walking','swimming','distance'].every(k=>Number.isFinite(s[k])&&s[k]>=0))return null;
   s.carrying=!!s.cargo;s.stored=s.wood;s.groveStock=s.patches.aspen.stock;return s;

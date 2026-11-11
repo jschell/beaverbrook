@@ -1,6 +1,7 @@
 import * as THREE from './vendor/three.module.js';
 import {BOUNDS,TREES,LODGE,GROVE,LANDING,groundHeight,movementMode,cameraBoom,dampCamera,creekWater,waterLevel,CHANNELS} from './explore-rules.mjs';
 
+import {CRESTS,damCenter} from './dam-placement.mjs';
 import {PATCHES,DAM} from './habitat-rules.mjs';
 
 export function createExploreScene(container){
@@ -96,6 +97,20 @@ export function createExploreScene(container){
  for(let i=0;i<9;i++)log([-3.8+i*.85,.55,9.8],[-2.8+i*.85,.75,10.2],.15,'#b0925e',crest);
  register(damGroup);
  const damPile=new THREE.Group();world.add(damPile);damPile.position.set(-2,groundHeight(-2,8.5),8.5);
+ const placedGroup=new THREE.Group();placedGroup.userData.kind='placed-dam';world.add(placedGroup);register(placedGroup);let lastPlaced='';
+ function drawPlaced(s,preview){
+  const dam=preview?.placedDam||s.placedDam,key=JSON.stringify([dam,!!preview]);if(key===lastPlaced)return;lastPlaced=key;clear(placedGroup);placedGroup.visible=!!dam;
+  if(!dam)return;for(const [i,p]of dam.sections.entries()){
+   const center=damCenter(p),bed=Math.min(groundHeight(center.x,center.z,s),groundHeight(p.a.x,p.a.z,s),groundHeight(p.b.x,p.b.z,s)),level=preview?p.target:p.level,crest=level?CRESTS[level]:bed+.3;
+   const section=new THREE.Group();section.userData.section=i;placedGroup.add(section);
+   if(level){
+    for(let y=bed+.1;y<crest+.06;y+=.17)log([p.a.x,y,p.a.z],[p.b.x,y,p.b.z],.105,preview?'#d3b667':'#977149',section);
+    for(const t of [.15,.65]){const x=p.a.x+(p.b.x-p.a.x)*t,z=p.a.z+(p.b.z-p.a.z)*t;log([x,bed,z],[x,crest+.12,z],.07,'#b29968',section);}
+   }else for(const v of [p.a,p.b])log([v.x,groundHeight(v.x,v.z,s),v.z],[v.x,Math.max(groundHeight(v.x,v.z,s)+.5,.55),v.z],.045,'#d9c497',section);
+   for(let j=0;j<Math.min(5,p.wood);j++)log([center.x-.4,Math.max(bed,.15)+.15+j*.1,center.z-.4],[center.x+.4,Math.max(bed,.15)+.15+j*.1,center.z-.25],.06,'#c09b65',section);
+  }
+  refresh(occluders.find(r=>r.root===placedGroup));
+ }
  const markers=[];
  for(const c of CHANNELS){
   const root=new THREE.Group();root.position.set(c.x,groundHeight(c.x,c.z),c.z);world.add(root);
@@ -184,7 +199,7 @@ export function createExploreScene(container){
  }
  return {mode:renderer?'WebGL':'Compatibility renderer',update(s,view,time){
   const dt=lastFrame?Math.min(.1,Math.max(0,(time-lastFrame)/1000)):1/60;
-  landscape(s);inventory(s);
+  landscape(s);inventory(s);drawPlaced(s,view.previewState);
   const mode=movementMode(s.x,s.z,s),swim=mode==='swimming',moving=view.moving;
   const surface=waterLevel(s.x,s.z,s)??0;
   beaver.position.set(s.x,swim?surface-.12:groundHeight(s.x,s.z,s),s.z);
@@ -197,7 +212,7 @@ export function createExploreScene(container){
   foodCargo.visible=s.version===2&&s.cargo?.food>0;
   cargo.visible=s.carrying;cargo.children.forEach(o=>o.visible=s.version!==2||s.cargo?.wood>0);cargo.rotation.y=swim?-.15:.15;
   wake.visible=swim&&moving;wake.position.set(s.x,surface+.025,s.z);wake.rotation.z=s.yaw;
-  const hydrology=creekWater(s);
+  const hydrology=creekWater(view.previewState||s);waterMaterial.color.set(view.previewState?'#a2bda5':'#448f9f');waterMaterial.opacity=view.previewState?.6:.85;
   for(const tile of waterTiles){const x=tile.position.x,z=tile.position.z,level=hydrology?hydrology.wet.get(Math.floor(x)+','+Math.floor(z)):groundHeight(x,z)<.35?0:undefined;tile.visible=level!==undefined&&Math.hypot(x-s.x,z-s.z)<20;tile.position.y=level??0;}
   for(const stand of stands){stand.root.visible=s.version===2&&Math.hypot(stand.p.x-s.x,stand.p.z-s.z)<16;stand.root.position.y=groundHeight(stand.p.x,stand.p.z,s);if(s.version===2){const stock=s.patches[stand.p.id].stock;stand.shoots.forEach((o,i)=>o.visible=i<stock);stand.stump.visible=stock===0;}}
   damGroup.visible=s.version===2;damGroup.position.y=s.version===2?[-.28,0,.2][s.dam]:0;damGroup.children.forEach((o,i)=>{if(o!==crest)o.visible=s.dam>0||i%5!==2;});crest.visible=s.dam===2;damPile.visible=s.version===2;

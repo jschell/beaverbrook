@@ -2,11 +2,13 @@
 
 A proposed browser strategy game about guiding a beaver family to a safe home by reading river clues, choosing a suitable shelter, and adapting to seasonal change.
 
-**Current phase: Creekside harvesting and water-management test, alongside First Reach.** The user authorized the first Three.js/vanilla-JS test on 2026-11-09. The working name, rules, scope and technology preferences remain subject to review and playtesting.
+**Current phase: Creekside harvesting and flexible dam placement tests, alongside First Reach.** The user authorized the first Three.js/vanilla-JS test on 2026-11-09. The working name, rules, scope and technology preferences remain subject to review and playtesting.
 
 The design targets curious players around ages 8–10+ and adults, with short, approachable scenarios and optional depth. Building a dam is one possible response to a river; choosing a bank den, a sheltered lodge or another reach can be the better decision.
 
 ## Start here
+
+- [Flexible dam placement lab](playtest/explore.html?mode=dam-lab) — choose bank endpoints, span and section heights; preview water, haul nearby timber and build locally. Stable terrain with no erosion; [controls, rules and limits](playtest/FLEXIBLE-DAMS.md).
 
 - [Creekside living creek test](playtest/explore.html) — steer a beaver, harvest food and wood, supply the family, improve the dam and dig useful hauling cuts in an open-ended persistent area; [controls and limits](playtest/CREEKSIDE.md).
 
