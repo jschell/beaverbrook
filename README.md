@@ -8,6 +8,8 @@ The design targets curious players around ages 8–10+ and adults, with short, a
 
 ## Start here
 
+- [Creekside movement proof of concept](playtest/explore.html) — steer one beaver in a third-person local view, discover the creek and bring a branch home; [controls and limits](playtest/CREEKSIDE.md).
+
 - [First Reach](playtest/reach.html) — restore the inherited home, establish a meadow pond or settle a natural deep bend. Queue work and continue after low water; [rules and limits](playtest/FIRST-REACH.md).
 
 - [Shrub seasons](playtest/patches.html) — balance three renewable patches, refresh remembered supplies and feed the lodge across a dry season; [rules and limits](playtest/SHRUB-SEASONS.md).
