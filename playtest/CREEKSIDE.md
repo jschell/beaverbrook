@@ -17,6 +17,8 @@ A useful playtest outcome is a family with food and a usable lodge approach, plu
 | WASD / arrows | Move relative to the camera |
 | Drag open view | Orbit horizontally |
 | Wheel | Smoothly adjust follow distance; height stays fixed relative to the followed ground/water reference |
+| Find family dam / Find next section | Turn the camera toward work and show its distance; movement remains manual |
+| Amber / green work marker | Inspect missing supplies or perform the advertised nearby delivery/build action |
 | E / bottom action | Use the displayed nearby action |
 | Nearby work buttons | Choose among harvesting, building, digging and resting options |
 | X / set down | Release the current load for later recovery |
@@ -69,7 +71,7 @@ Save key: `beaverbrook-creekside-habitat-v2`. Position, knowledge, day, effort, 
 
 ## Verification and remaining limits
 
-90 automated tests pass across the repository. New rule checks cover resource conservation, local delivery, felling/drop/recovery, regrowth, effort, reversible water changes without refunds, dry-weather channel adaptation, two different supported-home approaches, shortage recovery, and an integrated route using normal movement. A Three.js renderer-stub test checks that the actual water meshes and excavated terrain change with the same rules; it does not verify native GPU pixels.
+96 automated tests pass across the repository. New rule checks cover resource conservation, local delivery, felling/drop/recovery, regrowth, effort, reversible water changes without refunds, dry-weather channel adaptation, two different supported-home approaches, shortage recovery, and an integrated route using normal movement. A Three.js renderer-stub test checks that the actual water meshes and excavated terrain change with the same rules; it does not verify native GPU pixels.
 
 Browser checks in the compatibility renderer covered harvesting, delivering/storing mixed loads, stand cutting and recovery of timber piles, hauling wood to the dam, sealing leaks, opening a visibly flooded hauling cut, entering swimming depth, resting with food consumption, and reload persistence. The native WebGL path, phone gestures, comfort, pacing and enjoyment remain unverified. The CPU renderer is slower and has coarser geometry and transparency sorting.
 

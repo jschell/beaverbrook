@@ -7,3 +7,9 @@
 #dam-map{width:min(100%,65vh);height:auto;max-height:none;margin:auto}@media(max-width:650px){#dam-map{width:min(100%,43vh);max-height:none}}
 
 @media(max-width:650px){header a{font-size:18px}nav button{font-size:9px;padding:5px 4px}}
+
+.work-navigation{display:flex;gap:6px;pointer-events:auto;margin-top:3px}.work-navigation button{font-size:11px;padding:5px 8px}#work-direction{margin:3px 0 0;max-width:350px;font-size:11px}#work-help{padding:10px;border-left:4px solid #bd842e;background:#f5e7bd;font-weight:600;font-size:12px}#work-markers{position:absolute;inset:0;pointer-events:none;overflow:hidden}.work-marker{position:absolute;transform:translate(-50%,-100%);border:2px solid #8b5b1b;background:#ffe2a3;color:#51370e;font-weight:750;border-radius:50%;padding:3px;min-width:27px;min-height:27px;font-size:11px;pointer-events:auto;box-shadow:0 2px 7px #173b3140}.work-marker.expanded{border-radius:8px;max-width:250px;padding:6px 9px;white-space:normal}.work-marker.ready{background:#e4f2c9;color:#23482e;border-color:#456e41}.work-marker:after{content:'';position:absolute;left:calc(50% - 4px);bottom:-8px;border-left:4px solid transparent;border-right:4px solid transparent;border-top:7px solid #8b5b1b}.colony{max-width:390px}#message{top:235px}@media(max-width:650px){.colony{max-width:calc(100% - 20px)}.work-navigation button{font-size:10px;padding:4px 6px}#work-direction{font-size:10px}#message{top:205px}#work-help{font-size:11px;padding:7px}.work-marker.expanded{max-width:190px;font-size:10px}}
+
+#play.has-work-goal #message{top:270px}@media(max-width:650px){#play.has-work-goal #message{top:240px}}
+
+.work-marker.complete{background:#eef0e0;border-color:#87957c;color:#43553d}

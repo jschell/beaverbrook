@@ -230,5 +230,7 @@ export function createExploreScene(container){
   fadeScenery(s,dt);
   if(renderer)renderer.render(scene,camera);
   else if(time-lastFallback>120||view.force){compatibility(s);lastFallback=time;}
+ },projectWorkSites(sites,s){
+  return sites.filter(p=>Math.hypot(p.x-s.x,p.z-s.z)<14).map(p=>{const y=Math.max(groundHeight(p.x,p.z,s),waterLevel(p.x,p.z,s)??-1)+1.15,v=new THREE.Vector3(p.x,y,p.z).project(camera);return {...p,distance:Math.hypot(p.x-s.x,p.z-s.z),screenX:(v.x+1)*50,screenY:(1-v.y)*50,shown:v.z>=-1&&v.z<=1&&Math.abs(v.x)<.92&&v.y<.8&&v.y>-.65};}).filter(p=>p.shown);
  },dispose(){renderer?.dispose();world.traverse(o=>o.geometry?.dispose());for(const record of occluders)for(const m of record.materials)m.dispose();}};
 }

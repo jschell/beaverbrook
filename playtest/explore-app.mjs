@@ -1,3 +1,4 @@
+import {damWorkSites,nextDamWork} from './dam-work.mjs';
 import {createDamPlanner} from './dam-planner.mjs';
 import {CRESTS} from './dam-placement.mjs';
 import {createExploreScene} from './explore-scene.mjs';
@@ -9,11 +10,12 @@ const newRun=()=>lab?freshDamLab():freshHabitat({flexible:true});
 let state,storage=true;
 try{state=loadHabitat(localStorage.getItem(saveKey))||newRun();}catch{state=newRun();storage=false;}
 state.flexible=true;state.placedDam??=null;
+let selectedWork=null,workSites=[],markerButtons=new Map();
 let planning=false,paused=true,mapOpen=false,yaw=0,distance=6.5,lastTime=0,lastSave=0,lastHud=0,mapDirty=true;
 let stick={x:0,y:0},stickPointer=null,lookPointer=null,lookStart=null,lookDirection=0;
 const keys=new Set(),scene=createExploreScene(el('view'));
 el('renderer').textContent=scene.mode;
-const planner=createDamPlanner({getState:()=>state,setState:next=>{state=next;mapDirty=true;persist();updateHud();},notify:message,onToggle:value=>{planning=value;stopInput();for(const child of el('play').children)if(!['dam-planner','menu'].includes(child.id))child.inert=value;if(!value)el('view').focus();}});
+const planner=createDamPlanner({getState:()=>state,setState:next=>{const justPlaced=!state.placedDam&&next.placedDam;state=next;if(justPlaced)selectedWork=nextDamWork(state)?.id||null;mapDirty=true;persist();updateHud();},notify:message,onToggle:value=>{planning=value;stopInput();for(const child of el('play').children)if(!['dam-planner','menu'].includes(child.id))child.inert=value;if(!value)el('view').focus();}});
 el('dam-button').onclick=()=>{if(!paused){toggleMap(false);planner.toggle();}};
 function persist(){try{localStorage.setItem(saveKey,JSON.stringify(state));storage=true;}catch{storage=false;}}
 function stopInput(){keys.clear();stick={x:0,y:0};stickPointer=null;lookPointer=null;lookDirection=0;el('stick-knob').style.transform='';}
@@ -21,6 +23,21 @@ function message(text){el('message').textContent=text+(storage?'':' Saving is un
 function setPause(value){if(value&&planning)planner.toggle(false);paused=value;stopInput();for(const child of el('play').children)if(child.id!=='menu')child.inert=paused;el('menu').hidden=!paused;el('menu-title').textContent='Make a creek your own';el('resume').textContent='Return to the creek';if(!paused)el('view').focus();else el('resume').focus();persist();}
 function toggleMap(value=!mapOpen){mapOpen=value;stopInput();el('map-panel').hidden=!value;el('map-button').setAttribute('aria-expanded',value);if(value)drawMap();else el('view').focus();}
 function recenter(){yaw=-state.yaw;}
+function faceWork(kind){const target=nextDamWork(state,kind);if(!target)return;selectedWork=target.id;yaw=Math.atan2(state.x-target.x,state.z-target.z);message(target.name+': '+target.detail);updateHud();}
+el('face-family').onclick=()=>faceWork('family');el('face-new').onclick=()=>faceWork('new');
+function updateWorkMarkers(){
+ el('work-markers').hidden=paused||mapOpen||planning;
+ const projected=scene.projectWorkSites(workSites,state),ids=new Set(projected.map(p=>p.id));
+ for(const [id,button]of markerButtons)if(!ids.has(id)){button.remove();markerButtons.delete(id);}
+ const expanded=projected.find(p=>p.id===selectedWork)||projected.find(p=>p.local)||projected.filter(p=>p.needsWork).sort((a,b)=>a.distance-b.distance)[0];
+ for(const site of projected){
+  if(!site.needsWork&&site.id!==expanded?.id){markerButtons.get(site.id)?.remove();markerButtons.delete(site.id);continue;}let button=markerButtons.get(site.id);
+  if(!button){button=document.createElement('button');button.dataset.siteId=site.id;button.onclick=()=>{const current=damWorkSites(state).find(p=>p.id===site.id);if(!current)return;selectedWork=site.id;if(current.action)interact(current.action);else{message(current.name+': '+current.detail);yaw=Math.atan2(state.x-current.x,state.z-current.z);updateHud();}};el('work-markers').append(button);markerButtons.set(site.id,button);}
+  const full=site.id===expanded?.id;button.className='work-marker '+(full?'expanded ':'')+(site.phase==='complete'?'complete':site.phase==='build'||site.phase==='deliver'?'ready':'');
+  button.textContent=full?site.name+' · '+site.prompt:site.index===undefined?'Family dam':String(site.index+1);
+  button.setAttribute('aria-label',site.name+' — '+site.prompt);button.title=site.detail;button.style.left=site.screenX+'%';button.style.top=site.screenY+'%';
+ }
+}
 function drawMap(){
  const canvas=el('map'),ctx=canvas.getContext('2d'),size=canvas.width,scale=size/(BOUNDS*2);
  ctx.fillStyle='#253f39';ctx.fillRect(0,0,size,size);
@@ -49,8 +66,11 @@ function updateHud(){
  el('stock').textContent=`Day ${state.day} · ${weather(state)} flow · effort ${state.effort}/${DAY_WORK}`;
  el('colony').textContent=`Lodge: ${state.food} food (${home.foodNights} nights), ${state.wood} wood · Dam: ${state.damWood} wood delivered`;
  el('home-state').textContent=home.protected?'Lodge approach submerged':'Shallow approach · costs 2 effort after rest';
+ workSites=damWorkSites(state);const workHere=workSites.find(p=>p.local),target=workSites.find(p=>p.id===selectedWork);
+ el('play').classList.toggle('has-work-goal',!!target);el('face-new').hidden=!state.placedDam;el('face-new').textContent=workSites.some(p=>p.id!=='family'&&p.needsWork)?'Find next section':'Inspect new dam';el('work-direction').hidden=!target;el('work-direction').textContent=target?target.name+' · '+Math.ceil(target.distance)+' units away · '+target.prompt:'';
+ el('work-help').hidden=!workHere;el('work-help').textContent=workHere?workHere.prompt+' — '+workHere.detail:'';
  const options=habitatOptions(state),primary=primaryHabitatAction(state);
- el('interact').disabled=!primary||paused||mapOpen;el('interact').textContent=primary?primary.label+' · E':options.length?'Choose nearby work':'Explore the creek';
+ el('interact').disabled=!primary||paused||mapOpen||planning;el('interact').textContent=primary?primary.label+' · E':workHere?.needsWork?workHere.prompt:options.length?'Choose nearby work':'Explore the creek';
  el('drop').hidden=!state.cargo;
  const signature=JSON.stringify([place?.point.id,options]);
  if(signature!==actionSignature){
@@ -77,7 +97,7 @@ function interact(action){
  const result=habitatAction(state,action);state=result.state;message(result.message);mapDirty=true;persist();updateHud();
 }
 el('resume').onclick=()=>setPause(false);
-el('restart').onclick=()=>{state=newRun();yaw=0;distance=6.5;toggleMap(false);setPause(false);mapDirty=true;message('Willow grows ahead along this bank. Gather food, improve water access, or explore for bulk timber. Choose what the family needs.');updateHud();};
+el('restart').onclick=()=>{state=newRun();selectedWork=null;yaw=0;distance=6.5;toggleMap(false);setPause(false);mapDirty=true;message('Willow grows ahead along this bank. Gather food, improve water access, or explore for bulk timber. Choose what the family needs.');updateHud();};
 el('pause-button').onclick=()=>setPause(!paused);
 el('map-button').onclick=()=>{if(!paused)toggleMap();};el('close-map').onclick=()=>toggleMap(false);
 el('center-button').onclick=recenter;
@@ -149,7 +169,7 @@ function frame(time){
    else if(oldMode!=='swimming'&&movementMode(state.x,state.z,state)==='swimming'&&!state.known.swimming){state.known.swimming=true;message('You are swimming. Hauling is faster here than over land.');}
   }
  }
- scene.update(state,{yaw,distance,moving,previewState:planner.previewState},time);
+ scene.update(state,{yaw,distance,moving,previewState:planner.previewState},time);updateWorkMarkers();
  if(time-lastHud>160){updateHud();lastHud=time;}
  if(time-lastSave>2000){persist();lastSave=time;}
  requestAnimationFrame(frame);
