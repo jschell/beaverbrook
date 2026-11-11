@@ -9,7 +9,7 @@ Start beside the family lodge. Walk along the bank, cross the creek, approach th
 | Input | Action |
 | --- | --- |
 | WASD or arrow keys | Camera-relative movement |
-| Drag open view, either mouse button | Orbit and tilt the follow camera |
+| Drag open view, either mouse button | Orbit the follow camera horizontally |
 | Mouse wheel | Adjust follow distance within limits |
 | E or nearby action button | Pick up, inspect or deliver |
 | X or Drop branch | Release a carried branch |
@@ -26,7 +26,7 @@ Character facing follows actual travel direction; the camera follows position an
 
 The smooth height field defines ground, depth and movement mode. Walking, wading and swimming use different speeds. A carried branch slows land travel substantially and swimming less. The avatar changes posture and carries a visible forked limb. Collisions use a horizontal radius against trees, a lodge and a rock, with axis sliding, bounded slopes and map boundaries. Movement advances in small substeps, with a bounded catch-up after a slow frame. It has no jumping or diving.
 
-The follow camera samples terrain and trunk/lodge/rock volumes and shortens its boom when obstructed. It can tighten abruptly near an obstacle. It does not provide a polished spring camera or full canopy collision. Terrain and visual meshes share a height function, while the compatibility mesh is coarser. Branches are attached cargo with no independent collision, buoyancy, current transport or snagging simulation. Released branches stay in place, including on water.
+The camera keeps a fixed 3.6-unit height above a smoothly followed ground/water reference. Obstacles never shorten the follow distance. Wheel changes ease in while keeping that height; vertical drag does not tilt the camera. Trees, shrubs, the lodge, rocks and individual terrain patches fade when they cover the beaver or enclose the camera, then recover with a short delay. This visual transparency does not remove movement collisions or reveal map knowledge. Both renderers respect fading. Transparency sorting can still show overlapping surfaces, and terrain fades in eight-unit patches. Terrain and visual meshes share a height function, while the compatibility mesh is coarser. Branches are attached cargo with no independent collision, buoyancy, current transport or snagging simulation. Released branches stay in place, including on water.
 
 Discovery is radius-based. Nearby ground becomes explored, retains its known geography, and appears darker when distant on the map. The grove and landing are marked after approaching them. The lodge location is known from the start. Discovery follows the animal's position, never the orbit camera. Rendering uses distance fog and nearby objects. There is no ray-based line-of-sight visibility or dynamic offscreen resource history in this static scene.
 
@@ -38,8 +38,10 @@ The local save key is beaverbrook-creekside-v1. Position, facing, explored cells
 
 ## Verification and limits
 
-Rules tests cover movement modes, normalized speed, collision/boundary behavior, local discovery, camera obstruction, finite-stock conservation and save/reload. An integrated movement test traverses land and water to the grove and returns a branch through the same rules.
+Rules tests cover movement modes, normalized speed, collision/boundary behavior, local discovery, fixed camera height/range and smoothing, finite-stock conservation and save/reload. An integrated movement test traverses land and water to the grove and returns a branch through the same rules.
 
 Browser checks used ordinary keyboard holds to walk, swim, discover the grove, collect a branch, drop/recover it, return around a tree and deliver it. Reload retained one stored branch and discovered terrain. Map inspection and recenter controls were checked. Cloud WebGL was unavailable, so visual checks used a deliberately reduced-detail compatibility renderer. It is slower than the intended GPU view. Native WebGL performance, touch gestures on a phone, comfort and enjoyment remain unverified.
+
+Camera revision verification: all 71 automated tests pass. A renderer-stub test uses real Three.js geometry and raycasts to check independent lodge fading, restoration, unchanged follow range/height, solid beaver materials and retained movement collisions. Browser checks confirmed lodge transparency and manual follow-distance adjustment in the compatibility renderer; native GPU transparency remains unverified.
 
 Next evaluation: can a new player find a landing, distinguish dragging from floating, recover orientation using the remembered map, and complete the trip without continuous coaching? Observe whether they choose a second route voluntarily. Camera proximity around vegetation and the amount of travel are open tuning questions.

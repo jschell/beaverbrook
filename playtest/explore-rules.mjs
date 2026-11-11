@@ -75,19 +75,11 @@ export function interactExplore(state,action='interact'){
  if(interaction.type==='pickup'){s.dropped.splice(interaction.index,1);s.carrying=true;return {state:s,message:'Branch recovered.'};}
  s.inspected=true;return {state:s,message:'A low, gradual bank. You can wade here, then swim in the deeper channel. This could be a useful hauling landing.'};
 }
-export function cameraBoom(s,yaw,distance=6.5,pitch=.5,obstacles=OBSTACLES){
- const height=movementMode(s.x,s.z)==='swimming'?-.1:groundHeight(s.x,s.z);
- const target={x:s.x,y:height+.8,z:s.z};
- const horizontal=Math.cos(pitch)*distance;
- const desired={x:target.x+Math.sin(yaw)*horizontal,y:target.y+Math.sin(pitch)*distance,z:target.z+Math.cos(yaw)*horizontal};
- let fraction=1;
- for(let i=3;i<=30;i++){
-  const t=i/30,x=target.x+(desired.x-target.x)*t,y=target.y+(desired.y-target.y)*t,z=target.z+(desired.z-target.z)*t;
-  const blocked=groundHeight(x,z)+.22>y||obstacles.some(o=>Math.hypot(x-o.x,z-o.z)<o.radius+.18&&y<groundHeight(o.x,o.z)+o.height+.5);
-  if(blocked){fraction=Math.max(.18,(i-2)/30);break;}
- }
- return {target,position:{x:target.x+(desired.x-target.x)*fraction,y:Math.max(groundHeight(target.x+(desired.x-target.x)*fraction,target.z+(desired.z-target.z)*fraction)+.25,target.y+(desired.y-target.y)*fraction),z:target.z+(desired.z-target.z)*fraction}};
+// Keep the eye above the local ground/water reference, independent of obstructions.
+export function cameraBoom(s,yaw,distance=6.5,height=Math.max(0,groundHeight(s.x,s.z))){
+ return {target:{x:s.x,y:height+.65,z:s.z},position:{x:s.x+Math.sin(yaw)*distance,y:height+3.6,z:s.z+Math.cos(yaw)*distance}};
 }
+export function dampCamera(current,target,dt,rate=6){return current+(target-current)*(1-Math.exp(-Math.max(0,dt)*rate));}
 export function loadExplore(text){
  try{
   const s=JSON.parse(text);

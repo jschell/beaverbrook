@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {freshExplore,moveExplore,movementMode,speedFor,groundHeight,canStand,cameraBoom,interactExplore,nearbyInteraction,loadExplore,GROVE,LODGE,TREES} from '../playtest/explore-rules.mjs';
+import {freshExplore,moveExplore,movementMode,speedFor,groundHeight,canStand,cameraBoom,dampCamera,interactExplore,nearbyInteraction,loadExplore,GROVE,LODGE,TREES} from '../playtest/explore-rules.mjs';
 
 test('walking, wading and swimming are derived from the same height field',()=>{
  assert.equal(movementMode(-7,3),'walking');assert.equal(movementMode(0,0),'swimming');
@@ -36,12 +36,17 @@ test('branch gathering, dropping, recovery and delivery conserve the finite supp
  assert.equal(s.stored,1);assert.equal(s.carrying,false);assert.equal(s.groveStock,2);
  assert.equal(s.groveStock+s.stored+s.dropped.length+Number(s.carrying),3);
 });
-test('camera boom avoids terrain and trunk volumes',()=>{
- const s=freshExplore(),boom=cameraBoom(s,0,6.5,.5,[]);
- assert.ok(boom.position.y>groundHeight(boom.position.x,boom.position.z));
- const blocker=[{x:s.x,z:s.z+2,radius:.6,height:6}];
- const clipped=cameraBoom(s,0,6.5,.5,blocker);
- assert.ok(clipped.position.z<boom.position.z);assert.ok(clipped.position.z<s.z+2);
+test('camera keeps its chosen range and height through obstacles and water transitions',()=>{
+ const s=freshExplore();
+ for(const yaw of [0,1,3]){
+  const boom=cameraBoom(s,yaw,6.5);
+  assert.ok(Math.abs(Math.hypot(boom.position.x-s.x,boom.position.z-s.z)-6.5)<1e-9);
+  assert.equal(boom.position.y,Math.max(0,groundHeight(s.x,s.z))+3.6);
+ }
+ const shore=cameraBoom({...s,x:2.5,z:0},0),water=cameraBoom({...s,x:0,z:0},0);
+ assert.equal(shore.position.y,water.position.y,'submerged banks share a continuous water reference');
+ const one=dampCamera(4,9,.1),two=dampCamera(dampCamera(4,9,.05),9,.05);
+ assert.ok(one>4&&one<9);assert.ok(Math.abs(one-two)<1e-9,'smoothing is independent of frame rate');
 });
 test('saved exploration preserves discoveries and cannot add branch stock',()=>{
  const s=freshExplore();assert.ok(canStand(s.x,s.z,TREES));

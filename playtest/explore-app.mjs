@@ -4,7 +4,7 @@ import {BOUNDS,LODGE,GROVE,LANDING,freshExplore,moveExplore,movementMode,nearbyI
 const el=id=>document.getElementById(id),saveKey='beaverbrook-creekside-v1';
 let state,storage=true;
 try{state=loadExplore(localStorage.getItem(saveKey))||freshExplore();}catch{state=freshExplore();storage=false;}
-let paused=true,mapOpen=false,yaw=0,pitch=.5,distance=6.5,lastTime=0,lastSave=0,lastHud=0,mapDirty=true;
+let paused=true,mapOpen=false,yaw=0,distance=6.5,lastTime=0,lastSave=0,lastHud=0,mapDirty=true;
 let stick={x:0,y:0},stickPointer=null,lookPointer=null,lookStart=null,lookDirection=0;
 const keys=new Set(),scene=createExploreScene(el('view'));
 el('renderer').textContent=scene.mode;
@@ -13,7 +13,7 @@ function stopInput(){keys.clear();stick={x:0,y:0};stickPointer=null;lookPointer=
 function message(text){el('message').textContent=text+(storage?'':' Saving is unavailable in this browser.');}
 function setPause(value){paused=value;stopInput();for(const child of el('play').children)if(child.id!=='menu')child.inert=paused;el('menu').hidden=!paused;el('menu-title').textContent='A beaver’s view';el('resume').textContent='Return to the creek';if(!paused)el('view').focus();else el('resume').focus();persist();}
 function toggleMap(value=!mapOpen){mapOpen=value;stopInput();el('map-panel').hidden=!value;el('map-button').setAttribute('aria-expanded',value);if(value)drawMap();else el('view').focus();}
-function recenter(){yaw=-state.yaw;pitch=.5;}
+function recenter(){yaw=-state.yaw;}
 function drawMap(){
  const canvas=el('map'),ctx=canvas.getContext('2d'),size=canvas.width,scale=size/(BOUNDS*2);
  ctx.fillStyle='#253f39';ctx.fillRect(0,0,size,size);
@@ -47,7 +47,7 @@ function interact(action){
  const result=interactExplore(state,action);state=result.state;message(result.message);mapDirty=true;persist();updateHud();
 }
 el('resume').onclick=()=>setPause(false);
-el('restart').onclick=()=>{state=freshExplore();yaw=0;pitch=.5;distance=6.5;toggleMap(false);setPause(false);mapDirty=true;message('A fresh creek. Find the grove across the water, or follow the bank and explore.');updateHud();};
+el('restart').onclick=()=>{state=freshExplore();yaw=0;distance=6.5;toggleMap(false);setPause(false);mapDirty=true;message('A fresh creek. Find the grove across the water, or follow the bank and explore.');updateHud();};
 el('pause-button').onclick=()=>setPause(!paused);
 el('map-button').onclick=()=>{if(!paused)toggleMap();};el('close-map').onclick=()=>toggleMap(false);
 el('center-button').onclick=recenter;
@@ -82,7 +82,7 @@ view.addEventListener('pointerdown',event=>{
 });
 view.addEventListener('pointermove',event=>{
  if(event.pointerId!==lookPointer||!lookStart)return;
- yaw-=(event.clientX-lookStart.x)*.006;pitch=Math.max(.22,Math.min(.85,pitch+(event.clientY-lookStart.y)*.004));lookStart={x:event.clientX,y:event.clientY};
+ yaw-=(event.clientX-lookStart.x)*.006;lookStart={x:event.clientX,y:event.clientY};
 });
 function releaseLook(event){if(event.pointerId===lookPointer){lookPointer=null;lookStart=null;}}
 for(const name of ['pointerup','pointercancel','lostpointercapture'])view.addEventListener(name,releaseLook);
@@ -118,7 +118,7 @@ function frame(time){
    else if(oldMode!=='swimming'&&movementMode(state.x,state.z)==='swimming'&&!state.known.swimming){state.known.swimming=true;message('You are swimming. Turn toward a gradual bank to get out.');}
   }
  }
- scene.update(state,{yaw,pitch,distance,moving},time);
+ scene.update(state,{yaw,distance,moving},time);
  if(time-lastHud>160){updateHud();lastHud=time;}
  if(time-lastSave>2000){persist();lastSave=time;}
  requestAnimationFrame(frame);

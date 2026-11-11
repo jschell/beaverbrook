@@ -1,5 +1,5 @@
 import * as THREE from './vendor/three.module.js';
-import {BOUNDS,TREES,LODGE,GROVE,LANDING,groundHeight,movementMode,cameraBoom} from './explore-rules.mjs';
+import {BOUNDS,TREES,LODGE,GROVE,LANDING,groundHeight,movementMode,cameraBoom,dampCamera} from './explore-rules.mjs';
 
 export function createExploreScene(container){
  const scene=new THREE.Scene();scene.background=new THREE.Color('#c7d9cc');scene.fog=new THREE.Fog('#c7d9cc',9,22);
@@ -18,15 +18,26 @@ export function createExploreScene(container){
   object.position.copy(new THREE.Vector3(...a).add(new THREE.Vector3(...b)).multiplyScalar(.5));
   object.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),direction.normalize());return object;
  }
- const terrain=new THREE.PlaneGeometry(BOUNDS*2,BOUNDS*2,renderer?64:32,renderer?64:32);terrain.rotateX(-Math.PI/2);
- const positions=terrain.getAttribute('position'),colors=[];
- for(let i=0;i<positions.count;i++){
-  const x=positions.getX(i),z=positions.getZ(i),h=groundHeight(x,z);positions.setY(i,h);
-  const color=new THREE.Color(h<-.05?'#a59a73':h<.28?'#a7a47b':h>1.5?'#758663':'#8fa57b');
-  colors.push(color.r,color.g,color.b);
+ // Separate materials keep fading local: one tree or bank never fades its neighbors.
+ const occluders=[];
+ function register(root){const record={root,materials:new Set(),opacity:1,hold:0};occluders.push(record);refresh(record);return root;}
+ function refresh(record){
+  const clones=new Map();
+  record.root.traverse(o=>{if(!o.isMesh||record.materials.has(o.material))return;
+   if(!clones.has(o.material)){const m=o.material.clone();m.side=THREE.DoubleSide;clones.set(o.material,m);record.materials.add(m);}
+   o.material=clones.get(o.material);
+  });
  }
- terrain.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));terrain.computeVertexNormals();
- world.add(new THREE.Mesh(terrain,new THREE.MeshStandardMaterial({vertexColors:true,roughness:1})));
+ for(let tz=-BOUNDS;tz<BOUNDS;tz+=8)for(let tx=-BOUNDS;tx<BOUNDS;tx+=8){
+  const terrain=new THREE.PlaneGeometry(8,8,renderer?12:6,renderer?12:6);terrain.rotateX(-Math.PI/2);terrain.translate(tx+4,0,tz+4);
+  const positions=terrain.getAttribute('position'),colors=[];
+  for(let i=0;i<positions.count;i++){
+   const x=positions.getX(i),z=positions.getZ(i),h=groundHeight(x,z);positions.setY(i,h);
+   const color=new THREE.Color(h<-.05?'#a59a73':h<.28?'#a7a47b':h>1.5?'#758663':'#8fa57b');colors.push(color.r,color.g,color.b);
+  }
+  terrain.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));terrain.computeVertexNormals();
+  const bank=new THREE.Mesh(terrain,new THREE.MeshStandardMaterial({vertexColors:true,roughness:1}));world.add(bank);register(bank);
+ }
  const waterTiles=[];
  const waterMaterial=new THREE.MeshStandardMaterial({color:'#448f9f',transparent:true,opacity:.85,roughness:.3});
 
@@ -38,7 +49,7 @@ export function createExploreScene(container){
   const tree=new THREE.Group();tree.position.set(t.x,groundHeight(t.x,t.z),t.z);world.add(tree);
   mesh(new THREE.CylinderGeometry(.14,.22,t.height,7),'#7d6847',0,t.height/2,0,tree);
   const crown=mesh(new THREE.IcosahedronGeometry(.95,renderer?1:0),t.id%3?'#547c55':'#779452',0,t.height,0,tree);crown.scale.y=1.2;
-  trees.push(tree);
+  trees.push(tree);register(tree);
  }
  // Low plants and rocks give the local camera recognizable shoreline landmarks.
  const plants=[];
@@ -47,9 +58,9 @@ export function createExploreScene(container){
   if(h<-.05||h>.35||Math.hypot(x-LANDING.x,z-LANDING.z)<1.4)continue;
   const group=new THREE.Group();group.position.set(x,h,z);world.add(group);
   for(let j=0;j<3;j++)log([j*.1,0,0],[j*.13,.55+(j%2)*.2,.1],.025,'#65834a',group);
-  plants.push(group);
+  plants.push(group);register(group);
  }
- mesh(new THREE.IcosahedronGeometry(.7,1),'#869082',-4,groundHeight(-4,-8)+.25,-8).scale.set(1.4,.65,1);
+ const rock=mesh(new THREE.IcosahedronGeometry(.7,1),'#869082',-4,groundHeight(-4,-8)+.25,-8);rock.scale.set(1.4,.65,1);register(rock);
  const lodge=new THREE.Group();lodge.position.set(LODGE.x,groundHeight(LODGE.x,LODGE.z),LODGE.z);world.add(lodge);
  const dome=mesh(new THREE.SphereGeometry(1.2,12,8),'#826346',0,.35,0,lodge);dome.scale.set(1,.8,1);
  for(let i=0;i<16;i++){const a=i*.9;log([Math.cos(a),.15,Math.sin(a)],[Math.cos(a+.7)*.3,1.1,Math.sin(a+.7)*.3],.065,'#a17d50',lodge);}
@@ -60,7 +71,7 @@ export function createExploreScene(container){
  }
  const branchPile=new THREE.Group();grove.add(branchPile);
  const storedPile=new THREE.Group();lodge.add(storedPile);
- const dropped=new THREE.Group();world.add(dropped);
+ const dropped=new THREE.Group();world.add(dropped);register(grove);register(lodge);
  function branch(parent,y=0){log([-.65,y,0],[.65,y,.13],.065,'#bd9560',parent);log([.1,y,.08],[.5,y,.5],.04,'#a98049',parent);}
  // A distinct exposed root identifies the same landing from land and water.
  log([LANDING.x-.7,groundHeight(LANDING.x-.7,LANDING.z)+.1,LANDING.z],[LANDING.x+.8,.12,LANDING.z+.1],.09,'#d9c28c');
@@ -79,6 +90,23 @@ export function createExploreScene(container){
  const cargo=new THREE.Group();beaver.add(cargo);
  log([0,.37,-.8],[.65,.1,1.2],.055,'#c5a16b',cargo);log([.4,.18,.5],[1,.1,.9],.04,'#b88b56',cargo);
  const wake=mesh(new THREE.TorusGeometry(.55,.018,3,28),'#bfddcc',0,.02,0);wake.rotation.x=-Math.PI/2;wake.scale.set(.75,1.7,1);
+ let followHeight=null,followDistance=null;
+ const ray=new THREE.Raycaster(),box=new THREE.Box3();
+ function fadeScenery(s,dt){
+  world.updateMatrixWorld(true);
+  const center=beaver.position.clone().add(new THREE.Vector3(0,.45,0));
+  const side=new THREE.Vector3(Math.cos(camera.rotation.y)*.3,0,-Math.sin(camera.rotation.y)*.3);
+  const targets=[center,center.clone().add(side),center.clone().sub(side),center.clone().add(new THREE.Vector3(0,.35,0))];
+  for(const record of occluders){
+   if(!record.root.visible)continue;
+   let blocked=box.setFromObject(record.root).expandByScalar(.2).containsPoint(camera.position);
+   for(const target of targets){if(blocked)break;const direction=target.clone().sub(camera.position);ray.set(camera.position,direction.clone().normalize());ray.far=Math.max(0,direction.length()-.45);blocked=ray.intersectObject(record.root,true).length>0;}
+   record.hold=blocked?.18:Math.max(0,record.hold-dt);
+   record.opacity=dampCamera(record.opacity,record.hold>0?.14:1,dt,record.hold>0?14:5);
+   if(record.opacity>.995)record.opacity=1;
+   for(const m of record.materials){const transparent=record.opacity<1;if(m.transparent!==transparent){m.transparent=transparent;m.needsUpdate=true;}m.opacity=record.opacity;m.depthWrite=!transparent;}
+  }
+ }
  let lastInventory='',lastFallback=0,lastFrame=0;
  const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
  function clear(group){while(group.children.length){const child=group.children.pop();child.traverse(o=>o.geometry?.dispose());child.parent=null;}}
@@ -88,6 +116,7 @@ export function createExploreScene(container){
   for(let i=0;i<s.groveStock;i++)branch(branchPile,.1+i*.11);
   for(let i=0;i<s.stored;i++){const stack=new THREE.Group();stack.position.set(1.1,.1+i*.13,0);storedPile.add(stack);branch(stack);}
   for(const point of s.dropped){const stack=new THREE.Group();stack.position.set(point.x,Math.max(0,groundHeight(point.x,point.z))+.05,point.z);dropped.add(stack);branch(stack);}
+  for(const record of occluders)if(record.root===lodge||record.root===grove)refresh(record);
  }
  function resize(){const w=container.clientWidth,h=container.clientHeight;if(!w||!h)return;camera.aspect=w/h;camera.updateProjectionMatrix();renderer?.setSize(w,h,false);}
  new ResizeObserver(resize).observe(container);resize();
@@ -104,19 +133,20 @@ export function createExploreScene(container){
     const center=vertices[0].clone().add(vertices[1]).add(vertices[2]).multiplyScalar(1/3);
     const distance=center.distanceTo(cameraPosition);if(distance>23)continue;
     const normal=vertices[1].clone().sub(vertices[0]).cross(vertices[2].clone().sub(vertices[0])).normalize();
-    if(normal.dot(cameraPosition.clone().sub(center))<=0)continue;
+    if(o.material.side!==THREE.DoubleSide&&normal.dot(cameraPosition.clone().sub(center))<=0)continue;
     const projected=vertices.map(v=>v.clone().project(camera));
     if(projected.some(v=>v.z< -1||v.z>1)||projected.every(v=>v.z>1)||projected.every(v=>v.x< -1)||projected.every(v=>v.x>1)||projected.every(v=>v.y< -1)||projected.every(v=>v.y>1))continue;
     const color=o.material.color.clone();
     if(attribute){color.setRGB(0,0,0);for(const id of ids){color.r+=attribute.getX(id)/3;color.g+=attribute.getY(id)/3;color.b+=attribute.getZ(id)/3;}}
     color.multiplyScalar(.75+Math.max(0,normal.dot(new THREE.Vector3(-.3,.9,.2).normalize()))*.3).lerp(scene.background,Math.max(0,Math.min(1,(distance-9)/13)));
-    faces.push({depth:projected.reduce((sum,v)=>sum+v.z,0)/3,svg:'<polygon points="'+projected.map(v=>((v.x+1)*w/2).toFixed(1)+','+((1-v.y)*h/2).toFixed(1)).join(' ')+'" fill="#'+color.getHexString()+'" stroke="#'+color.getHexString()+'" stroke-width=".45"/>'});
+    faces.push({depth:projected.reduce((sum,v)=>sum+v.z,0)/3,svg:'<polygon points="'+projected.map(v=>((v.x+1)*w/2).toFixed(1)+','+((1-v.y)*h/2).toFixed(1)).join(' ')+'" fill="#'+color.getHexString()+'" stroke="#'+color.getHexString()+'" fill-opacity="'+o.material.opacity.toFixed(3)+'" stroke-opacity="'+o.material.opacity.toFixed(3)+'" stroke-width=".45"/>'});
    }
   });
   faces.sort((a,b)=>b.depth-a.depth);
   container.innerHTML='<svg viewBox="0 0 '+w+' '+h+'" width="100%" height="100%" role="img" aria-label="Third-person beaver view of the creek">'+faces.map(f=>f.svg).join('')+'</svg>';
  }
  return {mode:renderer?'WebGL':'Compatibility renderer',update(s,view,time){
+  const dt=lastFrame?Math.min(.1,Math.max(0,(time-lastFrame)/1000)):1/60;
   inventory(s);
   const mode=movementMode(s.x,s.z),swim=mode==='swimming',moving=view.moving;
   beaver.position.set(s.x,swim?-.12:groundHeight(s.x,s.z),s.z);
@@ -133,10 +163,13 @@ export function createExploreScene(container){
   for(const plant of plants)plant.visible=Math.hypot(plant.position.x-s.x,plant.position.z-s.z)<14;
   grove.visible=Math.hypot(GROVE.x-s.x,GROVE.z-s.z)<15;
   lodge.visible=Math.hypot(LODGE.x-s.x,LODGE.z-s.z)<18;
-  const boom=cameraBoom(s,view.yaw,view.distance,view.pitch);
-  // Boom obstruction is resolved immediately, preventing interpolation through a bank.
+  const reference=Math.max(0,groundHeight(s.x,s.z));
+  followHeight=followHeight===null?reference:dampCamera(followHeight,reference,dt);
+  followDistance=followDistance===null?view.distance:dampCamera(followDistance,view.distance,dt,8);
+  const boom=cameraBoom(s,view.yaw,followDistance,followHeight);
   camera.position.set(boom.position.x,boom.position.y,boom.position.z);camera.lookAt(boom.target.x,boom.target.y,boom.target.z);camera.updateMatrixWorld();
+  fadeScenery(s,dt);
   if(renderer)renderer.render(scene,camera);
   else if(time-lastFallback>120||view.force){compatibility(s);lastFallback=time;}
- },dispose(){renderer?.dispose();world.traverse(o=>o.geometry?.dispose());}};
+ },dispose(){renderer?.dispose();world.traverse(o=>o.geometry?.dispose());for(const record of occluders)for(const m of record.materials)m.dispose();}};
 }
