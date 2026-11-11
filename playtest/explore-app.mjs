@@ -1,9 +1,10 @@
 import {createExploreScene} from './explore-scene.mjs';
-import {BOUNDS,LODGE,GROVE,LANDING,freshExplore,moveExplore,movementMode,nearbyInteraction,interactExplore,groundHeight,loadExplore} from './explore-rules.mjs';
+import {BOUNDS,LODGE,CHANNELS,movementMode,groundHeight,waterDepth} from './explore-rules.mjs';
+import {freshHabitat,habitatMove,habitatOptions,primaryHabitatAction,habitatAction,loadHabitat,PATCHES,DAM,localPlace,homeStatus,channelStatus,weather,DAY_WORK} from './habitat-rules.mjs';
 
-const el=id=>document.getElementById(id),saveKey='beaverbrook-creekside-v1';
+const el=id=>document.getElementById(id),saveKey='beaverbrook-creekside-habitat-v2';
 let state,storage=true;
-try{state=loadExplore(localStorage.getItem(saveKey))||freshExplore();}catch{state=freshExplore();storage=false;}
+try{state=loadHabitat(localStorage.getItem(saveKey))||freshHabitat();}catch{state=freshHabitat();storage=false;}
 let paused=true,mapOpen=false,yaw=0,distance=6.5,lastTime=0,lastSave=0,lastHud=0,mapDirty=true;
 let stick={x:0,y:0},stickPointer=null,lookPointer=null,lookStart=null,lookDirection=0;
 const keys=new Set(),scene=createExploreScene(el('view'));
@@ -11,43 +12,64 @@ el('renderer').textContent=scene.mode;
 function persist(){try{localStorage.setItem(saveKey,JSON.stringify(state));storage=true;}catch{storage=false;}}
 function stopInput(){keys.clear();stick={x:0,y:0};stickPointer=null;lookPointer=null;lookDirection=0;el('stick-knob').style.transform='';}
 function message(text){el('message').textContent=text+(storage?'':' Saving is unavailable in this browser.');}
-function setPause(value){paused=value;stopInput();for(const child of el('play').children)if(child.id!=='menu')child.inert=paused;el('menu').hidden=!paused;el('menu-title').textContent='A beaver’s view';el('resume').textContent='Return to the creek';if(!paused)el('view').focus();else el('resume').focus();persist();}
+function setPause(value){paused=value;stopInput();for(const child of el('play').children)if(child.id!=='menu')child.inert=paused;el('menu').hidden=!paused;el('menu-title').textContent='Make a creek your own';el('resume').textContent='Return to the creek';if(!paused)el('view').focus();else el('resume').focus();persist();}
 function toggleMap(value=!mapOpen){mapOpen=value;stopInput();el('map-panel').hidden=!value;el('map-button').setAttribute('aria-expanded',value);if(value)drawMap();else el('view').focus();}
 function recenter(){yaw=-state.yaw;}
 function drawMap(){
  const canvas=el('map'),ctx=canvas.getContext('2d'),size=canvas.width,scale=size/(BOUNDS*2);
  ctx.fillStyle='#253f39';ctx.fillRect(0,0,size,size);
  for(const cell of Object.keys(state.explored)){
-  const [x,z]=cell.split(',').map(Number),h=groundHeight(x+.5,z+.5),live=Math.hypot(x+.5-state.x,z+.5-state.z)<7;
-  ctx.fillStyle=h<0?(live?'#68a6af':'#446b70'):h>1.5?(live?'#86916c':'#53634e'):(live?'#b3bb8c':'#778465');
+  const [x,z]=cell.split(',').map(Number),h=groundHeight(x+.5,z+.5,state),live=Math.hypot(x+.5-state.x,z+.5-state.z)<7;
+  ctx.fillStyle=waterDepth(x+.5,z+.5,state)>.02?(live?'#68a6af':'#446b70'):h>1.5?(live?'#86916c':'#53634e'):(live?'#b3bb8c':'#778465');
   ctx.fillRect((x+BOUNDS)*scale,(z+BOUNDS)*scale,scale+.2,scale+.2);
  }
- function mark(point,color,label){const x=(point.x+BOUNDS)*scale,z=(point.z+BOUNDS)*scale;ctx.fillStyle=color;ctx.beginPath();ctx.arc(x,z,5,0,Math.PI*2);ctx.fill();ctx.font='bold 13px system-ui';ctx.fillText(label,x+9,z-7);}
+ function mark(point,color,label,dx=10,dy=-10){const x=(point.x+BOUNDS)*scale,z=(point.z+BOUNDS)*scale;ctx.fillStyle=color;ctx.beginPath();ctx.arc(x,z,5,0,Math.PI*2);ctx.fill();ctx.font='bold 18px system-ui';ctx.fillText(label,x+dx,z+dy);}
  mark(LODGE,'#f4ddb1','Lodge');
- if(state.known.grove)mark(GROVE,'#e6d6a3','Grove');
- if(state.known.landing)mark(LANDING,'#e5d8aa','Landing');
- for(const point of state.dropped)if(Math.hypot(point.x-state.x,point.z-state.z)<7)mark(point,'#d9b080','Branch');
+ mark(DAM,'#d6b585','Dam');
+ for(const p of PATCHES)if(state.known[p.id])mark(p,'#e6d6a3',p.name.replace('Bank ','').replace(' stand',''));
+ for(const p of CHANNELS)if(state.known[p.id])mark(p,'#bde2e0',p.name,10,24);
+ for(const point of state.loose)if(Math.hypot(point.x-state.x,point.z-state.z)<7)mark(point,'#d9b080','Branch');
  mark(state,'#ffffff','You');
  ctx.strokeStyle='#fff';ctx.beginPath();const px=(state.x+BOUNDS)*scale,pz=(state.z+BOUNDS)*scale;ctx.moveTo(px,pz);ctx.lineTo(px+Math.sin(state.yaw)*12,pz-Math.cos(state.yaw)*12);ctx.stroke();
  el('map-legend').textContent='Lighter ground is nearby. Darker ground is remembered. '+Object.keys(state.explored).length+' ground cells explored.';
  mapDirty=false;
 }
+let actionSignature='';
 function updateHud(){
- const mode=movementMode(state.x,state.z);
+ const mode=movementMode(state.x,state.z,state),home=homeStatus(state),place=localPlace(state);
  el('mode').textContent=mode[0].toUpperCase()+mode.slice(1);
- el('load').textContent=state.carrying?'Branch in tow':'Free paws';el('stock').textContent=state.stored+' at the lodge';
- const interaction=nearbyInteraction(state);
- el('interact').disabled=!interaction||paused||mapOpen;
- el('interact').textContent=interaction?interaction.label+' · E':state.carrying?'Bring the branch home':'Explore the creek';
- el('drop').hidden=!state.carrying;
+ el('load').textContent=state.cargo?`${state.cargo.wood} wood + ${state.cargo.food} food in tow`:'Free paws';
+ el('stock').textContent=`Day ${state.day} · ${weather(state)} flow · effort ${state.effort}/${DAY_WORK}`;
+ el('colony').textContent=`Lodge: ${state.food} food (${home.foodNights} nights), ${state.wood} wood · Dam: ${state.damWood} wood delivered`;
+ el('home-state').textContent=home.protected?'Lodge approach submerged':'Shallow approach · costs 2 effort after rest';
+ const options=habitatOptions(state),primary=primaryHabitatAction(state);
+ el('interact').disabled=!primary||paused||mapOpen;el('interact').textContent=primary?primary.label+' · E':options.length?'Choose nearby work':'Explore the creek';
+ el('drop').hidden=!state.cargo;
+ const signature=JSON.stringify([place?.point.id,options]);
+ if(signature!==actionSignature){
+  actionSignature=signature;el('local-actions').replaceChildren();
+  for(const a of options.filter(a=>a.id!=='drop')){
+   const button=document.createElement('button');button.textContent=a.label+(a.cost?` · ${a.cost} effort`:'');button.disabled=!a.enabled;button.title=a.reason;
+   button.onclick=()=>interact(a.id);el('local-actions').append(button);
+  }
+ }
+ el('nearby').hidden=!place&&!options.some(a=>a.id==='pickup')||mapOpen;
+ el('place-name').textContent=place?.point.name||'Supplies on the bank';
+ let detail='';
+ if(place?.type==='patch'){const p=place.point;detail=`${state.patches[p.id].stock}/${p.max} growth · ${p.description}${waterDepth(p.x,p.z,state)>.25?' Roots submerged: regrowth pauses.':''}`;}
+ if(place?.type==='lodge')detail='Store mixed loads, carry stored wood onward, or rest to advance growth and weather. Rest consumes 2 food. A shortage uses 4 effort tomorrow; feeding the next rest restores recovery.';
+ if(place?.type==='dam')detail=`${['Leaky established dam','Sealed low dam','Raised dam'][state.dam]}. Retaining water can turn shallow cuts into swimming routes. Opening a notch returns no wood.`;
+ if(place?.type==='channel'){const c=channelStatus(state,place.point.id);detail=`Depth ${c.depth.toFixed(2)} · ${c.swimmable?'swimmable with a load':'too shallow for swimming'}. Digging changes this route; dry flow can expose a shallow cut.`;}
+ const reason=options.filter(a=>!a.enabled&&a.reason).map(a=>a.reason);el('place-detail').textContent=detail+(reason.length?' '+[...new Set(reason)].join(' '):'');
  if(mapOpen&&mapDirty)drawMap();
 }
 function interact(action){
  if(paused||mapOpen)return;
- const result=interactExplore(state,action);state=result.state;message(result.message);mapDirty=true;persist();updateHud();
+ if(action==='interact')action=primaryHabitatAction(state)?.id;
+ const result=habitatAction(state,action);state=result.state;message(result.message);mapDirty=true;persist();updateHud();
 }
 el('resume').onclick=()=>setPause(false);
-el('restart').onclick=()=>{state=freshExplore();yaw=0;distance=6.5;toggleMap(false);setPause(false);mapDirty=true;message('A fresh creek. Find the grove across the water, or follow the bank and explore.');updateHud();};
+el('restart').onclick=()=>{state=freshHabitat();yaw=0;distance=6.5;toggleMap(false);setPause(false);mapDirty=true;message('Willow grows ahead along this bank. Gather food, improve water access, or explore for bulk timber. Choose what the family needs.');updateHud();};
 el('pause-button').onclick=()=>setPause(!paused);
 el('map-button').onclick=()=>{if(!paused)toggleMap();};el('close-map').onclick=()=>toggleMap(false);
 el('center-button').onclick=recenter;
@@ -109,13 +131,13 @@ function frame(time){
   const x=(keys.has('d')||keys.has('arrowright')?1:0)-(keys.has('a')||keys.has('arrowleft')?1:0)+stick.x;
   const forward=(keys.has('w')||keys.has('arrowup')?1:0)-(keys.has('s')||keys.has('arrowdown')?1:0)+stick.y;
   if(Math.hypot(x,forward)>.08){
-   const old=state,oldMode=movementMode(old.x,old.z);
+   const old=state,oldMode=movementMode(old.x,old.z,old);
    const steps=Math.max(1,Math.ceil(dt/.05));
-   for(let step=0;step<steps;step++)state=moveExplore(state,{x:x*Math.cos(yaw)-forward*Math.sin(yaw),z:-x*Math.sin(yaw)-forward*Math.cos(yaw)},dt/steps);
+   for(let step=0;step<steps;step++)state=habitatMove(state,{x:x*Math.cos(yaw)-forward*Math.sin(yaw),z:-x*Math.sin(yaw)-forward*Math.cos(yaw)},dt/steps);
    moving=Math.hypot(state.x-old.x,state.z-old.z)>.001;mapDirty=true;
-   if(!old.known.grove&&state.known.grove)message('A branch grove is ahead. Look for the fallen branches beneath the shrubs.');
-   else if(!old.known.landing&&state.known.landing)message('A pale root marks a low bank. Approach it and inspect the landing.');
-   else if(oldMode!=='swimming'&&movementMode(state.x,state.z)==='swimming'&&!state.known.swimming){state.known.swimming=true;message('You are swimming. Turn toward a gradual bank to get out.');}
+   const found=[...PATCHES,...CHANNELS].find(p=>!old.known[p.id]&&state.known[p.id]);
+   if(found)message(found.name+' is nearby. Approach to inspect its possibilities.');
+   else if(oldMode!=='swimming'&&movementMode(state.x,state.z,state)==='swimming'&&!state.known.swimming){state.known.swimming=true;message('You are swimming. Hauling is faster here than over land.');}
   }
  }
  scene.update(state,{yaw,distance,moving},time);
@@ -123,6 +145,6 @@ function frame(time){
  if(time-lastSave>2000){persist();lastSave=time;}
  requestAnimationFrame(frame);
 }
-if(state.carrying)message('Your branch is still in tow. Find the family lodge on the map.');
-else if(state.stored)message(state.stored+' branches are home. Explore another route or bring back another branch.');
+if(state.cargo)message('Your load is still in tow. Deliver wood at the dam or bring supplies to the lodge.');
+else message('Willow grows ahead along this bank. Gather food, improve water access, or explore for bulk timber. Choose what the family needs.');
 setPause(true);updateHud();requestAnimationFrame(frame);

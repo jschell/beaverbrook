@@ -4,11 +4,12 @@ import {readFile} from 'node:fs/promises';
 import vm from 'node:vm';
 import * as Three from 'three';
 import * as rules from '../playtest/explore-rules.mjs';
+import * as habitat from '../playtest/habitat-rules.mjs';
 
 test('occluding lodge fades independently, camera stays put, and scenery recovers',async()=>{
  let scene,camera;
  class Renderer{constructor(){this.domElement={};}setPixelRatio(){}setSize(){}render(s,c){scene=s;camera=c;}dispose(){}}
- const context=vm.createContext({THREE:{...Three,WebGLRenderer:Renderer},...rules,devicePixelRatio:1,window:{matchMedia:()=>({matches:true})},ResizeObserver:class{observe(){}}});
+ const context=vm.createContext({THREE:{...Three,WebGLRenderer:Renderer},...rules,...habitat,devicePixelRatio:1,window:{matchMedia:()=>({matches:true})},ResizeObserver:class{observe(){}}});
  const code=(await readFile(new URL('../playtest/explore-scene.mjs',import.meta.url),'utf8')).replace(/^import .*;\n/gm,'').replace('export function createExploreScene','function createExploreScene');
  vm.runInContext(code,context);
  const view=context.createExploreScene({clientWidth:900,clientHeight:760,append(){}}),s={...rules.freshExplore(),z:4.5};
@@ -27,4 +28,22 @@ test('occluding lodge fades independently, camera stays put, and scenery recover
  assert.equal(lodge.material.opacity,1,'lodge restores after leaving the sightline');
  assert.equal(rules.canStand(rules.LODGE.x,rules.LODGE.z),false,'transparent objects retain collision');
  view.dispose();
+});
+
+test('habitat renderer uses the same changing pond and cut bed as movement rules',async()=>{
+ let scene;
+ class Renderer{constructor(){this.domElement={};}setPixelRatio(){}setSize(){}render(s){scene=s;}dispose(){}}
+ const context=vm.createContext({THREE:{...Three,WebGLRenderer:Renderer},...rules,...habitat,devicePixelRatio:1,window:{matchMedia:()=>({matches:true})},ResizeObserver:class{observe(){}}});
+ const code=(await readFile(new URL('../playtest/explore-scene.mjs',import.meta.url),'utf8')).replace(/^import .*;\n/gm,'').replace('export function createExploreScene','function createExploreScene');
+ vm.runInContext(code,context);const view=context.createExploreScene({clientWidth:900,clientHeight:760,append(){}});
+ let s=habitat.freshHabitat();s.x=-4;s.z=0;view.update(s,{yaw:0,distance:6.5},10);
+ function water(){const tiles=[];scene.traverse(o=>{if(o.isMesh&&o.visible&&o.material.color.getHexString()==='448f9f')tiles.push(o);});return tiles;}
+ assert.ok(water().every(o=>o.position.y===.12||o.position.y===0));
+ const old=water().length;
+ // Renderer assertions isolate geometry from economy; rule tests cover valid construction costs.
+ s={...s,dam:1,channels:{west:1,east:0}};view.update(s,{yaw:0,distance:6.5},30);
+ assert.ok(water().length>old,'pond/cut changes visible water meshes');
+ const tile=water().find(o=>o.position.x===-3.5&&o.position.z===.5);assert.ok(tile);assert.equal(tile.position.y,rules.waterLevel(-3.5,.5,s));
+ let cut=false;scene.traverse(o=>{if(!o.isMesh||!o.material.vertexColors)return;const p=o.geometry.getAttribute('position');for(let i=0;i<p.count;i++)if(Math.abs(p.getX(i)+4)<.01&&Math.abs(p.getZ(i))<.01&&Math.abs(p.getY(i)+.08)<.01)cut=true;});assert.ok(cut,'rendered terrain is excavated, not just recolored');
+ s={...s,day:4};view.update(s,{yaw:0,distance:6.5},50);assert.ok(water().some(o=>Math.abs(o.position.y-.15)<1e-9));view.dispose();
 });

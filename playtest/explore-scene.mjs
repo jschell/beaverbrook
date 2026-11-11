@@ -1,5 +1,7 @@
 import * as THREE from './vendor/three.module.js';
-import {BOUNDS,TREES,LODGE,GROVE,LANDING,groundHeight,movementMode,cameraBoom,dampCamera} from './explore-rules.mjs';
+import {BOUNDS,TREES,LODGE,GROVE,LANDING,groundHeight,movementMode,cameraBoom,dampCamera,creekWater,waterLevel,CHANNELS} from './explore-rules.mjs';
+
+import {PATCHES,DAM} from './habitat-rules.mjs';
 
 export function createExploreScene(container){
  const scene=new THREE.Scene();scene.background=new THREE.Color('#c7d9cc');scene.fog=new THREE.Fog('#c7d9cc',9,22);
@@ -19,7 +21,7 @@ export function createExploreScene(container){
   object.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),direction.normalize());return object;
  }
  // Separate materials keep fading local: one tree or bank never fades its neighbors.
- const occluders=[];
+ const terrainBanks=[],occluders=[];
  function register(root){const record={root,materials:new Set(),opacity:1,hold:0};occluders.push(record);refresh(record);return root;}
  function refresh(record){
   const clones=new Map();
@@ -36,12 +38,12 @@ export function createExploreScene(container){
    const color=new THREE.Color(h<-.05?'#a59a73':h<.28?'#a7a47b':h>1.5?'#758663':'#8fa57b');colors.push(color.r,color.g,color.b);
   }
   terrain.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));terrain.computeVertexNormals();
-  const bank=new THREE.Mesh(terrain,new THREE.MeshStandardMaterial({vertexColors:true,roughness:1}));world.add(bank);register(bank);
+  const bank=new THREE.Mesh(terrain,new THREE.MeshStandardMaterial({vertexColors:true,roughness:1}));world.add(bank);register(bank);terrainBanks.push(bank);
  }
  const waterTiles=[];
  const waterMaterial=new THREE.MeshStandardMaterial({color:'#448f9f',transparent:true,opacity:.85,roughness:.3});
 
- for(let z=-BOUNDS;z<BOUNDS;z++)for(let x=-BOUNDS;x<BOUNDS;x++)if(groundHeight(x+.5,z+.5)<.35){
+ for(let z=-BOUNDS;z<BOUNDS;z++)for(let x=-BOUNDS;x<BOUNDS;x++){
   const tile=new THREE.Mesh(new THREE.PlaneGeometry(1.01,1.01),waterMaterial);tile.rotation.x=-Math.PI/2;tile.position.set(x+.5,0,z+.5);world.add(tile);waterTiles.push(tile);
  }
  const trees=[];
@@ -49,7 +51,7 @@ export function createExploreScene(container){
   const tree=new THREE.Group();tree.position.set(t.x,groundHeight(t.x,t.z),t.z);world.add(tree);
   mesh(new THREE.CylinderGeometry(.14,.22,t.height,7),'#7d6847',0,t.height/2,0,tree);
   const crown=mesh(new THREE.IcosahedronGeometry(.95,renderer?1:0),t.id%3?'#547c55':'#779452',0,t.height,0,tree);crown.scale.y=1.2;
-  trees.push(tree);register(tree);
+  tree.userData.source=t;trees.push(tree);register(tree);
  }
  // Low plants and rocks give the local camera recognizable shoreline landmarks.
  const plants=[];
@@ -75,6 +77,34 @@ export function createExploreScene(container){
  function branch(parent,y=0){log([-.65,y,0],[.65,y,.13],.065,'#bd9560',parent);log([.1,y,.08],[.5,y,.5],.04,'#a98049',parent);}
  // A distinct exposed root identifies the same landing from land and water.
  log([LANDING.x-.7,groundHeight(LANDING.x-.7,LANDING.z)+.1,LANDING.z],[LANDING.x+.8,.12,LANDING.z+.1],.09,'#d9c28c');
+ const stands=[];
+ for(const p of PATCHES){
+  const root=new THREE.Group();root.position.set(p.x,groundHeight(p.x,p.z),p.z);world.add(root);
+  const shoots=[];
+  for(let i=0;i<6;i++){
+   const shoot=new THREE.Group(),a=i*2.4;shoot.position.set(Math.cos(a)*.7,0,Math.sin(a)*.7);root.add(shoot);
+   const height=p.kind==='shrub'?1.2:2.4;
+   mesh(new THREE.CylinderGeometry(.08,.13,height,6),'#97724c',0,height/2,0,shoot);
+   const crown=mesh(new THREE.IcosahedronGeometry(p.kind==='shrub'?.5:.65,0),p.kind==='shrub'?'#a3b665':'#b1bb68',0,height,0,shoot);crown.scale.y=1.2;shoots.push(shoot);
+  }
+  const stump=mesh(new THREE.CylinderGeometry(.22,.3,.2,8),'#ba9965',0,.1,0,root);
+  register(root);stands.push({p,root,shoots,stump});
+ }
+ const damGroup=new THREE.Group();world.add(damGroup);
+ for(let i=0;i<18;i++){const x=-3.8+i*.45;log([x,-.25,9.6],[x+.6,.5+(i%3)*.08,10.4],.14,'#8b6947',damGroup);}
+ const crest=new THREE.Group();damGroup.add(crest);
+ for(let i=0;i<9;i++)log([-3.8+i*.85,.55,9.8],[-2.8+i*.85,.75,10.2],.15,'#b0925e',crest);
+ register(damGroup);
+ const damPile=new THREE.Group();world.add(damPile);damPile.position.set(-2,groundHeight(-2,8.5),8.5);
+ const markers=[];
+ for(const c of CHANNELS){
+  const root=new THREE.Group();root.position.set(c.x,groundHeight(c.x,c.z),c.z);world.add(root);
+  log([-.25,0,0],[-.25,.8,0],.04,'#dfcb92',root);log([-.5,.65,0],[.5,.65,0],.06,'#dfcb92',root);
+  const route=new THREE.Group();world.add(route);
+  for(let x=Math.min(c.start,c.end)+.25;x<Math.max(c.start,c.end);x+=.65)log([x,groundHeight(x,c.z)+.05,c.z-.16],[x,groundHeight(x,c.z)+.05,c.z+.16],.025,'#d3bb7b',route);
+  markers.push({c,root,route});
+ }
+ const entrance=mesh(new THREE.TorusGeometry(.32,.055,5,14),'#c6b58b',-2.2,groundHeight(-2.2,6)+.08,6);entrance.rotation.x=-Math.PI/2;
  const beaver=new THREE.Group();world.add(beaver);
  const body=mesh(new THREE.SphereGeometry(.35,12,8),'#795437',0,.36,0,beaver);body.scale.set(1,1,1.55);
  const head=mesh(new THREE.SphereGeometry(.25,10,8),'#8b6342',0,.5,-.48,beaver);head.scale.z=1.1;
@@ -89,6 +119,7 @@ export function createExploreScene(container){
  for(const x of [-.27,.27])for(const z of [-.24,.3])legs.push(mesh(new THREE.SphereGeometry(.11,7,5),'#543e2b',x,.11,z,beaver));
  const cargo=new THREE.Group();beaver.add(cargo);
  log([0,.37,-.8],[.65,.1,1.2],.055,'#c5a16b',cargo);log([.4,.18,.5],[1,.1,.9],.04,'#b88b56',cargo);
+ const foodCargo=mesh(new THREE.IcosahedronGeometry(.24,0),'#b3c075',0,.4,-.8,beaver);
  const wake=mesh(new THREE.TorusGeometry(.55,.018,3,28),'#bfddcc',0,.02,0);wake.rotation.x=-Math.PI/2;wake.scale.set(.75,1.7,1);
  let followHeight=null,followDistance=null;
  const ray=new THREE.Raycaster(),box=new THREE.Box3();
@@ -107,15 +138,21 @@ export function createExploreScene(container){
    for(const m of record.materials){const transparent=record.opacity<1;if(m.transparent!==transparent){m.transparent=transparent;m.needsUpdate=true;}m.opacity=record.opacity;m.depthWrite=!transparent;}
   }
  }
- let lastInventory='',lastFallback=0,lastFrame=0;
+ let lastTerrain='',lastInventory='',lastFallback=0,lastFrame=0;
+ function landscape(s){
+  const key=s.version===2?JSON.stringify([s.channels,s.entrance]):'original';if(key===lastTerrain)return;lastTerrain=key;
+  for(const bank of terrainBanks){const positions=bank.geometry.getAttribute('position'),colors=bank.geometry.getAttribute('color');for(let i=0;i<positions.count;i++){const x=positions.getX(i),z=positions.getZ(i),h=groundHeight(x,z,s);positions.setY(i,h);const color=new THREE.Color(groundHeight(x,z)-h>.05?'#a1946f':h<-.05?'#a59a73':h<.28?'#a7a47b':h>1.5?'#758663':'#8fa57b');colors.setXYZ(i,color.r,color.g,color.b);}colors.needsUpdate=true;positions.needsUpdate=true;bank.geometry.computeVertexNormals();bank.geometry.computeBoundingSphere();}
+ }
  const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
- function clear(group){while(group.children.length){const child=group.children.pop();child.traverse(o=>o.geometry?.dispose());child.parent=null;}}
+ function clear(group){while(group.children.length){const child=group.children.pop();child.traverse(o=>{o.geometry?.dispose();for(const record of occluders)if(record.materials.delete(o.material))o.material.dispose();});child.parent=null;}}
  function inventory(s){
-  const signature=JSON.stringify([s.groveStock,s.stored,s.dropped]);if(signature===lastInventory)return;lastInventory=signature;
-  for(const group of [branchPile,storedPile,dropped])clear(group);
-  for(let i=0;i<s.groveStock;i++)branch(branchPile,.1+i*.11);
-  for(let i=0;i<s.stored;i++){const stack=new THREE.Group();stack.position.set(1.1,.1+i*.13,0);storedPile.add(stack);branch(stack);}
-  for(const point of s.dropped){const stack=new THREE.Group();stack.position.set(point.x,Math.max(0,groundHeight(point.x,point.z))+.05,point.z);dropped.add(stack);branch(stack);}
+  const signature=JSON.stringify([s.groveStock,s.stored,s.dropped,s.loose,s.damWood,s.food]);if(signature===lastInventory)return;lastInventory=signature;
+  for(const group of [branchPile,storedPile,dropped,damPile])clear(group);
+  if(s.version!==2)for(let i=0;i<s.groveStock;i++)branch(branchPile,.1+i*.11);
+  for(let i=0;i<Math.min(12,s.damWood||0);i++)branch(damPile,.1+i*.13);
+  for(let i=0;i<Math.min(12,s.stored);i++){const stack=new THREE.Group();stack.position.set(1.1,.1+i*.13,0);storedPile.add(stack);branch(stack);}
+  for(const point of (s.version===2?s.loose:s.dropped)){const stack=new THREE.Group();stack.position.set(point.x,Math.max(waterLevel(point.x,point.z,s)??-1,groundHeight(point.x,point.z,s))+.05,point.z);dropped.add(stack);if(point.wood===undefined||point.wood>0)branch(stack);if(point.food>0)mesh(new THREE.IcosahedronGeometry(.2,0),'#acb96c',.2,.2,0,stack);}
+  if(s.version===2)for(let i=0;i<Math.min(10,s.food);i++)mesh(new THREE.IcosahedronGeometry(.13,0),'#a4b66d',-.8+(i%3)*.2,.08+Math.floor(i/3)*.15,.7,storedPile);
   for(const record of occluders)if(record.root===lodge||record.root===grove)refresh(record);
  }
  function resize(){const w=container.clientWidth,h=container.clientHeight;if(!w||!h)return;camera.aspect=w/h;camera.updateProjectionMatrix();renderer?.setSize(w,h,false);}
@@ -147,23 +184,30 @@ export function createExploreScene(container){
  }
  return {mode:renderer?'WebGL':'Compatibility renderer',update(s,view,time){
   const dt=lastFrame?Math.min(.1,Math.max(0,(time-lastFrame)/1000)):1/60;
-  inventory(s);
-  const mode=movementMode(s.x,s.z),swim=mode==='swimming',moving=view.moving;
-  beaver.position.set(s.x,swim?-.12:groundHeight(s.x,s.z),s.z);
+  landscape(s);inventory(s);
+  const mode=movementMode(s.x,s.z,s),swim=mode==='swimming',moving=view.moving;
+  const surface=waterLevel(s.x,s.z,s)??0;
+  beaver.position.set(s.x,swim?surface-.12:groundHeight(s.x,s.z,s),s.z);
   const turn=Math.atan2(Math.sin(-s.yaw-beaver.rotation.y),Math.cos(-s.yaw-beaver.rotation.y));
   beaver.rotation.y+=turn*(1-Math.exp(-Math.min(.2,(time-lastFrame)/1000)*14));lastFrame=time;
   body.scale.y=swim?.8:1;
   if(!reduced&&moving)body.position.y=.36+Math.sin(time*.012)*.025;
   else body.position.y=.36;
   legs.forEach((leg,i)=>{leg.position.y=.11+(moving&&!reduced?Math.sin(time*.015+i*Math.PI)*.06:0);});
-  cargo.visible=s.carrying;cargo.rotation.y=swim?-.15:.15;
-  wake.visible=swim&&moving;wake.position.set(s.x,.025,s.z);wake.rotation.z=s.yaw;
-  for(const tile of waterTiles)tile.visible=Math.hypot(tile.position.x-s.x,tile.position.z-s.z)<20;
+  foodCargo.visible=s.version===2&&s.cargo?.food>0;
+  cargo.visible=s.carrying;cargo.children.forEach(o=>o.visible=s.version!==2||s.cargo?.wood>0);cargo.rotation.y=swim?-.15:.15;
+  wake.visible=swim&&moving;wake.position.set(s.x,surface+.025,s.z);wake.rotation.z=s.yaw;
+  const hydrology=creekWater(s);
+  for(const tile of waterTiles){const x=tile.position.x,z=tile.position.z,level=hydrology?hydrology.wet.get(Math.floor(x)+','+Math.floor(z)):groundHeight(x,z)<.35?0:undefined;tile.visible=level!==undefined&&Math.hypot(x-s.x,z-s.z)<20;tile.position.y=level??0;}
+  for(const stand of stands){stand.root.visible=s.version===2&&Math.hypot(stand.p.x-s.x,stand.p.z-s.z)<16;stand.root.position.y=groundHeight(stand.p.x,stand.p.z,s);if(s.version===2){const stock=s.patches[stand.p.id].stock;stand.shoots.forEach((o,i)=>o.visible=i<stock);stand.stump.visible=stock===0;}}
+  damGroup.visible=s.version===2;damGroup.position.y=s.version===2?[-.28,0,.2][s.dam]:0;damGroup.children.forEach((o,i)=>{if(o!==crest)o.visible=s.dam>0||i%5!==2;});crest.visible=s.dam===2;damPile.visible=s.version===2;
+  for(const m of markers){m.root.visible=s.version===2&&Math.hypot(m.c.x-s.x,m.c.z-s.z)<14;m.root.position.y=groundHeight(m.c.x,m.c.z,s);m.route.visible=m.root.visible&&!(s.channels?.[m.c.id]);}
+  entrance.visible=s.version===2;entrance.position.y=groundHeight(-2.2,6,s)+.08;
   for(const tree of trees)tree.visible=Math.hypot(tree.position.x-s.x,tree.position.z-s.z)<16;
   for(const plant of plants)plant.visible=Math.hypot(plant.position.x-s.x,plant.position.z-s.z)<14;
-  grove.visible=Math.hypot(GROVE.x-s.x,GROVE.z-s.z)<15;
+  grove.visible=s.version!==2&&Math.hypot(GROVE.x-s.x,GROVE.z-s.z)<15;
   lodge.visible=Math.hypot(LODGE.x-s.x,LODGE.z-s.z)<18;
-  const reference=Math.max(0,groundHeight(s.x,s.z));
+  const reference=Math.max(surface,groundHeight(s.x,s.z,s));
   followHeight=followHeight===null?reference:dampCamera(followHeight,reference,dt);
   followDistance=followDistance===null?view.distance:dampCamera(followDistance,view.distance,dt,8);
   const boom=cameraBoom(s,view.yaw,followDistance,followHeight);

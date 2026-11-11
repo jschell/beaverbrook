@@ -1,47 +1,83 @@
-# Creekside movement proof of concept
+# Creekside — living creek test
 
-Implemented standalone Three.js and vanilla JavaScript experiment, 2026-11-10. Open explore.html, also linked from First Reach. It uses its own authored height field and saved run so the settlement modes remain available independently.
+Implemented experiment: third-person movement plus an open-ended, authored harvesting and water-management sandbox. Open [explore.html](explore.html). Three.js and vanilla HTML/CSS/JavaScript; static Pages hosting. First Reach remains a separate settlement experiment. This extends the earlier movement POC rather than attempting the whole colony game.
 
-## Try it
+## Starting situation and purpose
 
-Start beside the family lodge. Walk along the bank, cross the creek, approach the grove, pick up one fallen branch, and bring it home. A pale root marks an inspectable landing. The map starts with nearby ground and the known home location, and expands as you move. Three branches are available. Dropped branches remain recoverable at their release positions.
+One beaver, an established family lodge, a leaky dam, six stored food and three harvestable stands. Choose food gathering, construction supply, access improvements or exploration in any order. No final checklist, timed death, unlock tree or required construction sequence. Supplies and terrain persist after resting and reloading.
+
+A useful playtest outcome is a family with food and a usable lodge approach, plus an improvement the player chose for a reason. These are observation criteria, not compulsory objectives. Compare a modest pond with a deepened entrance against a raised pond; compare direct hauling with channel investment. Enjoyment and balance have not been established.
+
+## Controls
 
 | Input | Action |
-| --- | --- |
-| WASD or arrow keys | Camera-relative movement |
-| Drag open view, either mouse button | Orbit the follow camera horizontally |
-| Mouse wheel | Adjust follow distance within limits |
-| E or nearby action button | Pick up, inspect or deliver |
-| X or Drop branch | Release a carried branch |
-| C or Recenter | Put the view behind the current facing direction |
-| M or Map | Open the remembered map and pause movement |
-| Esc or Pause | Pause/resume |
-| Left touch thumbstick | Move with proportional speed |
-| Drag open view on touch | Look around |
-| Curved-arrow buttons | Turn the view |
+|---|---|
+| WASD / arrows | Move relative to the camera |
+| Drag open view | Orbit horizontally |
+| Wheel | Smoothly adjust follow distance; height stays fixed relative to the followed ground/water reference |
+| E / bottom action | Use the displayed nearby action |
+| Nearby work buttons | Choose among harvesting, building, digging and resting options |
+| X / set down | Release the current load for later recovery |
+| M / Map | Pause movement and inspect explored ground |
+| C / Recenter | Put the camera behind the beaver |
+| Esc / Pause | Pause, resume or start fresh |
+| Touch | Left thumbstick moves; drag open view or use turn buttons to orbit |
 
-Character facing follows actual travel direction; the camera follows position and can orbit independently. Recenter explicitly places it behind the character. A backwards movement input can therefore turn the beaver toward the camera. Controls clear on blur, pause, pointer cancellation and lost capture.
+Actions require physical proximity. Cutting a whole stand and opening a dam notch are explicit work-panel choices, never automatic E actions. Map discovery follows the beaver, not the camera. The lodge and dam are known from the start; nearby stands and cut markers become known as you approach.
 
-## Behavior
+## Trial economy
 
-The smooth height field defines ground, depth and movement mode. Walking, wading and swimming use different speeds. A carried branch slows land travel substantially and swimming less. The avatar changes posture and carries a visible forked limb. Collisions use a horizontal radius against trees, a lodge and a rock, with axis sliding, bounded slopes and map boundaries. Movement advances in small substeps, with a bounded catch-up after a slow frame. It has no jumping or diving.
+All quantities, growth rates, depths and effort are game abstractions, not measured beaver biology.
 
-The camera keeps a fixed 3.6-unit height above a smoothly followed ground/water reference. Obstacles never shorten the follow distance. Wheel changes ease in while keeping that height; vertical drag does not tilt the camera. Trees, shrubs, the lodge, rocks and individual terrain patches fade when they cover the beaver or enclose the camera, then recover with a short delay. This visual transparency does not remove movement collisions or reveal map knowledge. Both renderers respect fading. Transparency sorting can still show overlapping surfaces, and terrain fades in eight-unit patches. Terrain and visual meshes share a height function, while the compatibility mesh is coarser. Branches are attached cargo with no independent collision, buoyancy, current transport or snagging simulation. Released branches stay in place, including on water.
+| Work | Cost | Result |
+|---|---|---|
+| Prune | 1 effort, 1 growth | Carry 1 wood + 1 food |
+| Browse | 1 effort, 1 growth | Carry 2 food |
+| Cut/fell stand | 3 effort, all remaining growth | Ground piles: 2 wood per growth, plus ceil(growth/2) food distributed among piles |
+| Carry / recover / deliver | Travel time | One load; no automatic remote delivery |
+| Seal established dam | 2 effort + 2 wood delivered at dam | Retention rises from 0.12 to 0.40 |
+| Raise sealed dam | 2 effort + 3 wood delivered at dam | Retention rises to 0.68 |
+| Open notch | 1 effort | Drops one retention level; no wood refund |
+| Dig either hauling cut | 3 effort | Lowers its connected bed to -0.08 |
+| Deepen cut | 3 effort | Lowers its bed to -0.50 |
+| Deepen lodge approach | 3 effort | Local excavation to -0.60; alternative to raising the whole pond |
+| Rest at lodge | 2 food, up to stock available | Advance one day, recover effort, update weather and growth |
 
-Discovery is radius-based. Nearby ground becomes explored, retains its known geography, and appears darker when distant on the map. The grove and landing are marked after approaching them. The lodge location is known from the start. Discovery follows the animal's position, never the orbit camera. Rendering uses distance fog and nearby objects. There is no ray-based line-of-sight visibility or dynamic offscreen resource history in this static scene.
+Bank willow at (-7,0) has capacity 5, aspen across the creek at (7,-4) capacity 6, upstream alder at (-7,-11) capacity 5. Light yellow-green clusters are harvestable; darker background trees are scenery/collision landmarks. Felling is a stand-level abstraction, not individual tree targeting. Stems disappear as stock falls; cleared stands show stumps. Felled loads stay on the ground until carried. Food and wood remain distinct portions of a mixed load.
 
-Map inspection pauses movement. Seasons, daylight budgets, construction orders, gamepads, family workers and the settlement simulation are not integrated. That lets this prototype answer whether local movement, camera and discovery are worth integrating. It does not establish that manual hauling should replace automated delivery.
+The lodge accepts both resources. Stored wood can be picked up again, one unit at a time. Dam construction uses only wood deposited there. Depositing a mixed load at the dam keeps its food in tow for the lodge. Physical piles are drawn up to a visual cap; the HUD tracks all stored quantities.
 
-## Persistence
+There are 12 effort per day. Travel, exploration and carrying remain possible when tired. A lodge approach shallower than 0.32 uses 2 of the next day's effort; retaining water or locally deepening it avoids this recurring cost. A food shortage uses another 4 effort on the next day, leaving enough work to forage and recover; a fed rest clears that penalty. It does not end the test. The family consumes food only when the player chooses to rest.
 
-The local save key is beaverbrook-creekside-v1. Position, facing, explored cells, discovered landmarks, three-branch inventory, dropped branches and basic travel counters persist. Normal movement autosaves about every two seconds. Interactions and pause save immediately. Reload opens the pause/instruction screen at the saved position. Start fresh resets only this experiment. No information is uploaded. Camera angle and zoom reset on reload.
+## Living resources and water
 
-## Verification and limits
+A stand with growth remaining regains one unit per rest, up to capacity. A cleared stand needs three rests before its first new unit, then resumes ordinary recovery. Roots submerged more than 0.25 pause recovery, so a channel ending at a productive stand can trade regeneration for access. There is no plant mortality or recruitment simulation yet.
 
-Rules tests cover movement modes, normalized speed, collision/boundary behavior, local discovery, fixed camera height/range and smoothing, finite-stock conservation and save/reload. An integrated movement test traverses land and water to the grove and returns a branch through the same rules.
+Days 1–3 have normal flow; days 4–6 are dry, then the six-day cycle repeats. Dry flow subtracts 0.25 from the retained upstream surface. Downstream flowing water remains. A source-connected flood fill over the shared height field determines wet cells. Digging changes the same bed used by movement, water connectivity, terrain rendering and map coloring. Isolated terrain below the surface does not automatically fill. This is a bounded grid model with an authored dam line, not fluid simulation.
 
-Browser checks used ordinary keyboard holds to walk, swim, discover the grove, collect a branch, drop/recover it, return around a tree and deliver it. Reload retained one stored branch and discovered terrain. Map inspection and recenter controls were checked. Cloud WebGL was unavailable, so visual checks used a deliberately reduced-detail compatibility renderer. It is slower than the intended GPU view. Native WebGL performance, touch gestures on a phone, comfort and enjoyment remain unverified.
+The willow cut connects the stream to the west-bank stand; the aspen cut connects to the east stand. Both are authored routes marked with pale stakes and ground dashes. A shallow cut with a sealed dam supports swimming in normal flow, then becomes too shallow during dry flow. Deepening can preserve that access without another dam raise. A deep cut also works with the original leaky dam. Carrying speed is 1.55 on land, 1.15 wading and 2.50 swimming, so route investment changes the actual return trip.
 
-Camera revision verification: all 71 automated tests pass. A renderer-stub test uses real Three.js geometry and raycasts to check independent lodge fading, restoration, unchanged follow range/height, solid beaver materials and retained movement collisions. Browser checks confirmed lodge transparency and manual follow-distance adjustment in the compatibility renderer; native GPU transparency remains unverified.
+## Camera, map and persistence
 
-Next evaluation: can a new player find a landing, distinguish dragging from floating, recover orientation using the remembered map, and complete the trip without continuous coaching? Observe whether they choose a second route voluntarily. Camera proximity around vegetation and the amount of travel are open tuning questions.
+The follow camera holds a 3.6-unit vertical offset above a smoothed ground/water reference. Obstructions never shorten its follow distance. Trees, lodge, rocks, vegetation and local terrain patches fade when they block the beaver or enclose the camera, then restore smoothly. Transparency does not remove physical collisions. Both renderers respect fading; overlapping translucent surfaces can still be conspicuous.
+
+Unexplored map ground stays hidden. The map records geography and discovered locations, with nearby ground lighter. It does not yet maintain stale water or resource observations: known water geography reflects current simulation conditions, and supplies are shown only when inspecting a nearby stand. Distant world meshes use distance fog and range culling, rather than strict line-of-sight hiding.
+
+Save key: `beaverbrook-creekside-habitat-v2`. Position, knowledge, day, effort, cargo, ground loads, local stocks, consumed resources, dam, cuts and entrance work persist. Actions save immediately; movement saves approximately every two seconds. Reload opens paused. The older movement save is retained under its own key and is not migrated. Nothing is uploaded. Camera angle/distance reset on reload.
+
+## Verification and remaining limits
+
+81 automated tests pass across the repository. New rule checks cover resource conservation, local delivery, felling/drop/recovery, regrowth, effort, reversible water changes without refunds, dry-weather channel adaptation, two different supported-home approaches, shortage recovery, and an integrated route using normal movement. A Three.js renderer-stub test checks that the actual water meshes and excavated terrain change with the same rules; it does not verify native GPU pixels.
+
+Browser checks in the compatibility renderer covered harvesting, delivering/storing mixed loads, stand cutting and recovery of timber piles, hauling wood to the dam, sealing leaks, opening a visibly flooded hauling cut, entering swimming depth, resting with food consumption, and reload persistence. The native WebGL path, phone gestures, comfort, pacing and enjoyment remain unverified. The CPU renderer is slower and has coarser geometry and transparency sorting.
+
+Deferred: freeform channels, individual tree selection/felling animation, mud/sealing recipes, a newly built lodge or dam, colony workers, wildlife consumers, water plants, seasons with realistic durations, procedural terrain and additional settlements. The established lodge approach is an authored shoreline access point, not an excavated tunnel network. Background dam logs are visual geometry rather than movement obstacles. No claim of a complete ecology or colony game.
+
+## Human playtest questions
+
+- Can a new player discover a useful project without following a prescribed task sequence?
+- Does browsing versus pruning versus cutting change their decision, or only the number of clicks?
+- Does a player voluntarily build a channel because hauling is inconvenient, and notice the improvement?
+- Does changing flow invite a new solution rather than feel like lost progress?
+- Does flooding a stand make preservation/alternative sources interesting or merely frustrating?
+- Is manual hauling pleasant enough to repeat, and when should family assistance take over?

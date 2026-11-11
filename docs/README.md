@@ -2,9 +2,9 @@
 
 **Phase:** first basic playable experiment, authorized on 2026-11-09. The [playtest](../playtest/README.md) implements the Riverbank Refuge candidate for testing. Other design documents remain proposals, not a finished implementation specification.
 
-## Third-person movement proof of concept
+## Third-person living creek test
 
-[Creekside](../playtest/CREEKSIDE.md) tests direct steering, walking/wading/swimming, a follow camera, local discovery, a remembered map and branch delivery. It is separate from settlement rules.
+[Creekside](../playtest/CREEKSIDE.md) extends direct movement with three harvestable stands, mixed food/wood loads, local delivery, a food-consuming family, renewable growth, an established dam, two excavated hauling cuts and repeating dry flow. Several approaches support the lodge; there is no required task sequence or ending. The implementation record distinguishes tested behavior from ecological and gameplay limits. First Reach remains a separate experiment.
 
 ## Implemented settlement experiment
 

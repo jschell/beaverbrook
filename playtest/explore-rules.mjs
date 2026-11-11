@@ -6,17 +6,49 @@ export const LANDING={id:'landing',name:'Low-bank crossing',x:2,z:-4};
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
 const smooth=n=>{const t=clamp(n,0,1);return t*t*(3-2*t);};
 export function riverCenter(z){return Math.sin(z*.14)*1.7;}
-export function groundHeight(x,z){
+function baseHeight(x,z){
  const d=Math.abs(x-riverCenter(z));
  const bank=-.85+smooth((d-1.8)/3.3)*1.8;
  const ridge=smooth((x-12)/5)*smooth((z-2)/6)*5.5;
  return bank+ridge;
 }
-export function waterDepth(x,z){return Math.max(0,-groundHeight(x,z));}
-export function movementMode(x,z){const depth=waterDepth(x,z);return depth>=.32?'swimming':depth>.02?'wading':'walking';}
+export const CHANNELS=[
+ {id:'west',name:'Willow cut',x:-4,z:0,start:0,end:-7},
+ {id:'east',name:'Aspen cut',x:4,z:-4,start:0,end:7}
+];
+export function groundHeight(x,z,s){
+ let bed=baseHeight(x,z);
+ if(s?.version===2){
+  for(const c of CHANNELS){const level=s.channels[c.id];if(!level)continue;
+   const offset=Math.hypot(Math.max(Math.min(c.start,c.end)-x,0,x-Math.max(c.start,c.end)),z-c.z);
+   const blend=1-smooth((offset-.65)/1.8),floor=level===1?-.08:-.5;
+   bed=Math.min(bed,bed+(floor-bed)*blend);
+  }
+  if(s.entrance){const d=Math.hypot(x+2.2,z-6);bed=Math.min(bed,bed+(-.6-bed)*(1-smooth((d-.5)/1.8)));}
+ }
+ return bed;
+}
+const waterCache=new Map();
+export function creekWater(s){
+ if(s?.version!==2)return null;
+ const dry=s.day%6>=4||s.day%6===0,key=[s.dam,s.channels.west,s.channels.east,s.entrance,dry].join(',');
+ if(waterCache.has(key))return waterCache.get(key);
+ const surface=[.12,.4,.68][s.dam]-(dry?.25:0),wet=new Map(),queue=[[0,0]],seen=new Set();
+ for(let i=0;i<queue.length;i++){
+  const [x,z]=queue[i],k=x+','+z;if(seen.has(k))continue;seen.add(k);
+  if(Math.abs(x)>23||z< -23||z>=10||groundHeight(x+.5,z+.5,s)>=surface)continue;
+  wet.set(k,surface);queue.push([x+1,z],[x-1,z],[x,z+1],[x,z-1]);
+ }
+ // The downstream stream remains fed. Retained pond water cannot cross the dam.
+ for(let z=10;z<24;z++)for(let x=-24;x<24;x++)if(groundHeight(x+.5,z+.5,s)<0)wet.set(x+','+z,0);
+ const result={key,surface,wet};if(waterCache.size>30)waterCache.clear();waterCache.set(key,result);return result;
+}
+export function waterLevel(x,z,s){return s?.version===2?creekWater(s).wet.get(Math.floor(x)+','+Math.floor(z)):0;}
+export function waterDepth(x,z,s){const surface=waterLevel(x,z,s);return surface===undefined?0:Math.max(0,surface-groundHeight(x,z,s));}
+export function movementMode(x,z,s){const depth=waterDepth(x,z,s);return depth>=.32?'swimming':depth>.02?'wading':'walking';}
 export function speedFor(mode,carrying){return mode==='swimming'?(carrying?2.5:2.8):mode==='wading'?(carrying?1.15:1.45):(carrying?1.55:2.3);}
 // Trees are authored reproducibly, with clear approaches to the teaching locations.
-export const TREES=Array.from({length:88},(_,i)=>({id:i,x:((i*137)%431)/10-21.5,z:((i*193+51)%427)/10-21.3,radius:.45,height:2.7+(i%4)*.25})).filter(t=>groundHeight(t.x,t.z)>.3&&[LODGE,GROVE,LANDING].every(p=>Math.hypot(t.x-p.x,t.z-p.z)>3));
+export const TREES=Array.from({length:88},(_,i)=>({id:i,x:((i*137)%431)/10-21.5,z:((i*193+51)%427)/10-21.3,radius:.45,height:2.7+(i%4)*.25})).filter(t=>groundHeight(t.x,t.z)>.3&&[LODGE,GROVE,LANDING,{x:-7,z:0},{x:-7,z:-11}].every(p=>Math.hypot(t.x-p.x,t.z-p.z)>3));
 export const OBSTACLES=[...TREES,{x:LODGE.x,z:LODGE.z,radius:1.15,height:1.4},{x:-4,z:-8,radius:.8,height:.7}];
 export function canStand(x,z,obstacles=OBSTACLES){
  return Math.abs(x)<=BOUNDS-.6&&Math.abs(z)<=BOUNDS-.6&&!obstacles.some(o=>Math.hypot(x-o.x,z-o.z)<o.radius+.32);
@@ -34,10 +66,10 @@ export function moveExplore(state,input,seconds,obstacles=OBSTACLES){
  const s=structuredClone(state),dt=clamp(seconds,0,.1);
  const length=Math.hypot(input.x,input.z);
  if(!length||!Number.isFinite(length)||!dt)return s;
- const mode=movementMode(s.x,s.z),speed=speedFor(mode,s.carrying);
+ const mode=movementMode(s.x,s.z,s),speed=speedFor(mode,s.carrying);
  const dx=input.x/Math.max(1,length)*speed*dt,dz=input.z/Math.max(1,length)*speed*dt;
  // Axis sliding lets the player move past trunks and banks without getting pinned.
- const legal=(x,z)=>canStand(x,z,obstacles)&&groundHeight(x,z)-groundHeight(s.x,s.z)<=Math.hypot(x-s.x,z-s.z)*.95+.005;
+ const legal=(x,z)=>canStand(x,z,obstacles)&&groundHeight(x,z,s)-groundHeight(s.x,s.z,s)<=Math.hypot(x-s.x,z-s.z)*(s.version===2?1.6:.95)+.005;
  const old={x:s.x,z:s.z};
  if(legal(s.x+dx,s.z))s.x+=dx;
  if(legal(s.x,s.z+dz))s.z+=dz;
