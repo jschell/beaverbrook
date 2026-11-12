@@ -1,4 +1,4 @@
-import {groundHeight,creekWater,LODGE_APPROACH} from './explore-rules.mjs';
+import {groundHeight,creekWater,LODGE_APPROACH} from './explore-rules.mjs?v=lodge-access-1';
 import {CRESTS} from './dam-water.mjs';
 
 // Sample only known cells; split each half-unit square into triangles so saddle
