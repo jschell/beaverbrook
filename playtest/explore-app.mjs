@@ -16,13 +16,34 @@ let messageExpires=Infinity;
 let selectedWork=null,workSites=[],markerButtons=new Map();
 let planning=false,paused=true,mapOpen=false,yaw=0,distance=6.5,lastTime=0,lastSave=0,lastHud=0,mapDirty=true;
 let stick={x:0,y:0},stickPointer=null,lookPointer=null,lookStart=null,lookDirection=0;
+// Use actual panel/control heights so browser chrome, wrapping and rotation do
+// not put help underneath the touch controls. User disclosure choices survive resize.
+const compactLayout=matchMedia('(max-width: 950px), (max-height: 720px)');
+const panelChoices=new Map();
+for(const id of ['home-panel','work-panel']){
+ const panel=el(id);panel.open=!compactLayout.matches;
+ panel.querySelector('summary').addEventListener('click',()=>panelChoices.set(id,!panel.open));
+}
+compactLayout.addEventListener('change',()=>{for(const id of ['home-panel','work-panel'])if(!panelChoices.has(id))el(id).open=!compactLayout.matches;});
+function fitOverlay(){
+ const play=el('play'),header=play.querySelector('header'),footer=play.querySelector('footer');
+ const action=play.querySelector('.interactions'),stick=el('stick'),look=play.querySelector('.look-buttons');
+ play.style.setProperty('--header-height',Math.ceil(header.getBoundingClientRect().height)+'px');
+ play.style.setProperty('--footer-height',Math.ceil(footer.getBoundingClientRect().height)+'px');
+ const bottom=Math.min(...[action,stick,look].map(e=>e.getBoundingClientRect().top));
+ play.style.setProperty('--controls-clearance',Math.ceil(play.getBoundingClientRect().bottom-bottom+14)+'px');
+}
+const overlayResize=new ResizeObserver(fitOverlay);
+for(const e of [el('play'),el('play').querySelector('header'),el('play').querySelector('footer'),el('play').querySelector('.interactions'),el('stick')])overlayResize.observe(e);
+window.visualViewport?.addEventListener('resize',fitOverlay);
+window.addEventListener('resize',fitOverlay);fitOverlay();
 const keys=new Set(),scene=createExploreScene(el('view'));
 el('renderer').textContent=scene.mode;
 const planner=createDamPlanner({getState:()=>state,setState:next=>{const justPlaced=!state.placedDam&&next.placedDam;state=next;if(justPlaced)selectedWork=nextDamWork(state)?.id||null;mapDirty=true;persist();updateHud();},notify:message,onToggle:value=>{planning=value;stopInput();for(const child of el('play').children)if(!['dam-planner','menu'].includes(child.id))child.inert=value;if(!value)el('view').focus();}});
 el('dam-button').onclick=()=>{if(!paused){toggleMap(false);planner.toggle();}};
 function persist(){try{localStorage.setItem(saveKey,JSON.stringify(state));storage=true;}catch{storage=false;}}
 function stopInput(){keys.clear();stick={x:0,y:0};stickPointer=null;lookPointer=null;lookDirection=0;el('stick-knob').style.transform='';}
-function message(text){el('message').hidden=false;el('message').textContent=text+(storage?'':' Saving is unavailable in this browser.');messageExpires=!lab&&state.journey.broughtHome?performance.now()+12000:Infinity;}
+function message(text,{persistent=false}={}){el('hint-panel').hidden=false;el('message').hidden=false;el('message').textContent=text+(storage?'':' Saving is unavailable in this browser.');messageExpires=!persistent&&!lab&&state.journey.broughtHome?performance.now()+12000:Infinity;}
 function setPause(value){if(value&&planning)planner.toggle(false);paused=value;stopInput();for(const child of el('play').children)if(child.id!=='menu')child.inert=paused;el('menu').hidden=!paused;el('menu-title').textContent=lab?'Placement lab':journeyStatus(state).title;el('resume').textContent='Return to the creek';if(!paused)el('view').focus();else el('resume').focus();persist();}
 function toggleMap(value=!mapOpen){mapOpen=value;stopInput();el('map-panel').hidden=!value;el('map-button').setAttribute('aria-expanded',value);if(value)drawMap();else el('view').focus();}
 function recenter(){yaw=-state.yaw;}
@@ -113,7 +134,8 @@ function interact(action){
  const before=state,result=habitatAction(state,action);state=result.state;message(journeyFeedback(before,state,action)||result.message);
  if(!lab&&!before.journey.completedDay&&state.journey.completedDay){el('chapter-moment').hidden=false;el('moment-detail').textContent='The family spent a fed night at low water, with food left for tomorrow. Your changes made this home work. Keep the creek as it is, improve a hauling route, or explore for another crossing.';}mapDirty=true;persist();updateHud();
 }
-el('nudge').onclick=()=>message(journeyHint(state));
+el('nudge').onclick=()=>message(journeyHint(state),{persistent:true});
+el('hint-close').onclick=()=>{el('hint-panel').hidden=true;el('nudge').focus();};
 el('face-home').onclick=()=>{yaw=Math.atan2(state.x-LODGE.x,state.z-LODGE.z);message('The family lodge is ahead. Approach it to leave supplies or rest.');};
 el('moment-close').onclick=()=>{el('chapter-moment').hidden=true;el('view').focus();};
 el('resume').onclick=()=>setPause(false);
@@ -190,7 +212,7 @@ function frame(time){
    else if(oldMode!=='swimming'&&movementMode(state.x,state.z,state)==='swimming'&&!state.known.swimming){state.known.swimming=true;message('You are swimming. Hauling is faster here than over land.');}
   }
  }
- if(!lab&&state.journey.broughtHome&&time>messageExpires)el('message').hidden=true;
+ if(!lab&&state.journey.broughtHome&&time>messageExpires)el('hint-panel').hidden=true;
  scene.update(state,{yaw,distance,moving,active:!paused&&!mapOpen&&!planning,previewState:planner.previewState},time);updateWorkMarkers();
  if(time-lastHud>160){updateHud();lastHud=time;}
  if(time-lastSave>2000){persist();lastSave=time;}

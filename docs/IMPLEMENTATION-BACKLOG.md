@@ -22,6 +22,10 @@ The [roadmap](ROADMAP.md), [procedural generation plan](design/procedural-genera
 
 [Wood, framework and sealing mud](../playtest/M1-CONSTRUCTION.md) implements a bounded #3/#6 slice and discrete packed-crest behavior for #5. New section costs depend on surveyed depth/span; mud sources, local transfers and visible stages are accounted and saved. Existing completed structures remain paid. 116 tests pass; compatibility-browser evidence only. #3/#5/#6 remain partial; #4 collision, full flow/storage and player/device validation remain open. M0 white-flash confirmation is still pending independently.
 
+## Tablet layout update
+
+[Tablet layout review](../playtest/IPAD-LAYOUT-REVIEW.md) addresses hint clipping and overlay bounds under [#17](https://github.com/jschell/beaverbrook/issues/17), linked to PLATFORM-01/#15. Nudge/hint have reserved space above controls; home/work details scroll independently; map/planner/menu remain reachable. Fifteen representative usable CSS viewports pass layout checks. Native iPad Safari touch, safe areas and WebGL remain unverified; #17 stays open for those checks.
+
 ## Status and maintenance
 
 - **Resolved — implemented:** the bounded request exists with code/test evidence. This does not establish enjoyment, biological accuracy or device performance.

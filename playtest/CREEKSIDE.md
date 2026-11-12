@@ -1,5 +1,7 @@
 # Creekside — living creek test
 
+> Tablet update (2026-11-12): [hint and overlay layout review](IPAD-LAYOUT-REVIEW.md). Compact home/work disclosures, pinned dismissible nudges and bounded dialogs are implemented; physical iPad Safari validation remains open in #17/#15.
+
 > M1 update: [wood, framework and sealing mud](M1-CONSTRUCTION.md) now governs production Creekside/lab construction. Wood builds a frame; mud packs the effective crest. Older one-wood-per-level costs below describe the preceding experiment. Saves retain paid structures and inventories; ordinary play receives no free stored materials. See the new record for current costs, sources, evidence and limits.
 
 > Tracking audit (2026-11-11): [current discussion dispositions and issue queue](../docs/IMPLEMENTATION-BACKLOG.md). This record describes its named experiment; historical verification counts do not claim current human/device validation.
