@@ -12,6 +12,21 @@ Help an established family → found a suitable home → develop connected settl
 - Later stages can receive design/research work early, but their runtime dependencies must exist before implementation claims.
 - Historical P1/P2/P3 issue priorities are triage hints. The milestone gates below govern sequencing; no stage requires completing every idea in a broad issue.
 
+## Planning deliverables and decision register
+
+All three requested planning deliverables are complete for review: this roadmap, [procedural generation plan](design/procedural-generation-plan.md), and [building materials/realism plan](design/building-materials-and-realism-plan.md). [Request coverage review](PLAN-COMPLETION-REVIEW.md) validates capture against the available last-two-day discussions. Complete planning does not mean implemented or player-validated features.
+
+| Decision | Needed by | Current working direction | Resolution path |
+|---|---|---|---|
+| D1 Control and household scaling | M2 integration / M3 scope | Direct local control now; evaluate hybrid delegation later | Concrete alternatives for user review; research/control prototypes can proceed |
+| D2 Founding and integrated MVP boundary | M2 acceptance | Inherited family then found/occupy a viable new home in one main mode | Define occupation, reserve/time window, move/ownership and save behavior; review scope |
+| D3 Maintenance/failure pressure | Before later strength rules | Predictable forgiving construction, stable terrain | Review only if warned damage improves choices; no collapse requirement for M1 |
+| D4 Ecology and wildlife depth | M3/M4 content selection | Basic renewable supply first; richer recruitment/consumers later | Evidence and bounded pattern prototypes, then select pressure level |
+| D5 Art direction | Before substantial assets | Clear stylized silhouettes/materials/action feedback | Evaluate visual alternatives and device budget; detailed implementation deferred |
+| D6 Cost/profile coefficients | Selected M1/PG1 implementation | Fictional candidate formulas, no scientific calibration claim | Engineering review and legal boundary traces; commit chosen constants and fixtures together |
+
+These are tracked design decisions, not reasons to stop already authorized investigation, documentation or routine fixes. Record the adopted choice when evidence or user direction resolves one.
+
 ## Current baseline
 
 Willow Cove/Creekside is the default direct-control opening: harvesting, local hauling, family supplies, an inherited lodge/dam, two authored channel cuts, one new flexible dam project, repeating normal/dry flow and continued play after one fed low-water night. The adult and kit provide authored feedback, not worker AI.
@@ -43,6 +58,8 @@ Work:
 Gate: a player can identify the home and entrance and understand why depth matters; reported rendering faults have a recorded disposition; essential movement/work controls have actual target-device evidence. An unreproduced bug remains open, not silently closed.
 
 ## M1 — make gathering and building rewarding
+
+The [building materials and realism plan](design/building-materials-and-realism-plan.md) specifies the candidate resource/stage/cost/accounting contract and staged implementation.
 
 Work:
 - [#6](https://github.com/jschell/beaverbrook/issues/6): contrast accessible food with more distant construction stock; compare direct hauling with an optional channel using real route and load costs.
@@ -81,7 +98,7 @@ Gate: another settlement offers a meaningful advantage and cost; players can rea
 
 Design can proceed now; generator implementation follows supported rules. [#12](https://github.com/jschell/beaverbrook/issues/12) owns generation, [#10](https://github.com/jschell/beaverbrook/issues/10) vegetation, and [#11](https://github.com/jschell/beaverbrook/issues/11) consumers.
 
-Start with parameterized authored reaches, then combine patterns, then consider procedural terrain. [Environment and resource parameters](design/environment-and-resource-parameters.md) defines candidate variation and material roles. The [scenario contract](design/scenario-patterns-and-outcomes.md) defines evaluation and validation.
+Follow the [dedicated generation plan](design/procedural-generation-plan.md): start with parameterized authored reaches, then combine patterns, then consider procedural terrain. [Environment and resource parameters](design/environment-and-resource-parameters.md) defines candidate variation and material roles. The [scenario contract](design/scenario-patterns-and-outcomes.md) defines evaluation and validation.
 
 Gate: each accepted instance has visible evidence, explicit outcome criteria, at least two strategically distinct legal witnesses and a recovery route within its budgets. Variation must not require unsupported actions, impossible plant maturation or hidden indispensable resources. Seeds retain generator/content/rules versions and instantiated state.
 

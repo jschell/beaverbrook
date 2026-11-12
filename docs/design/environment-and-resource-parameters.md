@@ -2,6 +2,8 @@
 
 Design proposal, 2026-11-11. Supports [roadmap M4](../ROADMAP.md) and [scenario patterns](scenario-patterns-and-outcomes.md); it does not implement a generator or turn ecological examples into calibrated rules.
 
+Implementation planning is now separated into the [procedural generation plan](procedural-generation-plan.md) and [building materials/realism plan](building-materials-and-realism-plan.md). This catalog supplies parameter/evidence context; those plans define work packages and acceptance.
+
 ## Generate situations before generating every landform
 
 Keep simulation rules consistent. Choose an authored reach family, then vary geometry within safe bounds, resource distribution, existing works, seasonal pressure, information and outcome criteria. Validate legal solutions before accepting an instance. A cosmetic biome change is not a different gameplay challenge unless it changes a meaningful decision.

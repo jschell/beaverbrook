@@ -6,6 +6,8 @@ Design proposal. Builds on vegetation-and-resource-succession.md and willow-cove
 
 See [environment and resource parameters](environment-and-resource-parameters.md) for proposed reach families, bounded variation, material roles and generation dependencies; see [roadmap M4](../ROADMAP.md) for its implementation gate.
 
+The [dedicated procedural implementation plan](procedural-generation-plan.md) defines PG0–PG6, capability gates, state contracts, rejection and verification. This document remains the shared scenario/outcome semantics.
+
 ## Scenario contract
 
 Each instance records an ID, seed, generator/content/rules versions, initial state, permitted actions, objective predicates, evaluation times, announced changes, bounded surprises, feasibility witnesses, and a local event log. Saves retain the instantiated world and random state. A seed alone is insufficient after content changes.

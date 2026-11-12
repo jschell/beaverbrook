@@ -10,6 +10,10 @@ This is the current status index. GitHub issues track actionable work; linked de
 
 Starting-lodge placement and its visually disconnected entrance are now explicitly open under [PROG-01 / #8](https://github.com/jschell/beaverbrook/issues/8), coordinated with UX-01/SENSE-01/ART-01. Pond-edge integration is an option, not a committed relocation.
 
+## Completed planning package
+
+The [roadmap](ROADMAP.md), [procedural generation plan](design/procedural-generation-plan.md), and [building materials/realism plan](design/building-materials-and-realism-plan.md) are complete as reviewable planning deliverables. [Two-day request coverage and gap corrections](PLAN-COMPLETION-REVIEW.md) records what was checked and the distinction between captured, implemented, superseded and still unverified. New plans do not close runtime issues or change the original audit inventory.
+
 ## Status and maintenance
 
 - **Resolved — implemented:** the bounded request exists with code/test evidence. This does not establish enjoyment, biological accuracy or device performance.

@@ -4,6 +4,8 @@
 
 ## Current work and discussion status
 
+The complete planning package consists of [roadmap](ROADMAP.md), [procedural generation implementation plan](design/procedural-generation-plan.md), [building materials/realism plan](design/building-materials-and-realism-plan.md), and [request-by-request coverage review](PLAN-COMPLETION-REVIEW.md). All are planning artifacts; feature implementation and player/device validation remain tracked separately.
+
 Start with the [roadmap](ROADMAP.md) for staged scope and completion gates. [Environment and resource parameters](design/environment-and-resource-parameters.md) develops generated environmental challenges and evidence-backed construction-material roles; these remain proposals.
 
 [Discussion and implementation backlog](IMPLEMENTATION-BACKLOG.md) reconciles prior discussions, all G01–G21 findings, resolved requests and superseded assumptions. [GitHub issues](https://github.com/jschell/beaverbrook/issues) hold the actionable queue and acceptance criteria. Use that register for current status; older review prose below describes its original baseline.

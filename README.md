@@ -8,6 +8,8 @@ The design targets curious players around ages 8–10+ and adults, with short, a
 
 ## Improvement tracking
 
+Completed planning package: [roadmap](docs/ROADMAP.md), [procedural generation](docs/design/procedural-generation-plan.md), [building materials and realism](docs/design/building-materials-and-realism-plan.md), and [discussion coverage review](docs/PLAN-COMPLETION-REVIEW.md). Planning status is separate from implemented features.
+
 [Roadmap](docs/ROADMAP.md) defines the stages, dependencies and completion gates from helping the family to founding a home, connected settlements and varied scenarios.
 
 [Discussion and implementation backlog](docs/IMPLEMENTATION-BACKLOG.md) is the current status index, including resolved/superseded discussions and G01–G21. [GitHub issues](https://github.com/jschell/beaverbrook/issues) track actionable work and acceptance evidence.
