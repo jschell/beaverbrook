@@ -48,7 +48,7 @@ export function createExploreScene(container){
  const waterMaterial=new THREE.MeshStandardMaterial({color:'#448f9f',transparent:true,opacity:.85,roughness:.3});
 
  for(let z=-BOUNDS;z<BOUNDS;z++)for(let x=-BOUNDS;x<BOUNDS;x++){
-  const tile=new THREE.Mesh(new THREE.PlaneGeometry(1.01,1.01),waterMaterial);tile.rotation.x=-Math.PI/2;tile.position.set(x+.5,0,z+.5);world.add(tile);waterTiles.push(tile);
+  const tile=new THREE.Mesh(new THREE.PlaneGeometry(1,1),waterMaterial);tile.rotation.x=-Math.PI/2;tile.position.set(x+.5,0,z+.5);world.add(tile);waterTiles.push(tile);
  }
  const trees=[];
  for(const t of TREES){
@@ -100,10 +100,12 @@ export function createExploreScene(container){
  for(let i=0;i<9;i++)log([-3.8+i*.85,.55,9.8],[-2.8+i*.85,.75,10.2],.15,'#b0925e',crest);
  register(damGroup);
  const damPile=new THREE.Group();damPile.userData.kind='family-dam-supplies';world.add(damPile);damPile.position.set(-2,groundHeight(-2,8.5),8.5);
- const familyPackingFace=mesh(new THREE.BoxGeometry(8,1,.25),'#715039',0,0,9.7);familyPackingFace.userData.kind='family-packed-face';register(familyPackingFace);
+ // Visual clearance avoids coplanar mud caps and retained water; it is not a hydraulic crest change.
+ const mudCapClearance=.012;
+ const familyPackingFace=mesh(new THREE.BoxGeometry(8,1,.25),'#715039',0,0,9.7,damGroup);familyPackingFace.userData.kind='family-packed-face';refresh(occluders.find(r=>r.root===damGroup));
  const placedGroup=new THREE.Group();placedGroup.userData.kind='placed-dam';world.add(placedGroup);register(placedGroup);let lastPlaced='';
  function drawPlaced(s,preview){
-  const dam=preview?.placedDam||s.placedDam,key=JSON.stringify([dam,!!preview]);if(key===lastPlaced)return;lastPlaced=key;clear(placedGroup);placedGroup.visible=!!dam;
+  const dam=preview?.placedDam||s.placedDam,key=JSON.stringify([dam,!!preview,s.channels,s.entrance]);if(key===lastPlaced)return;lastPlaced=key;clear(placedGroup);placedGroup.visible=!!dam;
   if(!dam)return;for(const [i,p]of dam.sections.entries()){
    const center=damCenter(p),bed=Math.min(groundHeight(center.x,center.z,s),groundHeight(p.a.x,p.a.z,s),groundHeight(p.b.x,p.b.z,s)),level=preview?p.target:(p.frame??p.level),crest=level?CRESTS[level]:bed+.3;
    const section=new THREE.Group();section.userData.section=i;section.userData.stage=level>(p.level||0)&&!preview?'framework':level?'packed':'stakes';placedGroup.add(section);
@@ -112,7 +114,7 @@ export function createExploreScene(container){
     for(const t of [.15,.65]){const x=p.a.x+(p.b.x-p.a.x)*t,z=p.a.z+(p.b.z-p.a.z)*t;log([x,bed,z],[x,crest+.12,z],.07,'#b29968',section);}
    }else for(const v of [p.a,p.b])log([v.x,groundHeight(v.x,v.z,s),v.z],[v.x,Math.max(groundHeight(v.x,v.z,s)+.5,.55),v.z],.045,'#d9c497',section);
    const packed=preview?p.target:p.level;
-   if(s.construction&&packed&&CRESTS[packed]>bed){const face=mesh(new THREE.BoxGeometry(Math.hypot(p.b.x-p.a.x,p.b.z-p.a.z),CRESTS[packed]-bed,.25),'#715039',center.x,(bed+CRESTS[packed])/2,center.z,section);face.rotation.y=-Math.atan2(p.b.z-p.a.z,p.b.x-p.a.x);face.userData.kind='packed-face';}
+   if(s.construction&&packed&&CRESTS[packed]>bed){const face=mesh(new THREE.BoxGeometry(Math.hypot(p.b.x-p.a.x,p.b.z-p.a.z),CRESTS[packed]+mudCapClearance-bed,.25),'#715039',center.x,(bed+CRESTS[packed]+mudCapClearance)/2,center.z,section);face.rotation.y=-Math.atan2(p.b.z-p.a.z,p.b.x-p.a.x);face.userData.kind='packed-face';}
    if(p.mud)mesh(new THREE.IcosahedronGeometry(.18,0),'#715138',center.x+.25,Math.max(bed,.15)+.15,center.z+.3,section);
    for(let j=0;j<Math.min(5,p.wood);j++)log([center.x-.4,Math.max(bed,.15)+.15+j*.1,center.z-.4],[center.x+.4,Math.max(bed,.15)+.15+j*.1,center.z-.25],.06,'#c09b65',section);
   }
@@ -267,7 +269,7 @@ export function createExploreScene(container){
   const hydrology=creekWater(view.previewState||s);waterMaterial.color.set(view.previewState?'#a2bda5':'#448f9f');waterMaterial.opacity=view.previewState?.6:.85;
   for(const tile of waterTiles){const x=tile.position.x,z=tile.position.z,level=hydrology?hydrology.wet.get(Math.floor(x)+','+Math.floor(z)):groundHeight(x,z)<.35?0:undefined;tile.visible=level!==undefined&&Math.hypot(x-s.x,z-s.z)<20;tile.position.y=level??0;}
   for(const stand of stands){stand.root.visible=s.version===2&&Math.hypot(stand.p.x-s.x,stand.p.z-s.z)<16;stand.root.position.y=groundHeight(stand.p.x,stand.p.z,s);if(s.version===2){const stock=s.patches[stand.p.id].stock;stand.shoots.forEach((o,i)=>o.visible=i<stock);stand.stump.visible=stock===0;}}
-  damGroup.visible=s.version===2;damGroup.position.y=s.version===2?[-.28,0,.2][s.dam]:0;damGroup.children.forEach((o,i)=>{if(o!==crest)o.visible=(s.familyFrame??s.dam)>0||i%5!==2;});crest.visible=(s.familyFrame??s.dam)===2;damPile.visible=s.version===2;familyPackingFace.visible=!!s.construction&&s.dam>0;familyPackingFace.scale.y=s.dam===2?1.18:.9;familyPackingFace.position.y=s.dam===2?.09:-.05;
+  damGroup.visible=s.version===2;damGroup.position.y=s.version===2?[-.28,0,.2][s.dam]:0;damGroup.children.forEach((o,i)=>{if(o!==crest&&o!==familyPackingFace)o.visible=(s.familyFrame??s.dam)>0||i%5!==2;});crest.visible=(s.familyFrame??s.dam)===2;damPile.visible=s.version===2;familyPackingFace.visible=!!s.construction&&s.dam>0;familyPackingFace.scale.y=s.dam===2?1.18:.9;familyPackingFace.position.y=(CRESTS[s.dam]??0)+mudCapClearance-familyPackingFace.scale.y/2-damGroup.position.y;
   for(const m of markers){m.root.visible=s.version===2&&Math.hypot(m.c.x-s.x,m.c.z-s.z)<14;m.root.position.y=groundHeight(m.c.x,m.c.z,s);m.route.visible=m.root.visible&&!(s.channels?.[m.c.id]);}
   entrance.visible=s.version===2;entrance.position.y=groundHeight(-2.2,6,s)+.08;
   for(const tree of trees)tree.visible=Math.hypot(tree.position.x-s.x,tree.position.z-s.z)<16;

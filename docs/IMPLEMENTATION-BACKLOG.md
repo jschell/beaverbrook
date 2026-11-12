@@ -34,6 +34,10 @@ The [roadmap](ROADMAP.md), [procedural generation plan](design/procedural-genera
 
 [Supply support follow-up](../playtest/M1-CONSTRUCTION.md#loose-supply-support-after-excavation-2026-11-12) tracks [#18](https://github.com/jschell/beaverbrook/issues/18) and fixes unchanged loose logs hanging at their cached height after digging. Support follows current terrain and actual water independently of inventory geometry; mud-only loads settle on the bed. 119 tests and build pass; affected-device visual acceptance remains open.
 
+## Packed mud and water rendering
+
+[#19](https://github.com/jschell/beaverbrook/issues/19) and the [M1 rendering follow-up](../playtest/M1-CONSTRUCTION.md#packed-mud--water-rendering-correction-2026-11-12) track comb-like mud/water edges. Visual mud caps are separated from retained water, adjacent water tiles no longer overlap, and family mud/logs share fading. 120 tests and build pass. Native iPad pixel confirmation remains open; hydraulic crest and inventory are unchanged.
+
 ## Status and maintenance
 
 - **Resolved — implemented:** the bounded request exists with code/test evidence. This does not establish enjoyment, biological accuracy or device performance.

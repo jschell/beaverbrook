@@ -180,3 +180,30 @@ test('unchanged loose supplies resettle after excavation and water changes witho
  const positions=piles.map(p=>p.position.clone());update();assert.ok(piles.every((p,i)=>p.position.equals(positions[i])),'support is stable across identical frames');
  assert.equal(JSON.stringify([s.loose,s.ledger]),inventory,'visual settling never changes counts or accounting');view.dispose();
 });
+
+
+test('packed mud caps are separated from water and the family mud face shares log fading',async()=>{
+ let scene;
+ class Renderer{constructor(){this.domElement={};}setPixelRatio(){}setSize(){}render(s){scene=s;}dispose(){}}
+ const context=vm.createContext({THREE:{...Three,WebGLRenderer:Renderer},...rules,...habitat,...placement,...journey,...construction,devicePixelRatio:1,window:{matchMedia:()=>({matches:true})},ResizeObserver:class{observe(){}}});
+ const code=(await readFile(new URL('../playtest/explore-scene.mjs',import.meta.url),'utf8')).replace(/^import .*;\n/gm,'').replace('export function createExploreScene','function createExploreScene');
+ vm.runInContext(code,context);const view=context.createExploreScene({clientWidth:1024,clientHeight:620,append(){}});
+ let s=habitat.freshHabitat({construction:true});s.x=0;s.z=8;let time=0;
+ for(const level of [1,2]){
+  s.dam=level;s.familyFrame=2;const before=JSON.stringify(s);view.update(s,{yaw:0,distance:6.5},time+=100);scene.updateMatrixWorld(true);
+  let face;const water=[];scene.traverse(o=>{if(o.userData.kind==='family-packed-face')face=o;if(o.isMesh&&o.material.roughness===.3)water.push(o);});
+  assert.ok(face.visible);const bounds=new Three.Box3().setFromObject(face),crest=rules.waterLevel(0,8,s);
+  assert.ok(Math.abs(bounds.max.y-crest-.012)<1e-7,'visible mud cap has a small clearance above normal retained water');
+  assert.ok(water.every(o=>o.geometry.parameters.width===1&&o.geometry.parameters.height===1),'adjacent water tiles meet without double-blended strips');
+  assert.ok(face.parent.children.some(o=>o.geometry?.type==='CylinderGeometry'),'mud and family logs belong to one fading group');
+  for(let i=0;i<20;i++)view.update(s,{yaw:0,distance:6.5},time+=17);
+  assert.ok(face.parent.children.filter(o=>o.isMesh).every(o=>o.material.opacity===face.material.opacity),'mud and logs fade together');
+  assert.equal(JSON.stringify(s),before,'visual cap clearance never raises hydraulic crest or changes stock');
+ }
+ s=habitat.freshDamLab({construction:true});s=placement.commitDam(s,placement.makeDamPlan(s,{x:-6,z:-3},{x:6,z:-3},1).dam).state;
+ for(const section of s.placedDam.sections){section.frame=1;section.level=1;}
+ const before=JSON.stringify(s);view.update(s,{yaw:0,distance:6.5},time+=100);scene.updateMatrixWorld(true);
+ const faces=[];scene.traverse(o=>{if(o.userData.kind==='packed-face')faces.push(o);});assert.ok(faces.length);
+ for(const face of faces){const bounds=new Three.Box3().setFromObject(face);assert.ok(Math.abs(bounds.max.y-.412)<1e-7,'placed dam caps also avoid exact water coplanarity');}
+ assert.equal(JSON.stringify(s),before);view.dispose();
+});
