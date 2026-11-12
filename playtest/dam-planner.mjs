@@ -1,4 +1,4 @@
-import {buildSurvey} from './survey-view.mjs?v=survey-1';
+import {buildSurvey} from './survey-view.mjs?v=survey-2';
 import {BOUNDS,groundHeight,creekWater,LODGE} from './explore-rules.mjs';
 import {makeDamPlan,previewDam,commitDam,extendDam,CRESTS} from './dam-placement.mjs';
 export function createDamPlanner({getState,setState,notify,onToggle}){
