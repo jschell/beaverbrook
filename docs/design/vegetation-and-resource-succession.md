@@ -1,6 +1,8 @@
 # Vegetation, materials and wetland succession
 
-Design proposal, 2026-11-09. This describes a future simulation and content model. The current playtest uses finite authored sources. Parameters and species behaviors below need regional ecological review before educational claims or numerical calibration. External research retrieval was unavailable during this design pass.
+> Status audit (2026-11-11): this broader design remains proposed. Some bounded experiments now exist; see the [current discussion register](../IMPLEMENTATION-BACKLOG.md) before treating any part as implemented or scheduling work. Current experiment records govern their own rules.
+
+Design proposal, 2026-11-09. This describes a future simulation and content model. At writing, the playtest used finite authored sources. Later Shrub Seasons/First Reach implement roots/age/biomass recovery, and Creekside has simpler stock regrowth; recruitment and full succession remain unimplemented. Parameters and species behaviors below need regional ecological review before educational claims or numerical calibration. External research retrieval was unavailable during this design pass.
 
 ## Player experience
 

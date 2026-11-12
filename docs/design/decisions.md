@@ -1,5 +1,7 @@
 # Design decision register
 
+> Status audit (2026-11-11): historical proposal/review snapshot. Later implementations supersede its repository-wide “not implemented,” “all open,” or default-scope statements. See the [current discussion register and G01–G21 reconciliation](../IMPLEMENTATION-BACKLOG.md) for resolved, partial and superseded items. Original text below is retained for provenance.
+
 **Reviewed:** 2026-11-09. **Status:** documentation baseline imported for review, not production approval.
 
 “Inherited direction” means carried from the dedicated source notes. “Recommended” means a proposal still awaiting selection and later testing. This register reconciles the documents without claiming that playtests have occurred.

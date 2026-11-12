@@ -1,5 +1,7 @@
 # First Creek · 0.4.0
 
+> Tracking audit (2026-11-11): [current discussion dispositions and issue queue](../docs/IMPLEMENTATION-BACKLOG.md). This record describes its named experiment; historical verification counts do not claim current human/device validation.
+
 Open `playtest/creek.html` for **The first dry spell**. The site root opens this scenario. [Construction sandbox](creek.html?mode=sandbox) retains the original building/rain experiment; [Riverbank Refuge](index.html) remains the shelter-choice test.
 
 ## Quick channel demo

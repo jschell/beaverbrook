@@ -1,5 +1,7 @@
 # Willow Cove — playable opening
 
+> Tracking audit (2026-11-11): [current discussion dispositions and issue queue](../docs/IMPLEMENTATION-BACKLOG.md). This record describes its named experiment; historical verification counts do not claim current human/device validation.
+
 The default Pages entry opens Creekside at the established family home. The goal is to help the family through **one low-water night, with food left for tomorrow**. This is a bounded proof of concept, not the complete founding/colony game.
 
 ## Implemented experience

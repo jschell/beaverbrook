@@ -1,5 +1,7 @@
 # Exploration, visibility and remembered conditions
 
+> Status audit (2026-11-11): this broader design remains proposed. Some bounded experiments now exist; see the [current discussion register](../IMPLEMENTATION-BACKLOG.md) before treating any part as implemented or scheduling work. Current experiment records govern their own rules.
+
 Design proposal. Complements scenario-patterns-and-outcomes.md and vegetation-and-resource-succession.md. The current playtest exposes its authored map; this system is not implemented.
 
 ## Player rule

@@ -1,5 +1,7 @@
 # Gameplay design work plan
 
+> Status audit (2026-11-11): historical proposal/review snapshot. Later implementations supersede its repository-wide “not implemented,” “all open,” or default-scope statements. See the [current discussion register and G01–G21 reconciliation](../IMPLEMENTATION-BACKLOG.md) for resolved, partial and superseded items. Original text below is retained for provenance.
+
 **Status:** recommended documentation work following the [2026-11-09 review](gameplay-design-review.md). No mechanics below are adopted or tested, and no implementation is authorized.
 
 The review's G01–G21 identifiers are the stable finding references. This plan groups the work into five small design packets. Complete the first three before attempting to run Riverbank Refuge on paper. Later packets refine the experience without expanding the first experiment into a simulator.

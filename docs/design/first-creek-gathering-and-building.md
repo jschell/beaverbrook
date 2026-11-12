@@ -1,5 +1,7 @@
 # First Creek — gathering, hauling, dam and lodge gameplay
 
+> Status audit (2026-11-11): historical proposal/review snapshot. Later implementations supersede its repository-wide “not implemented,” “all open,” or default-scope statements. See the [current discussion register and G01–G21 reconciliation](../IMPLEMENTATION-BACKLOG.md) for resolved, partial and superseded items. Original text below is retained for provenance.
+
 **Direction recorded:** 2026-11-09. The user wants initial gameplay centered on building a dam, its associated lodge and useful supporting items. **Status:** next-slice design proposal; the current Riverbank Refuge implementation remains unchanged. Costs, source traits and formulas below are trial game rules, not verified biology or balanced numbers.
 
 ## Player loop and goal

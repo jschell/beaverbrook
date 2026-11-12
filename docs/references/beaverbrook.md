@@ -1,5 +1,7 @@
 # Beaverbrook — beaver family and wetland builder
 
+> Status audit (2026-11-11): retained reference/research material. Examples do not add implementation requirements or establish biological accuracy. See the [current discussion register](../IMPLEMENTATION-BACKLOG.md), especially RESEARCH-01.
+
 > Imported design material from [Ideas-for-projects](https://github.com/jschell/Ideas-for-projects/blob/2fabfceba1feab90f2ee4a60c13680f2125a8f98/animal-browser-games/beaverbrook.md) on 2026-11-09. See [source provenance](../sources.md) and the [decision register](../design/decisions.md) for current status and precedence.
 
 **Status:** Draft concept; working name.

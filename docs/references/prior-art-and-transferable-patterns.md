@@ -1,5 +1,7 @@
 # Prior art and transferable patterns
 
+> Status audit (2026-11-11): retained reference/research material. Examples do not add implementation requirements or establish biological accuracy. See the [current discussion register](../IMPLEMENTATION-BACKLOG.md), especially RESEARCH-01.
+
 **Status:** synthesis of the source collection, not a new external gameplay audit. Links and mechanics should be rechecked before a detailed comparative study. No third-party assets or content were imported.
 
 ## Focused review of neighboring concepts

@@ -2,6 +2,10 @@
 
 **Phase:** playable proof of concept. [Willow Cove](../playtest/WILLOW-COVE.md) is the default opening: direct movement, family needs, a low-water night and continued play. Earlier experiments and broader design proposals remain distinct.
 
+## Current work and discussion status
+
+[Discussion and implementation backlog](IMPLEMENTATION-BACKLOG.md) reconciles prior discussions, all G01–G21 findings, resolved requests and superseded assumptions. [GitHub issues](https://github.com/jschell/beaverbrook/issues) hold the actionable queue and acceptance criteria. Use that register for current status; older review prose below describes its original baseline.
+
 ## Flexible dam placement demo
 
 [Flexible dams](../playtest/FLEXIBLE-DAMS.md) implements one player-placed span alongside the family dam, local section construction, per-section heights, extension, notching and a terrain-edge water model. Terrain changes only through excavation. The surveyed placement lab supplies finite nearby timber for quick testing.
@@ -60,9 +64,9 @@ Version 0.3.0 adds one forecast dry spell, a deepened entrance, feeding route, a
 
 ## Gameplay review
 
-The [2026-11-09 gameplay design review](reviews/gameplay-design-review.md) audits the imported baseline and records 21 open findings. Its [design work plan](reviews/gameplay-design-work-plan.md) groups the proposed follow-up into five documentation packets.
+The [2026-11-09 gameplay design review](reviews/gameplay-design-review.md) audits the imported baseline and records 21 findings against the original baseline. Its [design work plan](reviews/gameplay-design-work-plan.md) groups the proposed follow-up into five documentation packets.
 
-These are review findings and recommendations; they do not replace the baseline rules or claim player-test evidence. Start with G01–G07 before treating Riverbank Refuge as a coherent paper-playable scenario.
+These are review findings and recommendations; they do not replace the baseline rules or claim player-test evidence. Consult the current G01–G21 reconciliation before scheduling follow-up work; multiple scenarios have since been implemented.
 
 ## Resolving the gaps
 
@@ -94,5 +98,5 @@ This is a named proposal for review, not adopted production rules. It includes e
 
 The decision register records how this import reconciles the sources. The six dedicated design documents provide the proposed baseline. Earlier references preserve alternatives and background; they do not add requirements to the first experiment.
 
-“Proposed” is not “approved.” Illustrative game units are not balance values. Acceptance criteria describe future verification; no playtests or simulation checks have been performed. Research links are leads, not claims newly verified by this import.
+“Proposed” is not “approved.” Illustrative game units are not balance values. Older proposal acceptance criteria describe intended verification. Implemented experiments have automated and developer-browser checks recorded in their implementation notes; human enjoyment and native-device validation remain open. Research links are leads, not claims newly verified by this audit.
 

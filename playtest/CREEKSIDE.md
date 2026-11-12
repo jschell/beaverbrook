@@ -1,5 +1,7 @@
 # Creekside — living creek test
 
+> Tracking audit (2026-11-11): [current discussion dispositions and issue queue](../docs/IMPLEMENTATION-BACKLOG.md). This record describes its named experiment; historical verification counts do not claim current human/device validation.
+
 See the [flexible dam placement demo](FLEXIBLE-DAMS.md) and [quick placement lab](explore.html?mode=dam-lab) for player-chosen spans, section heights and the new stable-terrain water model.
 
 Implemented experiment: third-person movement plus an open-ended, authored harvesting and water-management sandbox. Open [explore.html](explore.html). Three.js and vanilla HTML/CSS/JavaScript; static Pages hosting. First Reach remains a separate settlement experiment. This extends the earlier movement POC rather than attempting the whole colony game.

@@ -1,5 +1,7 @@
 # Source provenance and migration record
 
+> Current status: see the [discussion and implementation audit](IMPLEMENTATION-BACKLOG.md). This file preserves source lineage and earlier import history; upstream proposals are not a second active backlog.
+
 **Imported/reviewed:** 2026-11-09  
 **Source repository:** [jschell/Ideas-for-projects](https://github.com/jschell/Ideas-for-projects)  
 **Pinned source revision:** [2fabfceba1feab90f2ee4a60c13680f2125a8f98](https://github.com/jschell/Ideas-for-projects/commit/2fabfceba1feab90f2ee4a60c13680f2125a8f98)  

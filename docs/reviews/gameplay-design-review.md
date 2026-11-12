@@ -1,5 +1,7 @@
 # Gameplay and game design review
 
+> Status audit (2026-11-11): historical proposal/review snapshot. Later implementations supersede its repository-wide “not implemented,” “all open,” or default-scope statements. See the [current discussion register and G01–G21 reconciliation](../IMPLEMENTATION-BACKLOG.md) for resolved, partial and superseded items. Original text below is retained for provenance.
+
 **Date:** 2026-11-09  
 **Reviewed baseline:** [89c067b](https://github.com/jschell/beaverbrook/commit/89c067b51598f9a280a90e7fe212d559cec2d3cf)  
 **Status:** documentation audit and design hypotheses. No player tests, external comparative research, game implementation or balance simulation were conducted. Recommendations are proposals, not adopted mechanics.

@@ -1,5 +1,7 @@
 # Hauling channels and food access — demo 0.4.0
 
+> Tracking audit (2026-11-11): [current discussion dispositions and issue queue](../docs/IMPLEMENTATION-BACKLOG.md). This record describes its named experiment; historical verification counts do not claim current human/device validation.
+
 **Implemented trial.** The user requested a demo based on the accuracy review. This slice adds two authored hauling cuts, terrain excavation, connected filling, route previews and one deepening action per cut. It corrects the earlier blanket rule that flooded shore brush becomes unusable food. Earlier 0.3.0 walkthroughs remain historical evidence, not current rules.
 
 ## Try it immediately

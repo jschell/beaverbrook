@@ -9,3 +9,5 @@ The user authorized the first basic Three.js/vanilla JavaScript playtest on 2026
 - Preserve the distinction between proposals, implemented test behavior and verified findings. No claim of enjoyable gameplay or biological fidelity without evidence.
 - Run npm test and npm run build for relevant changes. Browser verification must disclose WebGL/compatibility limits.
 - Keep Pages deployment limited to static playtest output. Do not upload player logs automatically.
+
+- Track actionable improvements in GitHub issues and docs/IMPLEMENTATION-BACKLOG.md. Update the affected issue, discussion disposition and experiment implementation record together. Keep completed behavior separate from human/device validation; superseded items must identify their replacement.

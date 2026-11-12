@@ -1,5 +1,7 @@
 # Scenario patterns and outcome rules
 
+> Status audit (2026-11-11): this broader design remains proposed. Some bounded experiments now exist; see the [current discussion register](../IMPLEMENTATION-BACKLOG.md) before treating any part as implemented or scheduling work. Current experiment records govern their own rules.
+
 Design proposal. Builds on vegetation-and-resource-succession.md and willow-cove-tutorial.md. These contracts define future generated scenarios. They are not implemented generator behavior or verified balance. Numerical values are trial game units. Ecological encounter rules require regional evidence.
 
 ## Scenario contract

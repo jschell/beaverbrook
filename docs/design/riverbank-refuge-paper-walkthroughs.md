@@ -1,5 +1,7 @@
 # Riverbank Refuge v0.1 — walkthroughs and desk checks
 
+> Status audit (2026-11-11): historical proposal/review snapshot. Later implementations supersede its repository-wide “not implemented,” “all open,” or default-scope statements. See the [current discussion register and G01–G21 reconciliation](../IMPLEMENTATION-BACKLOG.md) for resolved, partial and superseded items. Original text below is retained for provenance.
+
 **Status:** authored walkthroughs of the [candidate rules](riverbank-refuge-paper-candidate.md), 2026-11-09. Arithmetic and stated eligibility reviewed at the desk; no human playtesting, prototype or simulation implementation. Numbers and rules remain proposals.
 
 W = ordinary work, S = construction supply, R = relocation-only work credit. The preparation W remainder expires; recovery starts at W3 once.

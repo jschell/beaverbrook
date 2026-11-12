@@ -1,6 +1,8 @@
 # First Reach
 
-Implemented settlement experiment. Open reach.html (the default root entry). Start at an inherited Willow lodge beside a leaking narrows dam. A lower meadow crossing and a naturally deep bend offer other settlement opportunities on the same authored map.
+> Tracking audit (2026-11-11): [current discussion dispositions and issue queue](../docs/IMPLEMENTATION-BACKLOG.md). This record describes its named experiment; historical verification counts do not claim current human/device validation.
+
+Implemented settlement experiment. Open reach.html (a separate experiment; the default root now opens Creekside/Willow Cove). Start at an inherited Willow lodge beside a leaking narrows dam. A lower meadow crossing and a naturally deep bend offer other settlement opportunities on the same authored map.
 
 ## Playing
 

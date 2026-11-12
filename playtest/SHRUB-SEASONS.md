@@ -1,5 +1,7 @@
 # Shrub seasons
 
+> Tracking audit (2026-11-11): [current discussion dispositions and issue queue](../docs/IMPLEMENTATION-BACKLOG.md). This record describes its named experiment; historical verification counts do not claim current human/device validation.
+
 Implemented resource experiment, accessed from the family tutorial header or patches.html. Three authored shrub patches share an established lodge and a deepened entrance. These are fictional yields and seasonal game rules, not a calibrated biological model.
 
 Each season gives 10 daylight. Harvest carries at most 2 food branches through the existing gather/deliver rules. The upstream patch uses the existing larger-source cutting cost (2 daylight), the other patches use 1, plus route work. Visiting alone spends route work. A trip commits atomically. Failed unaffordable actions spend nothing. An empty arrival spends travel/collection budget and refreshes the record.

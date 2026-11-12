@@ -1,5 +1,7 @@
 # Riverbank Refuge — options for closing the core gameplay gaps
 
+> Status audit (2026-11-11): historical proposal/review snapshot. Later implementations supersede its repository-wide “not implemented,” “all open,” or default-scope statements. See the [current discussion register and G01–G21 reconciliation](../IMPLEMENTATION-BACKLOG.md) for resolved, partial and superseded items. Original text below is retained for provenance.
+
 **Date:** 2026-11-09. **Status:** options and recommended candidate package, not selected rules or tested balance. Addresses G01–G10 and G15 from the [gameplay review](../reviews/gameplay-design-review.md). All findings remain open until the required artifacts are completed and reviewed.
 
 ## What needs to be documented

@@ -6,6 +6,10 @@ A proposed browser strategy game about guiding a beaver family to a safe home by
 
 The design targets curious players around ages 8–10+ and adults, with short, approachable scenarios and optional depth. Building a dam is one possible response to a river; choosing a bank den, a sheltered lodge or another reach can be the better decision.
 
+## Improvement tracking
+
+[Discussion and implementation backlog](docs/IMPLEMENTATION-BACKLOG.md) is the current status index, including resolved/superseded discussions and G01–G21. [GitHub issues](https://github.com/jschell/beaverbrook/issues) track actionable work and acceptance evidence.
+
 ## Start here
 
 - [Play Willow Cove](playtest/explore.html) — help the family through a low-water night, choose how to protect access and gather food, then keep exploring; [implemented opening and remaining gaps](playtest/WILLOW-COVE.md). This is the default Pages entry.

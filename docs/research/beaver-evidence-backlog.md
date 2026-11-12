@@ -1,5 +1,7 @@
 # Beaver evidence backlog
 
+> Status audit (2026-11-11): retained reference/research material. Examples do not add implementation requirements or establish biological accuracy. See the [current discussion register](../IMPLEMENTATION-BACKLOG.md), especially RESEARCH-01.
+
 **Status:** imported research leads organized for future verification. No external paper or wildlife source was newly reviewed during this import. “Evidence-inspired” does not mean the numerical game rule is scientifically validated.
 
 | Claim area | Proposed mechanic | Verification needed | Game abstraction / test |

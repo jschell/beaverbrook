@@ -1,5 +1,7 @@
 > The default game entry is now [Willow Cove](WILLOW-COVE.md) in [Creekside](explore.html). This document describes the earlier shelter-choice experiment.
 
+> Tracking audit (2026-11-11): [current discussion dispositions and issue queue](../docs/IMPLEMENTATION-BACKLOG.md). This record describes its named experiment; historical verification counts do not claim current human/device validation.
+
 # Riverbank Refuge — shelter test
 
 Version 0.1.0. Three.js 0.187.0 plus native HTML/CSS/JavaScript. No UI framework, backend, accounts or automatic telemetry.
