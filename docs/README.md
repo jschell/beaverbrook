@@ -4,6 +4,8 @@
 
 ## Current work and discussion status
 
+Start with the [roadmap](ROADMAP.md) for staged scope and completion gates. [Environment and resource parameters](design/environment-and-resource-parameters.md) develops generated environmental challenges and evidence-backed construction-material roles; these remain proposals.
+
 [Discussion and implementation backlog](IMPLEMENTATION-BACKLOG.md) reconciles prior discussions, all G01–G21 findings, resolved requests and superseded assumptions. [GitHub issues](https://github.com/jschell/beaverbrook/issues) hold the actionable queue and acceptance criteria. Use that register for current status; older review prose below describes its original baseline.
 
 ## Flexible dam placement demo

@@ -4,6 +4,12 @@ Audited 2026-11-11 (America/Los_Angeles), against implementation commit `bad2de5
 
 This is the current status index. GitHub issues track actionable work; linked design documents retain rationale and alternatives. Earlier documents are historical snapshots unless their named experiment is still being tested. Their phrases “all findings open,” “no implementation” and “recommended first” are not current repository-wide status.
 
+## Roadmap and subsequent planning
+
+[Roadmap](ROADMAP.md) maps the issue queue to M0 stabilization, M1 established-family play, M2 founding, M3 settlement networks and M4 environmental scenarios, with separate behavior/player/device gates. [Environment and resource parameters](design/environment-and-resource-parameters.md) records candidate procedural variation and construction-material roles with wildlife sources. These additions are planning, not implemented features; the 39-document inventory below remains the original audit snapshot.
+
+Starting-lodge placement and its visually disconnected entrance are now explicitly open under [PROG-01 / #8](https://github.com/jschell/beaverbrook/issues/8), coordinated with UX-01/SENSE-01/ART-01. Pond-edge integration is an option, not a committed relocation.
+
 ## Status and maintenance
 
 - **Resolved — implemented:** the bounded request exists with code/test evidence. This does not establish enjoyment, biological accuracy or device performance.

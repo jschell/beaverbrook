@@ -4,6 +4,8 @@
 
 Design proposal. Builds on vegetation-and-resource-succession.md and willow-cove-tutorial.md. These contracts define future generated scenarios. They are not implemented generator behavior or verified balance. Numerical values are trial game units. Ecological encounter rules require regional evidence.
 
+See [environment and resource parameters](environment-and-resource-parameters.md) for proposed reach families, bounded variation, material roles and generation dependencies; see [roadmap M4](../ROADMAP.md) for its implementation gate.
+
 ## Scenario contract
 
 Each instance records an ID, seed, generator/content/rules versions, initial state, permitted actions, objective predicates, evaluation times, announced changes, bounded surprises, feasibility witnesses, and a local event log. Saves retain the instantiated world and random state. A seed alone is insufficient after content changes.
