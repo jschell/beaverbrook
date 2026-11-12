@@ -33,12 +33,23 @@ export function createExploreScene(container){
    o.material=clones.get(o.material);
   });
  }
+ function terrainColor(x,z,s,wet){
+  const h=groundHeight(x,z,s),cut=groundHeight(x,z)-h,slope=Math.hypot(groundHeight(x+.15,z,s)-groundHeight(x-.15,z,s),groundHeight(x,z+.15,s)-groundHeight(x,z-.15,s))/.3;
+  const levelAt=(x,z)=>s?.version===2?wet?.get(Math.floor(x)+','+Math.floor(z)):0;
+  let water=levelAt(x,z);
+  if(water===undefined)for(const [dx,dz]of [[1,0],[-1,0],[0,1],[0,-1]]){const level=levelAt(x+dx,z+dz);if(level!==undefined&&(water===undefined||level>water))water=level;}
+  const depth=water===undefined?-Infinity:water-h;
+  const color=new THREE.Color(depth>=0?(depth>.6?'#726448':'#a08c61'):depth>-.16?'#665640':cut>.05?'#a17a50':slope>.65?'#82724d':h>1.5?'#758663':'#8fa16a');
+  return color.multiplyScalar(1-Math.min(.18,slope*.09));
+ }
  for(let tz=-BOUNDS;tz<BOUNDS;tz+=8)for(let tx=-BOUNDS;tx<BOUNDS;tx+=8){
-  const terrain=new THREE.PlaneGeometry(8,8,renderer?12:6,renderer?12:6);terrain.rotateX(-Math.PI/2);terrain.translate(tx+4,0,tz+4);
+  // One shared half-unit lattice keeps adjacent terrain patches watertight.
+  const segments=16;
+  const terrain=new THREE.PlaneGeometry(8,8,segments,segments);terrain.rotateX(-Math.PI/2);terrain.translate(tx+4,0,tz+4);
   const positions=terrain.getAttribute('position'),colors=[];
   for(let i=0;i<positions.count;i++){
    const x=positions.getX(i),z=positions.getZ(i),h=groundHeight(x,z);positions.setY(i,h);
-   const color=new THREE.Color(h<-.05?'#a59a73':h<.28?'#a7a47b':h>1.5?'#758663':'#8fa57b');colors.push(color.r,color.g,color.b);
+   const color=terrainColor(x,z);colors.push(color.r,color.g,color.b);
   }
   terrain.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));terrain.computeVertexNormals();
   const bank=new THREE.Mesh(terrain,new THREE.MeshStandardMaterial({vertexColors:true,roughness:1}));world.add(bank);register(bank,true);terrainBanks.push(bank);
@@ -46,6 +57,8 @@ export function createExploreScene(container){
  const mudBanks=MUD_BANKS.map(p=>{const root=new THREE.Group();root.userData.kind='mud-bank';root.position.set(p.x,groundHeight(p.x,p.z),p.z);world.add(root);mesh(new THREE.CylinderGeometry(.7,.8,.06,12),'#876546',0,.04,0,root);for(let i=0;i<3;i++)mesh(new THREE.IcosahedronGeometry(.16,0),'#715138',i*.22-.22,.15,0,root);return {p,root};});
  const waterTiles=[];
  const waterMaterial=new THREE.MeshStandardMaterial({color:'#448f9f',transparent:true,opacity:.85,roughness:.3});
+ const waterMaterials=[waterMaterial.clone(),waterMaterial.clone(),waterMaterial];
+ waterMaterials[0].opacity=.48;waterMaterials[1].opacity=.68;
 
  for(let z=-BOUNDS;z<BOUNDS;z++)for(let x=-BOUNDS;x<BOUNDS;x++){
   const tile=new THREE.Mesh(new THREE.PlaneGeometry(1,1),waterMaterial);tile.rotation.x=-Math.PI/2;tile.position.set(x+.5,0,z+.5);world.add(tile);waterTiles.push(tile);
@@ -197,10 +210,15 @@ export function createExploreScene(container){
   terrainMarker.position.copy(beaver.position);terrainMarker.position.y+=.04;
   terrainMarker.visible=terrainBlocked&&!!renderer;
  }
- let lastTerrain='',lastInventory='',lastFallback=0,lastFrame=0;
+ let lastTerrain='',lastTerrainShape='',lastInventory='',lastFallback=0,lastFrame=0;
  function landscape(s){
-  const key=s.version===2?JSON.stringify([s.channels,s.entrance]):'original';if(key===lastTerrain)return;lastTerrain=key;
-  for(const bank of terrainBanks){const positions=bank.geometry.getAttribute('position'),colors=bank.geometry.getAttribute('color');for(let i=0;i<positions.count;i++){const x=positions.getX(i),z=positions.getZ(i),h=groundHeight(x,z,s);positions.setY(i,h);const color=new THREE.Color(groundHeight(x,z)-h>.05?'#a1946f':h<-.05?'#a59a73':h<.28?'#a7a47b':h>1.5?'#758663':'#8fa57b');colors.setXYZ(i,color.r,color.g,color.b);}colors.needsUpdate=true;positions.needsUpdate=true;bank.geometry.computeVertexNormals();bank.geometry.computeBoundingSphere();}
+  const shape=s.version===2?JSON.stringify([s.channels,s.entrance]):'original',hydrology=creekWater(s),key=shape+'|'+(hydrology?.key||'original');if(key===lastTerrain)return;lastTerrain=key;
+  const changed=shape!==lastTerrainShape;lastTerrainShape=shape;
+  for(const bank of terrainBanks){
+   const positions=bank.geometry.getAttribute('position'),colors=bank.geometry.getAttribute('color');
+   for(let i=0;i<positions.count;i++){const x=positions.getX(i),z=positions.getZ(i);if(changed)positions.setY(i,groundHeight(x,z,s));const color=terrainColor(x,z,s,hydrology?.wet);colors.setXYZ(i,color.r,color.g,color.b);}
+   colors.needsUpdate=true;if(changed){positions.needsUpdate=true;bank.geometry.computeVertexNormals();bank.geometry.computeBoundingSphere();}
+  }
  }
  const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
  function clear(group){while(group.children.length){const child=group.children.pop();child.traverse(o=>{o.geometry?.dispose();for(const record of occluders)if(record.materials.delete(o.material))o.material.dispose();});child.parent=null;}}
@@ -266,8 +284,8 @@ export function createExploreScene(container){
   for(const {p,root}of mudBanks){root.visible=!!s.construction&&Math.hypot(s.x-p.x,s.z-p.z)<14;root.position.y=groundHeight(p.x,p.z,s);root.children.forEach((o,i)=>{if(i)o.visible=s.construction&&s.mudBanks[p.id]>0;});}
   cargo.visible=s.carrying;cargo.children.forEach(o=>o.visible=s.version!==2||s.cargo?.wood>0);cargo.rotation.y=swim?-.15:.15;
   wake.visible=swim&&moving;wake.position.set(s.x,surface+.025,s.z);wake.rotation.z=s.yaw;
-  const hydrology=creekWater(view.previewState||s);waterMaterial.color.set(view.previewState?'#a2bda5':'#448f9f');waterMaterial.opacity=view.previewState?.6:.85;
-  for(const tile of waterTiles){const x=tile.position.x,z=tile.position.z,level=hydrology?hydrology.wet.get(Math.floor(x)+','+Math.floor(z)):groundHeight(x,z)<.35?0:undefined;tile.visible=level!==undefined&&Math.hypot(x-s.x,z-s.z)<20;tile.position.y=level??0;}
+  const hydrology=creekWater(view.previewState||s);for(const [i,m]of waterMaterials.entries()){m.color.set(view.previewState?'#a2bda5':'#448f9f');m.opacity=view.previewState?.6:[.48,.68,.85][i];}
+  for(const tile of waterTiles){const x=tile.position.x,z=tile.position.z,level=hydrology?hydrology.wet.get(Math.floor(x)+','+Math.floor(z)):groundHeight(x,z)<.35?0:undefined;tile.visible=level!==undefined&&Math.hypot(x-s.x,z-s.z)<20;tile.position.y=level??0;const depth=(level??0)-groundHeight(x,z,view.previewState||s);tile.material=waterMaterials[depth<.25?0:depth<.65?1:2];}
   for(const stand of stands){stand.root.visible=s.version===2&&Math.hypot(stand.p.x-s.x,stand.p.z-s.z)<16;stand.root.position.y=groundHeight(stand.p.x,stand.p.z,s);if(s.version===2){const stock=s.patches[stand.p.id].stock;stand.shoots.forEach((o,i)=>o.visible=i<stock);stand.stump.visible=stock===0;}}
   damGroup.visible=s.version===2;damGroup.position.y=s.version===2?[-.28,0,.2][s.dam]:0;damGroup.children.forEach((o,i)=>{if(o!==crest&&o!==familyPackingFace)o.visible=(s.familyFrame??s.dam)>0||i%5!==2;});crest.visible=(s.familyFrame??s.dam)===2;damPile.visible=s.version===2;familyPackingFace.visible=!!s.construction&&s.dam>0;familyPackingFace.scale.y=s.dam===2?1.18:.9;familyPackingFace.position.y=(CRESTS[s.dam]??0)+mudCapClearance-familyPackingFace.scale.y/2-damGroup.position.y;
   for(const m of markers){m.root.visible=s.version===2&&Math.hypot(m.c.x-s.x,m.c.z-s.z)<14;m.root.position.y=groundHeight(m.c.x,m.c.z,s);m.route.visible=m.root.visible&&!(s.channels?.[m.c.id]);}
@@ -287,5 +305,5 @@ export function createExploreScene(container){
   else if(time-lastFallback>120||view.force){compatibility(s);lastFallback=time;}
  },projectWorkSites(sites,s){
   return sites.filter(p=>Math.hypot(p.x-s.x,p.z-s.z)<14).map(p=>{const y=Math.max(groundHeight(p.x,p.z,s),waterLevel(p.x,p.z,s)??-1)+1.15,v=new THREE.Vector3(p.x,y,p.z).project(camera);return {...p,distance:Math.hypot(p.x-s.x,p.z-s.z),screenX:(v.x+1)*50,screenY:(1-v.y)*50,shown:v.z>=-1&&v.z<=1&&Math.abs(v.x)<.92&&v.y<.8&&v.y>-.65};}).filter(p=>p.shown);
- },dispose(){markerMaterial.dispose();renderer?.dispose();world.traverse(o=>o.geometry?.dispose());for(const record of occluders)for(const m of record.materials)m.dispose();}};
+ },dispose(){for(const m of waterMaterials)m.dispose();markerMaterial.dispose();renderer?.dispose();world.traverse(o=>o.geometry?.dispose());for(const record of occluders)for(const m of record.materials)m.dispose();}};
 }

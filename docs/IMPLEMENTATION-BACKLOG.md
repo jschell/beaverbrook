@@ -38,6 +38,10 @@ The [roadmap](ROADMAP.md), [procedural generation plan](design/procedural-genera
 
 [#19](https://github.com/jschell/beaverbrook/issues/19) and the [M1 rendering follow-up](../playtest/M1-CONSTRUCTION.md#packed-mud--water-rendering-correction-2026-11-12) track comb-like mud/water edges. Visual mud caps are separated from retained water, adjacent water tiles no longer overlap, and family mud/logs share fading. 120 tests and build pass. Native iPad pixel confirmation remains open; hydraulic crest and inventory are unchanged.
 
+## Elevation readability slice
+
+[#20](https://github.com/jschell/beaverbrook/issues/20) and [implementation record](../playtest/ELEVATION-READABILITY.md): half-unit terrain sampling, slope/exposed-soil cues, current wet shoreline and more transparent shallows. Existing simulation/save rules remain. 121 tests/build pass; compatibility-browser evidence only. Native iPad readability and performance remain open. Next: lodge entrance connection, then optional survey overlays.
+
 ## Status and maintenance
 
 - **Resolved — implemented:** the bounded request exists with code/test evidence. This does not establish enjoyment, biological accuracy or device performance.

@@ -1,5 +1,7 @@
 # Creekside — living creek test
 
+> Elevation update: [terrain, shore and shallow-water readability](ELEVATION-READABILITY.md) is implemented as a first visual slice. Native iPad readability/performance remains open under #20.
+
 > Tablet update (2026-11-12): [hint and overlay layout review](IPAD-LAYOUT-REVIEW.md). Compact home/work disclosures, pinned dismissible nudges and bounded dialogs are implemented; physical iPad Safari validation remains open in #17/#15.
 
 > M1 update: [wood, framework and sealing mud](M1-CONSTRUCTION.md) now governs production Creekside/lab construction. Wood builds a frame; mud packs the effective crest. Older one-wood-per-level costs below describe the preceding experiment. Saves retain paid structures and inventories; ordinary play receives no free stored materials. See the new record for current costs, sources, evidence and limits.

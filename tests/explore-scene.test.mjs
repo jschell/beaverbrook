@@ -207,3 +207,24 @@ test('packed mud caps are separated from water and the family mud face shares lo
  for(const face of faces){const bounds=new Three.Box3().setFromObject(face);assert.ok(Math.abs(bounds.max.y-.412)<1e-7,'placed dam caps also avoid exact water coplanarity');}
  assert.equal(JSON.stringify(s),before);view.dispose();
 });
+
+
+test('elevation cues follow actual excavation and water while dry-bank geometry stays fixed',async()=>{
+ let scene;
+ class Renderer{constructor(){this.domElement={};}setPixelRatio(){}setSize(){}render(s){scene=s;}dispose(){}}
+ const context=vm.createContext({THREE:{...Three,WebGLRenderer:Renderer},...rules,...habitat,...placement,...journey,...construction,devicePixelRatio:1,window:{matchMedia:()=>({matches:true})},ResizeObserver:class{observe(){}}});
+ const code=(await readFile(new URL('../playtest/explore-scene.mjs',import.meta.url),'utf8')).replace(/^import .*;\n/gm,'').replace('export function createExploreScene','function createExploreScene');
+ vm.runInContext(code,context);const view=context.createExploreScene({clientWidth:1024,clientHeight:620,append(){}}),s=habitat.freshHabitat();let time=0;
+ view.update(s,{yaw:0,distance:6.5},time+=17);const banks=[];scene.traverse(o=>{if(o.isMesh&&o.material.vertexColors)banks.push(o);});
+ const sample=(x,z)=>{for(const bank of banks){const p=bank.geometry.getAttribute('position');for(let i=0;i<p.count;i++)if(Math.abs(p.getX(i)-x)<1e-5&&Math.abs(p.getZ(i)-z)<1e-5){const c=bank.geometry.getAttribute('color');return {height:p.getY(i),color:[c.getX(i),c.getY(i),c.getZ(i)],segments:bank.geometry.parameters.widthSegments};}}};
+ const bank=sample(-6,1),bed=sample(-6,0);assert.equal(bed.segments,16,'cuts have half-unit visual sampling');
+ s.channels.west=2;const before=JSON.stringify(s);view.update(s,{yaw:0,distance:6.5},time+=17);
+ assert.ok(sample(-6,0).height<bed.height-.3);assert.ok(Math.abs(sample(-6,0).height-rules.groundHeight(-6,0,s))<1e-6);assert.notDeepEqual(sample(-6,0).color,bed.color,'dug bed gets a distinct soil treatment');
+ assert.ok(sample(-6,1).height<bank.height,'actual sloping shoulder is sampled instead of an overlay wall');
+ const positions=banks.map(b=>Array.from(b.geometry.getAttribute('position').array)),colors=banks.map(b=>Array.from(b.geometry.getAttribute('color').array));
+ s.day=4;view.update(s,{yaw:0,distance:6.5},time+=17);
+ assert.deepEqual(banks.map(b=>Array.from(b.geometry.getAttribute('position').array)),positions,'water-stage shading never moves ground');
+ assert.notDeepEqual(banks.map(b=>Array.from(b.geometry.getAttribute('color').array)),colors,'wet shore updates with actual water');
+ const alphas=new Set();scene.traverse(o=>{if(o.isMesh&&o.visible&&o.material.roughness===.3)alphas.add(o.material.opacity);});assert.ok(alphas.has(.48)&&alphas.has(.85),'shallow water reveals more bed than deep water');
+ s.day=1;assert.equal(JSON.stringify(s),before,'appearance does not spend resources or alter state');view.dispose();
+});
