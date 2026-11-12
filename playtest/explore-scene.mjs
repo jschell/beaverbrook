@@ -145,6 +145,13 @@ export function createExploreScene(container){
  const foodCargo=mesh(new THREE.IcosahedronGeometry(.24,0),'#b3c075',0,.4,-.8,beaver);
  foodCargo.name='carried-food';
  const mudCargo=mesh(new THREE.IcosahedronGeometry(.23,0),'#715138',0,.38,-.8,beaver);mudCargo.name='carried-mud';
+ // Keep ground solid: a local player outline reveals location through a bank,
+ // without making an entire terrain patch blend into the pale sky/background.
+ const outlineMaterial=new THREE.MeshBasicMaterial({color:'#ffd783',wireframe:true,transparent:true,opacity:.8,depthTest:false,depthWrite:false,fog:false});
+ const terrainOutline=beaver.clone(true),outlineSources=[],outlineParts=[];
+ terrainOutline.userData.kind='terrain-visibility-outline';terrainOutline.visible=false;
+ beaver.traverse(o=>outlineSources.push(o));terrainOutline.traverse(o=>{outlineParts.push(o);if(o.isMesh){o.material=outlineMaterial;o.renderOrder=20;}});world.add(terrainOutline);
+ let terrainBlocked=false;
  const wake=mesh(new THREE.TorusGeometry(.55,.018,3,28),'#bfddcc',0,.02,0);wake.rotation.x=-Math.PI/2;wake.scale.set(.75,1.7,1);
  // Authored family response, not autonomous gathering or extra resource production.
  const family=new THREE.Group();family.userData.kind='family-response';world.add(family);
@@ -171,6 +178,7 @@ export function createExploreScene(container){
   const center=beaver.position.clone().add(new THREE.Vector3(0,.45,0));
   const side=new THREE.Vector3(Math.cos(camera.rotation.y)*.3,0,-Math.sin(camera.rotation.y)*.3);
   const targets=[center,center.clone().add(side),center.clone().sub(side),center.clone().add(new THREE.Vector3(0,.35,0))];
+  terrainBlocked=false;
   for(const record of occluders){
    if(!record.root.visible)continue;
    // A sloped tile's bounding box contains empty air above its lower ground.
@@ -179,10 +187,13 @@ export function createExploreScene(container){
    let blocked=!record.terrain&&box.setFromObject(record.root).expandByScalar(.2).containsPoint(camera.position);
    for(const target of targets){if(blocked)break;const direction=target.clone().sub(camera.position);ray.set(camera.position,direction.clone().normalize());ray.far=Math.max(0,direction.length()-.45);blocked=ray.intersectObject(record.root,true).length>0;}
    record.hold=blocked?.18:Math.max(0,record.hold-dt);
+   if(record.terrain){terrainBlocked ||= record.hold>0;continue;}
    record.opacity=dampCamera(record.opacity,record.hold>0?.14:1,dt,record.hold>0?14:5);
    if(record.opacity>.995)record.opacity=1;
    for(const m of record.materials){const transparent=record.opacity<1;if(m.transparent!==transparent){m.transparent=transparent;m.needsUpdate=true;}m.opacity=record.opacity;m.depthWrite=!transparent;}
   }
+  for(let i=0;i<outlineParts.length;i++){const source=outlineSources[i],part=outlineParts[i];part.position.copy(source.position);part.quaternion.copy(source.quaternion);part.scale.copy(source.scale);part.visible=source.visible;}
+  terrainOutline.visible=terrainBlocked&&!!renderer;
  }
  let lastTerrain='',lastInventory='',lastFallback=0,lastFrame=0;
  function landscape(s){
@@ -227,7 +238,9 @@ export function createExploreScene(container){
    }
   });
   faces.sort((a,b)=>b.depth-a.depth);
-  container.innerHTML='<svg viewBox="0 0 '+w+' '+h+'" width="100%" height="100%" role="img" aria-label="Third-person beaver view of the creek">'+faces.map(f=>f.svg).join('')+'</svg>';
+  const point=beaver.position.clone().add(new THREE.Vector3(0,.45,0)).project(camera);
+  const marker=terrainBlocked&&point.z>=-1&&point.z<=1?'<g fill="none" stroke="#ffd783" stroke-width="3"><ellipse cx="'+((point.x+1)*w/2)+'" cy="'+((1-point.y)*h/2)+'" rx="12" ry="18"/></g>':'';
+  container.innerHTML='<svg viewBox="0 0 '+w+' '+h+'" width="100%" height="100%" role="img" aria-label="Third-person beaver view of the creek">'+faces.map(f=>f.svg).join('')+marker+'</svg>';
  }
  return {mode:renderer?'WebGL':'Compatibility renderer',update(s,view,time){
   const dt=lastFrame?Math.min(.1,Math.max(0,(time-lastFrame)/1000)):1/60;
@@ -266,5 +279,5 @@ export function createExploreScene(container){
   else if(time-lastFallback>120||view.force){compatibility(s);lastFallback=time;}
  },projectWorkSites(sites,s){
   return sites.filter(p=>Math.hypot(p.x-s.x,p.z-s.z)<14).map(p=>{const y=Math.max(groundHeight(p.x,p.z,s),waterLevel(p.x,p.z,s)??-1)+1.15,v=new THREE.Vector3(p.x,y,p.z).project(camera);return {...p,distance:Math.hypot(p.x-s.x,p.z-s.z),screenX:(v.x+1)*50,screenY:(1-v.y)*50,shown:v.z>=-1&&v.z<=1&&Math.abs(v.x)<.92&&v.y<.8&&v.y>-.65};}).filter(p=>p.shown);
- },dispose(){renderer?.dispose();world.traverse(o=>o.geometry?.dispose());for(const record of occluders)for(const m of record.materials)m.dispose();}};
+ },dispose(){outlineMaterial.dispose();renderer?.dispose();world.traverse(o=>o.geometry?.dispose());for(const record of occluders)for(const m of record.materials)m.dispose();}};
 }

@@ -33,7 +33,7 @@ test('occluding lodge fades independently, camera stays put, and scenery recover
  view.dispose();
 });
 
-test('empty air inside a sloped terrain bounding box never fades ground, while real terrain obstruction still fades',async()=>{
+test('terrain stays opaque through false bounding-box and real hillside obstruction; player outline follows visibility',async()=>{
  let scene,camera;
  class Renderer{constructor(){this.domElement={};}setPixelRatio(){}setSize(){}render(s,c){scene=s;camera=c;}dispose(){}}
  const context=vm.createContext({THREE:{...Three,WebGLRenderer:Renderer},...rules,...habitat,...placement,...journey,...construction,devicePixelRatio:1,window:{matchMedia:()=>({matches:true})},ResizeObserver:class{observe(){}}});
@@ -49,10 +49,12 @@ test('empty air inside a sloped terrain bounding box never fades ground, while r
  const colors=banks.map(o=>Array.from(o.geometry.getAttribute('color').array));
  const obstructed={...s,x:10,z:8};for(let i=0;i<100;i++)frame(obstructed,Math.PI/2);
  assert.ok(camera.position.y<rules.groundHeight(camera.position.x,camera.position.z,obstructed),'camera lies inside a real hillside');
- assert.ok(banks.some(o=>o.material.opacity<.3),'real intersecting terrain still fades without raising the camera');
+ assert.ok(banks.every(o=>o.material.opacity===1&&!o.material.transparent&&o.material.depthWrite),'even real intersecting terrain remains solid');
+ let outline;scene.traverse(o=>{if(o.userData.kind==='terrain-visibility-outline')outline=o;});assert.ok(outline.visible,'player outline supplies visibility through the hillside');
  for(let i=0;i<140;i++)frame(s,0);
  assert.ok(banks.every(o=>o.material.opacity===1&&o.material.depthWrite),'terrain restores after the real obstruction');
- assert.deepEqual(banks.map(o=>Array.from(o.geometry.getAttribute('color').array)),colors,'orbit and fade do not recolor ground');
+ assert.equal(outline.visible,false,'outline disappears with clear terrain sightlines');
+ assert.deepEqual(banks.map(o=>Array.from(o.geometry.getAttribute('color').array)),colors,'orbit does not recolor ground');
  view.dispose();
 });
 
@@ -116,4 +118,36 @@ test('M1 renderer distinguishes stakes, open framework, packed faces and sealing
  const water=()=>{const out=[];scene.traverse(o=>{if(o.isMesh&&o.visible&&o.material.color.getHexString()==='448f9f')out.push([o.position.x,o.position.y,o.position.z]);});return out;};const initial=water();
  s.placedDam.sections[2].frame=1;s.cargo={wood:0,food:0,mud:2};update();assert.equal(group.children[2].userData.stage,'framework');assert.equal(group.children[2].children.some(o=>o.userData.kind==='packed-face'),false);assert.deepEqual(water(),initial);let cargo;scene.traverse(o=>{if(o.name==='carried-mud'&&o.parent?.parent?.type==='Group')cargo??=o;});assert.ok(cargo);assert.equal(cargo.visible,true);
  s.placedDam.sections[2].level=1;s.cargo=null;const before=JSON.stringify(s);update();assert.equal(group.children[2].userData.stage,'packed');assert.ok(group.children[2].children.some(o=>o.userData.kind==='packed-face'));assert.equal(JSON.stringify(s),before,'rendering cannot consume sealing stock');view.dispose();
+});
+
+
+test('deep Willow cut camera reproduction never fades whole ground tiles or changes the saved world',async()=>{
+ let scene;
+ class Renderer{constructor(){this.domElement={};}setPixelRatio(){}setSize(){}render(s){scene=s;}dispose(){}}
+ const context=vm.createContext({THREE:{...Three,WebGLRenderer:Renderer},...rules,...habitat,...placement,...journey,...construction,devicePixelRatio:1,window:{matchMedia:()=>({matches:true})},ResizeObserver:class{observe(){}}});
+ const code=(await readFile(new URL('../playtest/explore-scene.mjs',import.meta.url),'utf8')).replace(/^import .*;\n/gm,'').replace('export function createExploreScene','function createExploreScene');
+ vm.runInContext(code,context);const view=context.createExploreScene({clientWidth:1024,clientHeight:620,append(){}});
+ const s={...habitat.freshHabitat(),x:-7,z:1,channels:{west:2,east:0}},before=JSON.stringify(s);let time=0;
+ for(let i=0;i<50;i++)view.update(s,{yaw:0,distance:6.5},time+=17);
+ let outline;const banks=[];scene.traverse(o=>{if(o.userData.kind==='terrain-visibility-outline')outline=o;if(o.isMesh&&o.material.vertexColors)banks.push(o);});
+ assert.ok(outline.visible,'reproduces the bank intersecting camera sightlines at the deep cut');
+ assert.ok(banks.every(o=>o.material.opacity===1&&!o.material.transparent&&o.material.depthWrite),'no pale 8×8 patch or transparent terrain/water sorting');
+ outline.traverse(o=>{if(o.isMesh){assert.equal(o.material.depthTest,false);assert.equal(o.material.depthWrite,false);}});
+ const colors=banks.map(o=>Array.from(o.geometry.getAttribute('color').array));
+ for(let i=0;i<60;i++)view.update(s,{yaw:Math.PI,distance:6.5},time+=17);
+ assert.equal(outline.visible,false,'rotating away from the bank clears the outline');
+ assert.deepEqual(banks.map(o=>Array.from(o.geometry.getAttribute('color').array)),colors);
+ assert.equal(JSON.stringify(s),before,'camera movement does not modify water, resources or terrain state');view.dispose();
+});
+
+test('compatibility terrain obstruction uses a local player marker rather than transparent ground',async()=>{
+ class UnavailableRenderer{constructor(){throw new Error('No WebGL');}}
+ const context=vm.createContext({THREE:{...Three,WebGLRenderer:UnavailableRenderer},...rules,...habitat,...placement,...journey,...construction,devicePixelRatio:1,window:{matchMedia:()=>({matches:true})},ResizeObserver:class{observe(){}}});
+ const code=(await readFile(new URL('../playtest/explore-scene.mjs',import.meta.url),'utf8')).replace(/^import .*;\n/gm,'').replace('export function createExploreScene','function createExploreScene');
+ vm.runInContext(code,context);const container={clientWidth:900,clientHeight:760,append(){},innerHTML:''},view=context.createExploreScene(container);
+ const s={...habitat.freshHabitat(),x:10,z:8};let time=0;
+ for(let i=0;i<40;i++)view.update(s,{yaw:Math.PI/2,distance:9,force:true},time+=17);
+ assert.match(container.innerHTML,/<ellipse/,'fallback can locate the player through a hillside');
+ for(let i=0;i<60;i++)view.update({...s,x:12,z:5},{yaw:0,distance:9,force:true},time+=17);
+ assert.doesNotMatch(container.innerHTML,/<ellipse/,'clear terrain sightline removes fallback marker');view.dispose();
 });

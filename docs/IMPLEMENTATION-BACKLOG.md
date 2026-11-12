@@ -18,6 +18,10 @@ The [roadmap](ROADMAP.md), [procedural generation plan](design/procedural-genera
 
 [Terrain fading and family clarity](../playtest/M0-STABILIZATION.md): corrected false terrain occlusion from sloped tile bounding boxes; added family introduction and state-based optional notes. BUG-01 remains open for confirmation of the exact native white flash. UX-01 explanation is implemented, with fresh-player validation still open. 105 tests pass; compatibility-browser verification only. This update does not close all of M0.
 
+## Camera-dependent terrain follow-up
+
+[Deep Willow cut reproduction and correction](../playtest/M0-STABILIZATION.md#follow-up-camera-dependent-pale-tiles-at-the-deep-willow-cut) records native screenshot/camera-motion evidence and a real-Three geometry reproduction: legitimate bank intersections faded an entire tile. Ground now stays opaque; terrain occlusion shows a local beaver outline instead. Trees/lodge retain fading. 118 tests and build pass; compatibility-browser evidence only. #1 remains open for affected-iPad confirmation, coordinated with #15.
+
 ## M1 construction update
 
 [Wood, framework and sealing mud](../playtest/M1-CONSTRUCTION.md) implements a bounded #3/#6 slice and discrete packed-crest behavior for #5. New section costs depend on surveyed depth/span; mud sources, local transfers and visible stages are accounted and saved. Existing completed structures remain paid. 116 tests pass; compatibility-browser evidence only. #3/#5/#6 remain partial; #4 collision, full flow/storage and player/device validation remain open. M0 white-flash confirmation is still pending independently.
@@ -46,7 +50,7 @@ Current implementation evidence includes `playtest/explore-*.mjs`, `habitat-rule
 
 | ID | Priority/status | Issue |
 |---|---|---|
-| BUG-01 | P1 / partial: false terrain fade corrected; native flash confirmation open | [#1 White ground flash](https://github.com/jschell/beaverbrook/issues/1) |
+| BUG-01 | P1 / partial: deep-cut camera trigger reproduced; terrain made opaque with player outline; native acceptance open | [#1 White ground flash](https://github.com/jschell/beaverbrook/issues/1) |
 | UX-01 | P1 / partial | [#2 Explain adult and kit](https://github.com/jschell/beaverbrook/issues/2) |
 | DAM-01 | P1 / partial: depth-aware wood/packing implemented; strength deferred | [#3 Foundations, depth-aware costs, reinforcement options](https://github.com/jschell/beaverbrook/issues/3) |
 | DAM-02 | P1 / open | [#4 Dam collision and crossings](https://github.com/jschell/beaverbrook/issues/4) |
