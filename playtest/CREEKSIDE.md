@@ -4,11 +4,13 @@ See the [flexible dam placement demo](FLEXIBLE-DAMS.md) and [quick placement lab
 
 Implemented experiment: third-person movement plus an open-ended, authored harvesting and water-management sandbox. Open [explore.html](explore.html). Three.js and vanilla HTML/CSS/JavaScript; static Pages hosting. First Reach remains a separate settlement experiment. This extends the earlier movement POC rather than attempting the whole colony game.
 
+The default opening is now [Willow Cove](WILLOW-COVE.md): optional guidance, visible family responses and an outcome after a fed low-water night. The placement lab remains available separately.
+
 ## Starting situation and purpose
 
-One beaver, an established family lodge, a leaky dam, six stored food and three harvestable stands. Choose food gathering, construction supply, access improvements or exploration in any order. No final checklist, timed death, unlock tree or required construction sequence. Supplies and terrain persist after resting and reloading.
+One beaver, an established family lodge, a leaky dam, six stored food and three harvestable stands. Choose food gathering, construction supply, access improvements or exploration in any order. There is no timed death, unlock tree or required construction sequence. A nonmodal opening outcome recognizes one fed low-water night with food left for tomorrow; play continues afterward. Supplies and terrain persist after resting and reloading.
 
-A useful playtest outcome is a family with food and a usable lodge approach, plus an improvement the player chose for a reason. These are observation criteria, not compulsory objectives. Compare a modest pond with a deepened entrance against a raised pond; compare direct hauling with channel investment. Enjoyment and balance have not been established.
+A useful playtest outcome is a family with food and a usable lodge approach, plus an improvement the player chose for a reason. The opening now explicitly recognizes those food/access conditions after an actual low-water night. Compare a modest pond with a deepened entrance against a raised pond; compare direct hauling with channel investment. Enjoyment and balance have not been established.
 
 ## Controls
 
@@ -17,7 +19,7 @@ A useful playtest outcome is a family with food and a usable lodge approach, plu
 | WASD / arrows | Move relative to the camera |
 | Drag open view | Orbit horizontally |
 | Wheel | Smoothly adjust follow distance; height stays fixed relative to the followed ground/water reference |
-| Find family dam / Find next section | Turn the camera toward work and show its distance; movement remains manual |
+| Find home / Find family dam / Find next section | Turn the camera toward work and show its distance; movement remains manual |
 | Amber / green work marker | Inspect missing supplies or perform the advertised nearby delivery/build action |
 | E / bottom action | Use the displayed nearby action |
 | Nearby work buttons | Choose among harvesting, building, digging and resting options |

@@ -1,3 +1,4 @@
+import {familyOutlook,journeyStatus,journeyHint,journeyFeedback} from './journey-rules.mjs';
 import {damWorkSites,nextDamWork} from './dam-work.mjs';
 import {createDamPlanner} from './dam-planner.mjs';
 import {CRESTS} from './dam-placement.mjs';
@@ -10,6 +11,7 @@ const newRun=()=>lab?freshDamLab():freshHabitat({flexible:true});
 let state,storage=true;
 try{state=loadHabitat(localStorage.getItem(saveKey))||newRun();}catch{state=newRun();storage=false;}
 state.flexible=true;state.placedDam??=null;
+let messageExpires=Infinity;
 let selectedWork=null,workSites=[],markerButtons=new Map();
 let planning=false,paused=true,mapOpen=false,yaw=0,distance=6.5,lastTime=0,lastSave=0,lastHud=0,mapDirty=true;
 let stick={x:0,y:0},stickPointer=null,lookPointer=null,lookStart=null,lookDirection=0;
@@ -19,8 +21,8 @@ const planner=createDamPlanner({getState:()=>state,setState:next=>{const justPla
 el('dam-button').onclick=()=>{if(!paused){toggleMap(false);planner.toggle();}};
 function persist(){try{localStorage.setItem(saveKey,JSON.stringify(state));storage=true;}catch{storage=false;}}
 function stopInput(){keys.clear();stick={x:0,y:0};stickPointer=null;lookPointer=null;lookDirection=0;el('stick-knob').style.transform='';}
-function message(text){el('message').textContent=text+(storage?'':' Saving is unavailable in this browser.');}
-function setPause(value){if(value&&planning)planner.toggle(false);paused=value;stopInput();for(const child of el('play').children)if(child.id!=='menu')child.inert=paused;el('menu').hidden=!paused;el('menu-title').textContent='Make a creek your own';el('resume').textContent='Return to the creek';if(!paused)el('view').focus();else el('resume').focus();persist();}
+function message(text){el('message').hidden=false;el('message').textContent=text+(storage?'':' Saving is unavailable in this browser.');messageExpires=!lab&&state.journey.broughtHome?performance.now()+12000:Infinity;}
+function setPause(value){if(value&&planning)planner.toggle(false);paused=value;stopInput();for(const child of el('play').children)if(child.id!=='menu')child.inert=paused;el('menu').hidden=!paused;el('menu-title').textContent=lab?'Placement lab':journeyStatus(state).title;el('resume').textContent='Return to the creek';if(!paused)el('view').focus();else el('resume').focus();persist();}
 function toggleMap(value=!mapOpen){mapOpen=value;stopInput();el('map-panel').hidden=!value;el('map-button').setAttribute('aria-expanded',value);if(value)drawMap();else el('view').focus();}
 function recenter(){yaw=-state.yaw;}
 function faceWork(kind){const target=nextDamWork(state,kind);if(!target)return;selectedWork=target.id;yaw=Math.atan2(state.x-target.x,state.z-target.z);message(target.name+': '+target.detail);updateHud();}
@@ -60,10 +62,12 @@ function drawMap(){
 }
 let actionSignature='';
 function updateHud(){
- const mode=movementMode(state.x,state.z,state),home=homeStatus(state),place=localPlace(state);
+ const mode=movementMode(state.x,state.z,state),home=homeStatus(state),place=localPlace(state),family=familyOutlook(state),chapter=journeyStatus(state);
+ el('chapter-title').textContent=chapter.title;el('chapter-goal').textContent=chapter.goal;el('forecast').textContent=chapter.forecast;el('family-state').textContent=family.text+' '+home.foodNights+(home.foodNights===1?' supper stored.':' suppers stored.');el('family-state').dataset.mood=family.mood;
+ el('energy').value=DAY_WORK-state.effort;el('energy').setAttribute('aria-valuetext',(DAY_WORK-state.effort)+' of '+DAY_WORK+' energy remaining');
  el('mode').textContent=mode[0].toUpperCase()+mode.slice(1);
  el('load').textContent=state.cargo?`${state.cargo.wood} wood + ${state.cargo.food} food in tow`:'Free paws';
- el('stock').textContent=`Day ${state.day} · ${weather(state)} flow · effort ${state.effort}/${DAY_WORK}`;
+ el('stock').textContent=`Day ${state.day} · ${weather(state)==='dry'?'low water':'steady flow'}`;
  el('colony').textContent=`Lodge: ${state.food} food (${home.foodNights} nights), ${state.wood} wood · Dam: ${state.damWood} wood delivered`;
  el('home-state').textContent=home.protected?'Lodge approach submerged':'Shallow approach · costs 2 effort after rest';
  workSites=damWorkSites(state);const workHere=workSites.find(p=>p.local),target=workSites.find(p=>p.id===selectedWork);
@@ -88,16 +92,27 @@ function updateHud(){
  if(place?.type==='dam')detail=`${['Leaky established dam','Sealed low dam','Raised dam'][state.dam]}. Retaining water can turn shallow cuts into swimming routes. Opening a notch returns no wood.`;
  if(place?.type==='customDam'){const section=state.placedDam.sections[place.index];detail=`Built: ${section.level?CRESTS[section.level].toFixed(2):'open gap'} · target ${CRESTS[section.target].toFixed(2)} · ${section.wood} wood delivered here. Plan dam opens heights and extension controls. Work affects only this nearby section.`;}
  if(place?.type==='channel'){const c=channelStatus(state,place.point.id);detail=`Depth ${c.depth.toFixed(2)} · ${c.swimmable?'swimmable with a load':'too shallow for swimming'}. Digging changes this route; dry flow can expose a shallow cut.`;}
+ let story='';
+ if(place?.type==='patch'){const p=place.point;story=state.patches[p.id].stock===0?'Only cut stems remain here. Leave time for new growth, or try another stand.':p.description;}
+ if(place?.type==='lodge')story='Rest here when you are ready for tomorrow. The family eats from your supply, and the creek can change overnight.';
+ if(place?.type==='dam')story=state.dam===0?'Water slips through the gaps. Holding more water could help the lodge and your hauling routes.':'The pond reaches farther along the banks. Consider what a higher or lower pond would change.';
+ if(place?.type==='customDam')story='These stakes mark your chosen crossing. Build nearby sections with delivered wood; open gaps let water through.';
+ if(place?.type==='channel')story=channelStatus(state,place.point.id).swimmable?'This cut now floats a load. Try it on your next supply trip.':state.channels[place.point.id]?'The cut is too shallow to float a load now. You could deepen it or retain more water.':'A low strip leads toward useful growth. Digging here could bring water closer to it.';
+ el('place-story').textContent=story;
  const reason=options.filter(a=>!a.enabled&&a.reason).map(a=>a.reason);el('place-detail').textContent=detail+(reason.length?' '+[...new Set(reason)].join(' '):'');
  if(mapOpen&&mapDirty)drawMap();
 }
 function interact(action){
  if(paused||mapOpen||planning)return;
  if(action==='interact')action=primaryHabitatAction(state)?.id;
- const result=habitatAction(state,action);state=result.state;message(result.message);mapDirty=true;persist();updateHud();
+ const before=state,result=habitatAction(state,action);state=result.state;message(journeyFeedback(before,state,action)||result.message);
+ if(!lab&&!before.journey.completedDay&&state.journey.completedDay){el('chapter-moment').hidden=false;el('moment-detail').textContent='The family spent a fed night at low water, with food left for tomorrow. Your changes made this home work. Keep the creek as it is, improve a hauling route, or explore for another crossing.';}mapDirty=true;persist();updateHud();
 }
+el('nudge').onclick=()=>message(journeyHint(state));
+el('face-home').onclick=()=>{yaw=Math.atan2(state.x-LODGE.x,state.z-LODGE.z);message('The family lodge is ahead. Approach it to leave supplies or rest.');};
+el('moment-close').onclick=()=>{el('chapter-moment').hidden=true;el('view').focus();};
 el('resume').onclick=()=>setPause(false);
-el('restart').onclick=()=>{state=newRun();selectedWork=null;yaw=0;distance=6.5;toggleMap(false);setPause(false);mapDirty=true;message('Willow grows ahead along this bank. Gather food, improve water access, or explore for bulk timber. Choose what the family needs.');updateHud();};
+el('restart').onclick=()=>{state=newRun();el('chapter-moment').hidden=true;selectedWork=null;yaw=0;distance=6.5;toggleMap(false);setPause(false);mapDirty=true;message(lab?'Pick up the timber beside you, or open Plan dam to experiment.':journeyHint(state));updateHud();};
 el('pause-button').onclick=()=>setPause(!paused);
 el('map-button').onclick=()=>{if(!paused)toggleMap();};el('close-map').onclick=()=>toggleMap(false);
 el('center-button').onclick=recenter;
@@ -105,12 +120,13 @@ el('interact').onclick=()=>interact('interact');el('drop').onclick=()=>interact(
 window.addEventListener('keydown',event=>{
  const key=event.key.toLowerCase();
  if(key==='tab'&&paused){
-  const controls=[...el('menu').querySelectorAll('button,a')],first=controls[0],last=controls.at(-1);
+  const controls=[...el('menu').querySelectorAll('button,a,summary')],first=controls[0],last=controls.at(-1);
   if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}
   else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}
   return;
  }
  if(event.target.closest('input,select,textarea'))return;
+ if([' ','enter'].includes(key)&&event.target.closest('button,summary'))return;
  if(['arrowup','arrowdown','arrowleft','arrowright',' '].includes(key))event.preventDefault();
  if(event.repeat)return;
  if(key==='escape'){if(planning){planner.toggle(false);return;}if(mapOpen)toggleMap(false);else setPause(!paused);return;}
@@ -169,12 +185,13 @@ function frame(time){
    else if(oldMode!=='swimming'&&movementMode(state.x,state.z,state)==='swimming'&&!state.known.swimming){state.known.swimming=true;message('You are swimming. Hauling is faster here than over land.');}
   }
  }
- scene.update(state,{yaw,distance,moving,previewState:planner.previewState},time);updateWorkMarkers();
+ if(!lab&&state.journey.broughtHome&&time>messageExpires)el('message').hidden=true;
+ scene.update(state,{yaw,distance,moving,active:!paused&&!mapOpen&&!planning,previewState:planner.previewState},time);updateWorkMarkers();
  if(time-lastHud>160){updateHud();lastHud=time;}
  if(time-lastSave>2000){persist();lastSave=time;}
  requestAnimationFrame(frame);
 }
 if(state.cargo)message('Your load is still in tow. Deliver wood at the dam or bring supplies to the lodge.');
-else message('Willow grows ahead along this bank. Gather food, improve water access, or explore for bulk timber. Choose what the family needs.');
+else message(lab?'Pick up the timber beside you, or open Plan dam to experiment.':journeyHint(state));
 if(lab){el('lab-link').href='explore.html';el('lab-link').textContent='Return to the living creek sandbox';el('menu-note').textContent='Placement lab: the terrain is surveyed and 24 wood are in piles beside you. Open Plan dam, choose two bank endpoints and a target crest, then place stakes. Pick up timber and deliver it to nearby sections. Compare the completed preview with gaps, notches and different heights.';}
 setPause(true);updateHud();requestAnimationFrame(frame);

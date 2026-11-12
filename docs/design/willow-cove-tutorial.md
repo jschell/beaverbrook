@@ -1,3 +1,5 @@
+> Implementation status: [Willow Cove opening](../../playtest/WILLOW-COVE.md) records the current bounded Creekside implementation. This design document includes broader proposals, including later founding/colony progression, that are not implemented.
+
 # Learning at Willow Cove
 
 The family-lodge prototype opens with a short adult haul. Players can repeat the trip, excavate the east channel, sleep through the first water drop, undo an experiment or open the construction sandbox. The three-night challenge remains available separately. The sequence below describes the broader design, including future site scouting and free movement.

@@ -2,11 +2,13 @@
 
 A proposed browser strategy game about guiding a beaver family to a safe home by reading river clues, choosing a suitable shelter, and adapting to seasonal change.
 
-**Current phase: Creekside harvesting and flexible dam placement tests, alongside First Reach.** The user authorized the first Three.js/vanilla-JS test on 2026-11-09. The working name, rules, scope and technology preferences remain subject to review and playtesting.
+**Current phase: a playable Willow Cove opening in Creekside, with separate settlement and placement experiments.** The user authorized the first Three.js/vanilla-JS test on 2026-11-09. The working name, rules, scope and technology preferences remain subject to review and playtesting.
 
 The design targets curious players around ages 8–10+ and adults, with short, approachable scenarios and optional depth. Building a dam is one possible response to a river; choosing a bank den, a sheltered lodge or another reach can be the better decision.
 
 ## Start here
+
+- [Play Willow Cove](playtest/explore.html) — help the family through a low-water night, choose how to protect access and gather food, then keep exploring; [implemented opening and remaining gaps](playtest/WILLOW-COVE.md). This is the default Pages entry.
 
 - [Flexible dam placement lab](playtest/explore.html?mode=dam-lab) — choose bank endpoints, span and section heights; preview water, haul nearby timber and build locally. Stable terrain with no erosion; [controls, rules and limits](playtest/FLEXIBLE-DAMS.md).
 
@@ -34,9 +36,9 @@ River Sense improves interpretation and forecasting; it does not change physical
 
 ## Scope
 
-The default First Creek experiment connects gathering, hauling, dam and lodge construction with one forecast dry spell. Choose pond depth, entrance work, food access and hauling-channel investment, then test and adapt the settlement. Flooded branches remain available by water; a cache is optional. See [the channel demo rules and evidence](docs/design/hauling-channels-demo.md). The construction sandbox retains optional rain and repair supplies. See [the scenario rules and playtest questions](docs/design/first-dry-spell.md). Riverbank Refuge remains a separate shelter-choice experiment. Both are trial gameplay, not an approved full-game MVP.
+The earlier First Creek experiment connects gathering, hauling, dam and lodge construction with one forecast dry spell. Choose pond depth, entrance work, food access and hauling-channel investment, then test and adapt the settlement. Flooded branches remain available by water; a cache is optional. See [the channel demo rules and evidence](docs/design/hauling-channels-demo.md). The construction sandbox retains optional rain and repair supplies. See [the scenario rules and playtest questions](docs/design/first-dry-spell.md). Riverbank Refuge remains a separate shelter-choice experiment. Both are trial gameplay, not an approved full-game MVP.
 
-The tests use Three.js and vanilla HTML/CSS/JavaScript, deterministic rule modules and static hosting. Run `npm ci`, `npm test`, and `npm run build`; serve `dist/` over HTTP and open `/playtest/creek.html`. See [First Creek instructions](playtest/FIRST-CREEK.md) and [shelter-test instructions](playtest/README.md). There is no PWA. Creekside and First Reach use local browser saves; earlier experiments have their own persistence limits.
+The tests use Three.js and vanilla HTML/CSS/JavaScript, deterministic rule modules and static hosting. Run `npm ci`, `npm test`, and `npm run build`; serve `dist/` over HTTP and open `/playtest/explore.html`. See [First Creek instructions](playtest/FIRST-CREEK.md) and [shelter-test instructions](playtest/README.md). There is no PWA. Creekside and First Reach use local browser saves; earlier experiments have their own persistence limits.
 
 ## Origin
 

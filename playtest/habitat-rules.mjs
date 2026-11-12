@@ -1,7 +1,8 @@
 // Trial game economy; compressed days/yields are design abstractions, not biology.
-import {freshExplore,moveExplore,discover,waterDepth,canStand,OBSTACLES,LODGE,CHANNELS} from './explore-rules.mjs';
+import {freshExplore,moveExplore,discover,waterDepth,lodgeApproachDepth,canStand,OBSTACLES,LODGE,CHANNELS} from './explore-rules.mjs';
 import {nearestDamSection} from './dam-placement.mjs';
 import {validPlacedDam} from './dam-water.mjs';
+import {initialJourney,advanceJourney,validJourney} from './journey-rules.mjs';
 export const DAM={id:'dam',name:'Family dam',x:0,z:10};
 export const PATCHES=[
  {id:'willow',name:'Bank willow',x:-7,z:0,max:5,kind:'shrub',description:'Close to home. Prune for a mixed load, or browse for food. Leave stems for faster regrowth.'},
@@ -11,7 +12,7 @@ export const PATCHES=[
 export const DAY_WORK=12;
 export function freshHabitat({flexible=false,lab=false}={}){
  const s={...freshExplore(),version:2,flexible,lab,placedDam:null,day:1,effort:0,food:6,wood:0,dam:0,damWood:0,channels:{west:0,east:0},entrance:0,patches:Object.fromEntries(PATCHES.map(p=>[p.id,{stock:p.max,recovery:0}])),cargo:null,loose:[],ledger:{woodHarvested:0,foodHarvested:0,woodUsed:0,foodEaten:0},nights:0,shortage:false,history:[]};
- s.known.dam=true;for(const p of [...PATCHES,...CHANNELS])if(Math.hypot(s.x-p.x,s.z-p.z)<5.5)s.known[p.id]=true;return discover(s);
+ s.journey=initialJourney(s);s.known.dam=true;for(const p of [...PATCHES,...CHANNELS])if(Math.hypot(s.x-p.x,s.z-p.z)<5.5)s.known[p.id]=true;return discover(s);
 }
 export function weather(s){return s.day%6>=4||s.day%6===0?'dry':'normal';}
 export function habitatMove(s,input,dt){const next=moveExplore(s,input,dt,OBSTACLES);for(const p of [...PATCHES,...CHANNELS])if(Math.hypot(next.x-p.x,next.z-p.z)<5.5)next.known[p.id]=true;return next;}
@@ -35,7 +36,7 @@ export function channelStatus(s,id){
  const depth=waterDepth(p.x,p.z,s);return {depth,swimmable:depth>=.32};
 }
 export function homeStatus(s){
- const depth=waterDepth(-2.2,6,s);
+ const depth=lodgeApproachDepth(s);
  return {depth,protected:depth>=.32,foodNights:Math.floor(s.food/2),supported:s.food>=2&&depth>=.32};
 }
 function option(s,id,label,cost=0,allowed=true,why=''){
@@ -54,7 +55,7 @@ export function habitatOptions(s){
  }
  if(place?.type==='lodge'){
   if(s.cargo)actions.push(option(s,'store','Store load at lodge',0));
-  if(!s.cargo&&s.wood>0)actions.push(option(s,'takeWood','Take 1 stored wood to haul',0));
+  if(!s.cargo&&s.wood>0)actions.push(option(s,'takeWood','Take stored wood to haul · up to 2',0));
   actions.push(option(s,'entrance','Deepen lodge entrance',3,!s.cargo&&!s.entrance,s.cargo?'Set down your load first.':'Entrance already deepened.'));
   actions.push(option(s,'rest','Rest until tomorrow · family eats 2',0,!s.cargo,'Store your load before resting.'));
  }
@@ -98,7 +99,7 @@ export function habitatAction(state,id){
  if(id==='pickup'){const i=s.loose.findIndex(p=>near(s,p,1.8));const p=s.loose.splice(i,1)[0];s.cargo={wood:p.wood,food:p.food};message='Load in tow. Water carries wood faster than the bank.';}
  if(id==='drop'){s.loose.push({...s.cargo,x:s.x,z:s.z});s.cargo=null;message='Load set down here. You can return for it.';}
  if(id==='store'){s.wood+=s.cargo.wood;s.food+=s.cargo.food;s.cargo=null;message='Supplies delivered. Food stays in the lodge; stored wood can be picked up again.';}
- if(id==='takeWood'){s.wood--;s.cargo={wood:1,food:0};message='One stored wood in tow. Carry it to the dam.';}
+ if(id==='takeWood'){const amount=Math.min(2,s.wood);s.wood-=amount;s.cargo={wood:amount,food:0};message=amount+' stored wood in tow. Carry it to the dam.';}
  if(id==='deposit'){s.damWood=(s.damWood||0)+s.cargo.wood;s.cargo.wood=0;if(!s.cargo.food)s.cargo=null;message='Wood delivered at the dam. Food remains in tow for the lodge.';}
  if(id==='build'){const cost=s.dam===0?2:3;s.damWood-=cost;s.ledger.woodUsed+=cost;s.dam++;message=s.dam===1?'Leaks sealed. The higher pond now reaches farther into low banks and shallow cuts.':'Crest raised. More water is retained, but newly flooded vegetation recovers differently.';}
  if(id==='lower'){s.dam--;message='A notch releases retained water. Construction wood is not refunded; inspect your channels before hauling.';}
@@ -114,6 +115,7 @@ export function habitatAction(state,id){
   message=(!homeStatus(s).protected?'The shallow lodge approach costs 2 effort today. ':'')+(s.shortage?'Food ran short: recovery uses 4 effort today. Bring food home before resting again to recover. ':'The family ate; you are rested. ')+(weather(s)==='dry'?'Dry weather: shallow cuts may lose swimming depth.':'Normal flow: inspect regrowth and choose your next improvement.');
  }
  s.carrying=!!s.cargo;s.stored=s.wood;s.groveStock=s.patches.aspen.stock;
+ s.journey=advanceJourney(state,s,id);
  s.history.push({day:s.day,action:id});if(s.history.length>40)s.history.shift();
  return {state:s,message};
 }
@@ -132,6 +134,8 @@ export function loadHabitat(text){
   if(s.wood+s.damWood+(s.placedDam?.sections.reduce((n,p)=>n+p.wood,0)||0)+(s.cargo?.wood||0)+s.loose.reduce((n,p)=>n+p.wood,0)+s.ledger.woodUsed!==s.ledger.woodHarvested)return null;
   if(s.food+(s.cargo?.food||0)+s.loose.reduce((n,p)=>n+p.food,0)+s.ledger.foodEaten!==6+s.ledger.foodHarvested)return null;
   if(!s.explored||!s.known||!Array.isArray(s.history)||!['walking','swimming','distance'].every(k=>Number.isFinite(s[k])&&s[k]>=0))return null;
+  if(s.journey!==undefined&&!validJourney(s.journey,s))return null;
+  s.journey??=initialJourney(s);
   s.carrying=!!s.cargo;s.stored=s.wood;s.groveStock=s.patches.aspen.stock;return s;
  }catch{return null;}
 }

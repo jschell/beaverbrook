@@ -1,6 +1,7 @@
 import * as THREE from './vendor/three.module.js';
 import {BOUNDS,TREES,LODGE,GROVE,LANDING,groundHeight,movementMode,cameraBoom,dampCamera,creekWater,waterLevel,CHANNELS} from './explore-rules.mjs';
 
+import {familyOutlook} from './journey-rules.mjs';
 import {CRESTS,damCenter} from './dam-placement.mjs';
 import {PATCHES,DAM} from './habitat-rules.mjs';
 
@@ -134,8 +135,28 @@ export function createExploreScene(container){
  for(const x of [-.27,.27])for(const z of [-.24,.3])legs.push(mesh(new THREE.SphereGeometry(.11,7,5),'#543e2b',x,.11,z,beaver));
  const cargo=new THREE.Group();beaver.add(cargo);
  log([0,.37,-.8],[.65,.1,1.2],.055,'#c5a16b',cargo);log([.4,.18,.5],[1,.1,.9],.04,'#b88b56',cargo);
+ cargo.name='carried-wood';body.name='beaver-body';
  const foodCargo=mesh(new THREE.IcosahedronGeometry(.24,0),'#b3c075',0,.4,-.8,beaver);
+ foodCargo.name='carried-food';
  const wake=mesh(new THREE.TorusGeometry(.55,.018,3,28),'#bfddcc',0,.02,0);wake.rotation.x=-Math.PI/2;wake.scale.set(.75,1.7,1);
+ // Authored family response, not autonomous gathering or extra resource production.
+ const family=new THREE.Group();family.userData.kind='family-response';world.add(family);
+ function relative(scale,tint){const animal=beaver.clone(true);animal.scale.setScalar(scale);animal.traverse(o=>{if(o.isMesh&&['795437','8b6342'].includes(o.material.color.getHexString())){o.material=o.material.clone();o.material.color.set(tint);}});animal.getObjectByName('carried-wood').visible=false;animal.getObjectByName('carried-food').visible=false;family.add(animal);return animal;}
+ const adult=relative(.8,'#806048'),kit=relative(.52,'#9b7755');adult.userData.kind='family-adult';kit.userData.kind='family-kit';let familyClock=0;
+ const waterMemory=new THREE.Group();waterMemory.userData.kind='water-memory';world.add(waterMemory);
+ log([0,-.8,6],[0,1.35,6],.045,'#b4a57c',waterMemory);
+ const oldBand=mesh(new THREE.BoxGeometry(.65,.045,.1),'#f4dfad',0,0,6,waterMemory);
+ function updateFamily(s,view,dt){
+  const near=Math.hypot(s.x-LODGE.x,s.z-LODGE.z)<16;family.visible=s.version===2&&!!s.journey&&near;
+  if(!family.visible){waterMemory.visible=false;return;}
+  if(view.active&&!reduced)familyClock+=dt;const mood=familyOutlook(s),t=(1-Math.cos(familyClock*.6))/2;
+  family.userData.mood=mood.mood;family.userData.route=mood.accessible?'water':'bank';
+  const x=mood.accessible?-6+t*3.8:-6+Math.sin(familyClock*.6)*.3,z=mood.accessible?4.6+t*1.4:4.6;
+  const swimming=movementMode(x,z,s)==='swimming';adult.position.set(x,swimming?(waterLevel(x,z,s)??0)-.1:groundHeight(x,z,s),z);adult.rotation.y=mood.accessible?Math.atan2(-3.8,-1.4)+(Math.sin(familyClock*.6)<0?Math.PI:0):Math.sin(familyClock*.3)*.4;
+  adult.getObjectByName('beaver-body').scale.y=swimming?.8:1;adult.getObjectByName('carried-food').visible=s.food>0&&t<.12;
+  const kx=-7.9+(mood.mood==='settled'?Math.sin(familyClock)*.3:0),kz=4.5;kit.position.set(kx,groundHeight(kx,kz,s),kz);kit.rotation.y=mood.mood==='hungry'?Math.PI:Math.sin(familyClock*.7)*.5;
+  waterMemory.visible=s.journey.normalWater!==null&&(s.day%6>=4||s.day%6===0);oldBand.position.y=s.journey.normalWater??0;
+ }
  let followHeight=null,followDistance=null;
  const ray=new THREE.Raycaster(),box=new THREE.Box3();
  function fadeScenery(s,dt){
@@ -227,6 +248,7 @@ export function createExploreScene(container){
   followDistance=followDistance===null?view.distance:dampCamera(followDistance,view.distance,dt,8);
   const boom=cameraBoom(s,view.yaw,followDistance,followHeight);
   camera.position.set(boom.position.x,boom.position.y,boom.position.z);camera.lookAt(boom.target.x,boom.target.y,boom.target.z);camera.updateMatrixWorld();
+  updateFamily(s,view,dt);
   fadeScenery(s,dt);
   if(renderer)renderer.render(scene,camera);
   else if(time-lastFallback>120||view.force){compatibility(s);lastFallback=time;}

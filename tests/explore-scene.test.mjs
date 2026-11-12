@@ -6,11 +6,12 @@ import * as Three from 'three';
 import * as rules from '../playtest/explore-rules.mjs';
 import * as habitat from '../playtest/habitat-rules.mjs';
 import * as placement from '../playtest/dam-placement.mjs';
+import * as journey from '../playtest/journey-rules.mjs';
 
 test('occluding lodge fades independently, camera stays put, and scenery recovers',async()=>{
  let scene,camera;
  class Renderer{constructor(){this.domElement={};}setPixelRatio(){}setSize(){}render(s,c){scene=s;camera=c;}dispose(){}}
- const context=vm.createContext({THREE:{...Three,WebGLRenderer:Renderer},...rules,...habitat,...placement,devicePixelRatio:1,window:{matchMedia:()=>({matches:true})},ResizeObserver:class{observe(){}}});
+ const context=vm.createContext({THREE:{...Three,WebGLRenderer:Renderer},...rules,...habitat,...placement,...journey,devicePixelRatio:1,window:{matchMedia:()=>({matches:true})},ResizeObserver:class{observe(){}}});
  const code=(await readFile(new URL('../playtest/explore-scene.mjs',import.meta.url),'utf8')).replace(/^import .*;\n/gm,'').replace('export function createExploreScene','function createExploreScene');
  vm.runInContext(code,context);
  const view=context.createExploreScene({clientWidth:900,clientHeight:760,append(){}}),s={...rules.freshExplore(),z:4.5};
@@ -34,7 +35,7 @@ test('occluding lodge fades independently, camera stays put, and scenery recover
 test('habitat renderer uses the same changing pond and cut bed as movement rules',async()=>{
  let scene;
  class Renderer{constructor(){this.domElement={};}setPixelRatio(){}setSize(){}render(s){scene=s;}dispose(){}}
- const context=vm.createContext({THREE:{...Three,WebGLRenderer:Renderer},...rules,...habitat,...placement,devicePixelRatio:1,window:{matchMedia:()=>({matches:true})},ResizeObserver:class{observe(){}}});
+ const context=vm.createContext({THREE:{...Three,WebGLRenderer:Renderer},...rules,...habitat,...placement,...journey,devicePixelRatio:1,window:{matchMedia:()=>({matches:true})},ResizeObserver:class{observe(){}}});
  const code=(await readFile(new URL('../playtest/explore-scene.mjs',import.meta.url),'utf8')).replace(/^import .*;\n/gm,'').replace('export function createExploreScene','function createExploreScene');
  vm.runInContext(code,context);const view=context.createExploreScene({clientWidth:900,clientHeight:760,append(){}});
  let s=habitat.freshHabitat();s.x=-4;s.z=0;view.update(s,{yaw:0,distance:6.5},10);
@@ -52,7 +53,7 @@ test('habitat renderer uses the same changing pond and cut bed as movement rules
 test('placed dam meshes and preview water reflect arbitrary geometry without committing the preview',async()=>{
  let scene;
  class Renderer{constructor(){this.domElement={};}setPixelRatio(){}setSize(){}render(s){scene=s;}dispose(){}}
- const context=vm.createContext({THREE:{...Three,WebGLRenderer:Renderer},...rules,...habitat,...placement,devicePixelRatio:1,window:{matchMedia:()=>({matches:true})},ResizeObserver:class{observe(){}}});
+ const context=vm.createContext({THREE:{...Three,WebGLRenderer:Renderer},...rules,...habitat,...placement,...journey,devicePixelRatio:1,window:{matchMedia:()=>({matches:true})},ResizeObserver:class{observe(){}}});
  const code=(await readFile(new URL('../playtest/explore-scene.mjs',import.meta.url),'utf8')).replace(/^import .*;\n/gm,'').replace('export function createExploreScene','function createExploreScene');
  vm.runInContext(code,context);const view=context.createExploreScene({clientWidth:900,clientHeight:760,append(){}});
  let s=habitat.freshDamLab();s=placement.commitDam(s,placement.makeDamPlan(s,{x:-6,z:-3},{x:6,z:0},2).dam).state;s.x=0;s.z=-5;
@@ -63,4 +64,19 @@ test('placed dam meshes and preview water reflect arbitrary geometry without com
  view.update(s,{yaw:0,distance:6.5},50);assert.equal(read(),.12,'closing preview restores actual water');
  for(const p of s.placedDam.sections)p.level=2;view.update(s,{yaw:0,distance:6.5},70);assert.equal(read(),.68);
  s.placedDam.sections[3].level=0;view.update(s,{yaw:0,distance:6.5},90);assert.equal(read(),.12,'visible water responds to an actual gap');view.dispose();
+});
+
+test('family uses improved water access, pauses with play, and the old water mark reflects a witnessed drop',async()=>{
+ let scene;
+ class Renderer{constructor(){this.domElement={};}setPixelRatio(){}setSize(){}render(s){scene=s;}dispose(){}}
+ const context=vm.createContext({THREE:{...Three,WebGLRenderer:Renderer},...rules,...habitat,...placement,...journey,devicePixelRatio:1,window:{matchMedia:()=>({matches:false})},ResizeObserver:class{observe(){}}});
+ const code=(await readFile(new URL('../playtest/explore-scene.mjs',import.meta.url),'utf8')).replace(/^import .*;\n/gm,'').replace('export function createExploreScene','function createExploreScene');
+ vm.runInContext(code,context);const view=context.createExploreScene({clientWidth:900,clientHeight:760,append(){}}),s=habitat.freshHabitat({flexible:true});
+ view.update(s,{yaw:0,distance:6.5,active:true},10);let family,memory;scene.traverse(o=>{if(o.userData.kind==='family-response')family=o;if(o.userData.kind==='water-memory')memory=o;});
+ assert.ok(family.visible);assert.equal(family.userData.route,'bank');s.entrance=1;const snapshot=JSON.stringify(s);
+ for(let i=1;i<=40;i++)view.update(s,{yaw:0,distance:6.5,active:true},10+i*100);
+ assert.equal(family.userData.route,'water');assert.equal(family.userData.mood,'settled');assert.ok(family.children[0].position.x> -4,'adult visibly uses the improved approach');
+ const position=family.children[0].position.clone();view.update(s,{yaw:0,distance:6.5,active:false},4110);assert.ok(family.children[0].position.equals(position),'ambient activity pauses');assert.equal(JSON.stringify(s),snapshot,'family visuals never generate/consume supplies');
+ s.day=4;s.journey.normalWater=.12;view.update(s,{yaw:0,distance:6.5,active:true},4210);assert.ok(memory.visible);assert.equal(memory.children[1].position.y,.12);
+ s.food=0;view.update(s,{yaw:0,distance:6.5},4310);assert.equal(family.userData.mood,'hungry');view.dispose();
 });

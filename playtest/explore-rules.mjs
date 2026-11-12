@@ -52,6 +52,7 @@ export function creekWater(s){
 }
 export function waterLevel(x,z,s){return s?.version===2?creekWater(s).wet.get(Math.floor(x)+','+Math.floor(z)):0;}
 export function waterDepth(x,z,s){const surface=waterLevel(x,z,s);return surface===undefined?0:Math.max(0,surface-groundHeight(x,z,s));}
+export function lodgeApproachDepth(s){return waterDepth(-2.2,6,s);}
 export function movementMode(x,z,s){const depth=waterDepth(x,z,s);return depth>=.32?'swimming':depth>.02?'wading':'walking';}
 export function speedFor(mode,carrying){return mode==='swimming'?(carrying?2.5:2.8):mode==='wading'?(carrying?1.15:1.45):(carrying?1.55:2.3);}
 // Trees are authored reproducibly, with clear approaches to the teaching locations.

@@ -1,6 +1,6 @@
 # Documentation guide
 
-**Phase:** first basic playable experiment, authorized on 2026-11-09. The [playtest](../playtest/README.md) implements the Riverbank Refuge candidate for testing. Other design documents remain proposals, not a finished implementation specification.
+**Phase:** playable proof of concept. [Willow Cove](../playtest/WILLOW-COVE.md) is the default opening: direct movement, family needs, a low-water night and continued play. Earlier experiments and broader design proposals remain distinct.
 
 ## Flexible dam placement demo
 
@@ -8,7 +8,7 @@
 
 ## Third-person living creek test
 
-[Creekside](../playtest/CREEKSIDE.md) extends direct movement with three harvestable stands, mixed food/wood loads, local delivery, a food-consuming family, renewable growth, an established dam, two excavated hauling cuts and repeating dry flow. Several approaches support the lodge; there is no required task sequence or ending. The implementation record distinguishes tested behavior from ecological and gameplay limits. First Reach remains a separate experiment.
+[Creekside](../playtest/CREEKSIDE.md) extends direct movement with three harvestable stands, mixed food/wood loads, local delivery, a food-consuming family, renewable growth, an established dam, two excavated hauling cuts and repeating dry flow. Several approaches support the lodge; the opening recognizes a fed low-water night with food remaining, without prescribing a task sequence or ending play. The implementation record distinguishes tested behavior from ecological and gameplay limits. First Reach remains a separate experiment.
 
 ## Implemented settlement experiment
 
