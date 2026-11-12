@@ -28,6 +28,11 @@ export function familyOutlook(s){
  if(!accessible)return {mood:'shallow',text:'The family has food, but the way home is shallow.',accessible};
  return {mood:'settled',text:'The family can swim home and has food for supper.',accessible};
 }
+export function familyActivity(s){
+ const {accessible,mood}=familyOutlook(s);
+ const route=accessible?'The adult can swim along the lodge approach.':'The adult stays by the bank: the lodge approach is too shallow to swim.';
+ return route+(mood==='hungry'?' The family needs more food before the next rest.':' There is food for the next family supper.');
+}
 export function journeyStatus(s){
  const j=s.journey||initialJourney(s);
  return {complete:!!j.completedDay,title:j.completedDay?'A home through low water':dry(s)?'The creek is low':'Low water is coming',forecast:dry(s)?j.normalWater===null?'Low water exposes more bank. Revisit your routes.':'The exposed band shows where the water used to reach.':s.day%6===3?'Water will fall after tonight.':'A dry spell is approaching. Rest at home when you are ready.',goal:j.completedDay?'Keep exploring and choose what to improve next.':'Help the family through a low-water night, with food left for tomorrow.'};

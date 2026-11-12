@@ -14,6 +14,10 @@ Starting-lodge placement and its visually disconnected entrance are now explicit
 
 The [roadmap](ROADMAP.md), [procedural generation plan](design/procedural-generation-plan.md), and [building materials/realism plan](design/building-materials-and-realism-plan.md) are complete as reviewable planning deliverables. [Two-day request coverage and gap corrections](PLAN-COMPLETION-REVIEW.md) records what was checked and the distinction between captured, implemented, superseded and still unverified. New plans do not close runtime issues or change the original audit inventory.
 
+## M0 implementation update
+
+[Terrain fading and family clarity](../playtest/M0-STABILIZATION.md): corrected false terrain occlusion from sloped tile bounding boxes; added family introduction and state-based optional notes. BUG-01 remains open for confirmation of the exact native white flash. UX-01 explanation is implemented, with fresh-player validation still open. 105 tests pass; compatibility-browser verification only. This update does not close all of M0.
+
 ## Status and maintenance
 
 - **Resolved — implemented:** the bounded request exists with code/test evidence. This does not establish enjoyment, biological accuracy or device performance.
@@ -34,7 +38,7 @@ Current implementation evidence includes `playtest/explore-*.mjs`, `habitat-rule
 
 | ID | Priority/status | Issue |
 |---|---|---|
-| BUG-01 | P1 / open, reproduction needed | [#1 White ground flash](https://github.com/jschell/beaverbrook/issues/1) |
+| BUG-01 | P1 / partial: false terrain fade corrected; native flash confirmation open | [#1 White ground flash](https://github.com/jschell/beaverbrook/issues/1) |
 | UX-01 | P1 / partial | [#2 Explain adult and kit](https://github.com/jschell/beaverbrook/issues/2) |
 | DAM-01 | P1 / proposed | [#3 Foundations, depth-aware costs, reinforcement options](https://github.com/jschell/beaverbrook/issues/3) |
 | DAM-02 | P1 / open | [#4 Dam collision and crossings](https://github.com/jschell/beaverbrook/issues/4) |

@@ -49,6 +49,8 @@ M2 is the recommended first integrated MVP boundary: helping an inherited househ
 
 ## M0 — stabilize and explain
 
+First implementation: [terrain fading and family clarity](../playtest/M0-STABILIZATION.md). False terrain-box occlusion is corrected and family roles are explained; the exact native white flash and new-player understanding remain open. M0 is not yet complete.
+
 Work:
 - [#1](https://github.com/jschell/beaverbrook/issues/1): reproduce the brief white ground flash; confirm its cause before fixing.
 - [#2](https://github.com/jschell/beaverbrook/issues/2): introduce the adult/kit and explain what their behavior does and does not imply.

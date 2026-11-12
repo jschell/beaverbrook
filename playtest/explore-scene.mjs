@@ -24,7 +24,7 @@ export function createExploreScene(container){
  }
  // Separate materials keep fading local: one tree or bank never fades its neighbors.
  const terrainBanks=[],occluders=[];
- function register(root){const record={root,materials:new Set(),opacity:1,hold:0};occluders.push(record);refresh(record);return root;}
+ function register(root,terrain=false){const record={root,terrain,materials:new Set(),opacity:1,hold:0};occluders.push(record);refresh(record);return root;}
  function refresh(record){
   const clones=new Map();
   record.root.traverse(o=>{if(!o.isMesh||record.materials.has(o.material))return;
@@ -40,7 +40,7 @@ export function createExploreScene(container){
    const color=new THREE.Color(h<-.05?'#a59a73':h<.28?'#a7a47b':h>1.5?'#758663':'#8fa57b');colors.push(color.r,color.g,color.b);
   }
   terrain.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));terrain.computeVertexNormals();
-  const bank=new THREE.Mesh(terrain,new THREE.MeshStandardMaterial({vertexColors:true,roughness:1}));world.add(bank);register(bank);terrainBanks.push(bank);
+  const bank=new THREE.Mesh(terrain,new THREE.MeshStandardMaterial({vertexColors:true,roughness:1}));world.add(bank);register(bank,true);terrainBanks.push(bank);
  }
  const waterTiles=[];
  const waterMaterial=new THREE.MeshStandardMaterial({color:'#448f9f',transparent:true,opacity:.85,roughness:.3});
@@ -166,7 +166,10 @@ export function createExploreScene(container){
   const targets=[center,center.clone().add(side),center.clone().sub(side),center.clone().add(new THREE.Vector3(0,.35,0))];
   for(const record of occluders){
    if(!record.root.visible)continue;
-   let blocked=box.setFromObject(record.root).expandByScalar(.2).containsPoint(camera.position);
+   // A sloped tile's bounding box contains empty air above its lower ground.
+   // Only surface intersections establish terrain occlusion; enclosing objects
+   // still need the containment check when the camera is inside their mesh.
+   let blocked=!record.terrain&&box.setFromObject(record.root).expandByScalar(.2).containsPoint(camera.position);
    for(const target of targets){if(blocked)break;const direction=target.clone().sub(camera.position);ray.set(camera.position,direction.clone().normalize());ray.far=Math.max(0,direction.length()-.45);blocked=ray.intersectObject(record.root,true).length>0;}
    record.hold=blocked?.18:Math.max(0,record.hold-dt);
    record.opacity=dampCamera(record.opacity,record.hold>0?.14:1,dt,record.hold>0?14:5);

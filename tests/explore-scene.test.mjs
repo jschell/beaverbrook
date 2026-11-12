@@ -21,7 +21,7 @@ test('occluding lodge fades independently, camera stays put, and scenery recover
  scene.traverse(o=>{if(!o.isMesh)return;if(o.material.color.getHexString()==='826346')lodge=o;if(o.material.color.getHexString()==='795437')body=o;if(o.material.vertexColors)banks.push(o);});
  assert.ok(lodge.material.opacity<.3,'lodge blocking the view becomes translucent');
  assert.equal(body.material.opacity,1,'beaver remains solid');
- assert.equal(banks.length,36,'banks fade in local patches');
+ assert.equal(banks.length,36,'terrain is divided into local patches');
  assert.ok(banks.some(o=>o.material.opacity===1),'distant terrain remains solid');
  const height=camera.position.y;
  assert.ok(Math.abs(camera.position.z-s.z-6.5)<1e-9);
@@ -29,6 +29,29 @@ test('occluding lodge fades independently, camera stays put, and scenery recover
  assert.equal(camera.position.y,height,'orbiting through scenery never changes camera height');
  assert.equal(lodge.material.opacity,1,'lodge restores after leaving the sightline');
  assert.equal(rules.canStand(rules.LODGE.x,rules.LODGE.z),false,'transparent objects retain collision');
+ view.dispose();
+});
+
+test('empty air inside a sloped terrain bounding box never fades ground, while real terrain obstruction still fades',async()=>{
+ let scene,camera;
+ class Renderer{constructor(){this.domElement={};}setPixelRatio(){}setSize(){}render(s,c){scene=s;camera=c;}dispose(){}}
+ const context=vm.createContext({THREE:{...Three,WebGLRenderer:Renderer},...rules,...habitat,...placement,...journey,devicePixelRatio:1,window:{matchMedia:()=>({matches:true})},ResizeObserver:class{observe(){}}});
+ const code=(await readFile(new URL('../playtest/explore-scene.mjs',import.meta.url),'utf8')).replace(/^import .*;\n/gm,'').replace('export function createExploreScene','function createExploreScene');
+ vm.runInContext(code,context);const view=context.createExploreScene({clientWidth:900,clientHeight:760,append(){}});
+ let time=0;const s={...habitat.freshHabitat(),x:12,z:5};
+ const frame=(state,yaw)=>view.update(state,{yaw,distance:9},time+=17);
+ for(let i=0;i<80;i++)frame(s,0);
+ const banks=[];scene.traverse(o=>{if(o.isMesh&&o.material.vertexColors)banks.push(o);});
+ assert.ok(camera.position.y>rules.groundHeight(camera.position.x,camera.position.z,s)+3,'camera is above the actual surface');
+ assert.ok(banks.some(o=>new Three.Box3().setFromObject(o).expandByScalar(.2).containsPoint(camera.position)),'reproduces misleading tile bounding-box containment');
+ assert.ok(banks.every(o=>o.material.opacity===1&&!o.material.transparent&&o.material.depthWrite),'unobstructing terrain stays opaque instead of flashing pale');
+ const colors=banks.map(o=>Array.from(o.geometry.getAttribute('color').array));
+ const obstructed={...s,x:10,z:8};for(let i=0;i<100;i++)frame(obstructed,Math.PI/2);
+ assert.ok(camera.position.y<rules.groundHeight(camera.position.x,camera.position.z,obstructed),'camera lies inside a real hillside');
+ assert.ok(banks.some(o=>o.material.opacity<.3),'real intersecting terrain still fades without raising the camera');
+ for(let i=0;i<140;i++)frame(s,0);
+ assert.ok(banks.every(o=>o.material.opacity===1&&o.material.depthWrite),'terrain restores after the real obstruction');
+ assert.deepEqual(banks.map(o=>Array.from(o.geometry.getAttribute('color').array)),colors,'orbit and fade do not recolor ground');
  view.dispose();
 });
 

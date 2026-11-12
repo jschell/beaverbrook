@@ -4,6 +4,8 @@
 
 The default Pages entry opens Creekside at the established family home. The goal is to help the family through **one low-water night, with food left for tomorrow**. This is a bounded proof of concept, not the complete founding/colony game.
 
+See [M0 stabilization](M0-STABILIZATION.md) for the terrain-occlusion correction, family-role introduction, optional state-based family notes and 105-test verification record. Native flash confirmation and player comprehension remain open.
+
 ## Implemented experience
 
 - The first invitation is to bring a leafy branch home. After the first delivery, messages fade after 12 seconds; optional “Need a nudge?” advice responds to current conditions.

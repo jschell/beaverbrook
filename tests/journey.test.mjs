@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {freshHabitat,habitatAction,loadHabitat,PATCHES,DAM} from '../playtest/habitat-rules.mjs';
 import {LODGE,waterLevel} from '../playtest/explore-rules.mjs';
-import {familyOutlook,journeyStatus,journeyHint} from '../playtest/journey-rules.mjs';
+import {familyOutlook,familyActivity,journeyStatus,journeyHint} from '../playtest/journey-rules.mjs';
 const at=(s,p)=>({...s,x:p.x,z:p===LODGE?4.4:p.z});
 const act=(s,id)=>{const r=habitatAction(s,id);assert.notEqual(r.state,s,`${id}: ${r.message}`);return r.state;};
 function deliver(s,p,action='browse',destination=LODGE){s=act(at(s,p),action);s=act(at(s,destination),destination===DAM?'deposit':'store');if(s.cargo)s=act(at(s,LODGE),'store');return s;}
@@ -38,4 +38,13 @@ test('normal-weather rest cannot falsely claim a low-water success',()=>{
 test('withdrawing a larger stored load moves existing wood without duplication',()=>{
  let s=freshHabitat({flexible:true});s=deliver(s,PATCHES[0],'prune');s=deliver(s,PATCHES[0],'prune');assert.equal(s.wood,2);
  s=act(at(s,LODGE),'takeWood');assert.equal(s.cargo.wood,2);assert.equal(s.wood,0);assert.ok(loadHabitat(JSON.stringify(s)));
+});
+
+test('family explanation follows actual access and food independently without changing supplies',()=>{
+ let s=freshHabitat({flexible:true}),before=JSON.stringify(s);
+ assert.match(familyActivity(s),/stays by the bank/);assert.match(familyActivity(s),/food for the next/);
+ assert.equal(JSON.stringify(s),before,'inspection creates no food or work');
+ s=act(at(s,LODGE),'entrance');assert.match(familyActivity(s),/can swim/);
+ s={...s,food:0};assert.match(familyActivity(s),/can swim/);assert.match(familyActivity(s),/needs more food/,'hungry does not incorrectly imply the route is shallow');
+ s={...s,entrance:0};assert.match(familyActivity(s),/stays by the bank/);assert.match(familyActivity(s),/needs more food/);
 });

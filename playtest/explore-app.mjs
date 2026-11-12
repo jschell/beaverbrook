@@ -1,4 +1,4 @@
-import {familyOutlook,journeyStatus,journeyHint,journeyFeedback} from './journey-rules.mjs';
+import {familyOutlook,familyActivity,journeyStatus,journeyHint,journeyFeedback} from './journey-rules.mjs';
 import {damWorkSites,nextDamWork} from './dam-work.mjs';
 import {createDamPlanner} from './dam-planner.mjs';
 import {CRESTS} from './dam-placement.mjs';
@@ -64,6 +64,7 @@ let actionSignature='';
 function updateHud(){
  const mode=movementMode(state.x,state.z,state),home=homeStatus(state),place=localPlace(state),family=familyOutlook(state),chapter=journeyStatus(state);
  el('chapter-title').textContent=chapter.title;el('chapter-goal').textContent=chapter.goal;el('forecast').textContent=chapter.forecast;el('family-state').textContent=family.text+' '+home.foodNights+(home.foodNights===1?' supper stored.':' suppers stored.');el('family-state').dataset.mood=family.mood;
+ el('family-activity').textContent=familyActivity(state);
  el('energy').value=DAY_WORK-state.effort;el('energy').setAttribute('aria-valuetext',(DAY_WORK-state.effort)+' of '+DAY_WORK+' energy remaining');
  el('mode').textContent=mode[0].toUpperCase()+mode.slice(1);
  el('load').textContent=state.cargo?`${state.cargo.wood} wood + ${state.cargo.food} food in tow`:'Free paws';
