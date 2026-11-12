@@ -1,9 +1,10 @@
+import {lodgeSection} from './lodge-section.mjs?v=lodge-access-1';
 import {MUD_BANKS,enableConstruction,sectionStep} from './construction-rules.mjs';
 import {familyOutlook,familyActivity,journeyStatus,journeyHint,journeyFeedback} from './journey-rules.mjs';
 import {damWorkSites,nextDamWork} from './dam-work.mjs';
 import {createDamPlanner} from './dam-planner.mjs?v=dam-feedback-2';
 import {CRESTS} from './dam-placement.mjs';
-import {createExploreScene} from './explore-scene.mjs?v=elevation-1';
+import {createExploreScene} from './explore-scene.mjs?v=lodge-access-1';
 import {BOUNDS,LODGE,CHANNELS,movementMode,groundHeight,waterDepth} from './explore-rules.mjs';
 import {freshHabitat,freshDamLab,habitatMove,habitatOptions,primaryHabitatAction,habitatAction,loadHabitat,PATCHES,DAM,localPlace,homeStatus,channelStatus,weather,DAY_WORK} from './habitat-rules.mjs';
 
@@ -83,11 +84,12 @@ function drawMap(){
  el('map-legend').textContent='Lighter ground is nearby. Darker ground is remembered. '+Object.keys(state.explored).length+' ground cells explored.';
  mapDirty=false;
 }
-let actionSignature='';
+let actionSignature='',lodgeSignature='';
 function updateHud(){
  const mode=movementMode(state.x,state.z,state),home=homeStatus(state),place=localPlace(state),family=familyOutlook(state),chapter=journeyStatus(state);
  el('chapter-title').textContent=chapter.title;el('chapter-goal').textContent=chapter.goal;el('forecast').textContent=chapter.forecast;el('family-state').textContent=family.text+' '+home.foodNights+(home.foodNights===1?' supper stored.':' suppers stored.');el('family-state').dataset.mood=family.mood;
  el('family-activity').textContent=familyActivity(state);
+ const sectionKey=JSON.stringify([state.entrance,state.day,state.dam,state.placedDam,state.channels]);if(sectionKey!==lodgeSignature){lodgeSignature=sectionKey;const section=lodgeSection(state);el('lodge-section').innerHTML=section.svg;el('lodge-access').textContent=section.text;}
  el('energy').value=DAY_WORK-state.effort;el('energy').setAttribute('aria-valuetext',(DAY_WORK-state.effort)+' of '+DAY_WORK+' energy remaining');
  el('mode').textContent=mode[0].toUpperCase()+mode.slice(1);
  el('load').textContent=state.cargo?[state.cargo.wood?state.cargo.wood+' wood':'',state.cargo.mud?state.cargo.mud+' mud':'',state.cargo.food?state.cargo.food+' food':''].filter(Boolean).join(' + ')+' in tow':'Free paws';
@@ -120,7 +122,7 @@ function updateHud(){
  let story='';
  if(place?.type==='mud')story='Soft sealing material is exposed here. Mud packs the gaps in a wooden framework; it does not replace structural wood.';
  if(place?.type==='patch'){const p=place.point;story=state.patches[p.id].stock===0?'Only cut stems remain here. Leave time for new growth, or try another stand.':p.description;}
- if(place?.type==='lodge')story='Rest here when you are ready for tomorrow. The family eats from your supply, and the creek can change overnight.';
+ if(place?.type==='lodge')story='This bank lodge has a dry chamber and a passage to the creek entrance. Open “How the lodge connects to the creek” in Home and creek to inspect it. Rest here when you are ready for tomorrow. The family eats from your supply, and the creek can change overnight.';
  if(place?.type==='dam')story=state.dam===0?'Water slips through the gaps. Holding more water could help the lodge and your hauling routes.':'The pond reaches farther along the banks. Consider what a higher or lower pond would change.';
  if(place?.type==='customDam')story='Wood builds the framework; mud packs it. Only a packed crest holds the target water. Low sections and bank bypasses still matter.';
  if(place?.type==='channel')story=channelStatus(state,place.point.id).swimmable?'This cut now floats a load. Try it on your next supply trip.':state.channels[place.point.id]?'The cut is too shallow to float a load now. You could deepen it or retain more water.':'A low strip leads toward useful growth. Digging here could bring water closer to it.';

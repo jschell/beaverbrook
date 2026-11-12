@@ -2,6 +2,7 @@ import {solveBarrierWater} from './dam-water.mjs';
 // Authored movement playground. Distances and speeds are game units.
 export const BOUNDS=24;
 export const LODGE={id:'lodge',name:'Family lodge',x:-7,z:6};
+export const LODGE_APPROACH={x:-2.2,z:6};
 export const GROVE={id:'grove',name:'Branch grove',x:7,z:-4};
 export const LANDING={id:'landing',name:'Low-bank crossing',x:2,z:-4};
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
@@ -25,7 +26,7 @@ export function groundHeight(x,z,s){
    const blend=1-smooth((offset-.65)/1.8),floor=level===1?-.08:-.5;
    bed=Math.min(bed,bed+(floor-bed)*blend);
   }
-  if(s.entrance){const d=Math.hypot(x+2.2,z-6);bed=Math.min(bed,bed+(-.6-bed)*(1-smooth((d-.5)/1.8)));}
+  if(s.entrance){const d=Math.hypot(x-LODGE_APPROACH.x,z-LODGE_APPROACH.z);bed=Math.min(bed,bed+(-.6-bed)*(1-smooth((d-.5)/1.8)));}
  }
  return bed;
 }
@@ -52,7 +53,7 @@ export function creekWater(s){
 }
 export function waterLevel(x,z,s){return s?.version===2?creekWater(s).wet.get(Math.floor(x)+','+Math.floor(z)):0;}
 export function waterDepth(x,z,s){const surface=waterLevel(x,z,s);return surface===undefined?0:Math.max(0,surface-groundHeight(x,z,s));}
-export function lodgeApproachDepth(s){return waterDepth(-2.2,6,s);}
+export function lodgeApproachDepth(s){return waterDepth(LODGE_APPROACH.x,LODGE_APPROACH.z,s);}
 export function movementMode(x,z,s){const depth=waterDepth(x,z,s);return depth>=.32?'swimming':depth>.02?'wading':'walking';}
 export function speedFor(mode,carrying){return mode==='swimming'?(carrying?2.5:2.8):mode==='wading'?(carrying?1.15:1.45):(carrying?1.55:2.3);}
 // Trees are authored reproducibly, with clear approaches to the teaching locations.

@@ -1,6 +1,6 @@
 import {MUD_BANKS} from './construction-rules.mjs';
 import * as THREE from './vendor/three.module.js';
-import {BOUNDS,TREES,LODGE,GROVE,LANDING,groundHeight,movementMode,cameraBoom,dampCamera,creekWater,waterLevel,CHANNELS} from './explore-rules.mjs';
+import {BOUNDS,TREES,LODGE,LODGE_APPROACH,GROVE,LANDING,groundHeight,movementMode,cameraBoom,dampCamera,creekWater,waterLevel,CHANNELS} from './explore-rules.mjs?v=lodge-access-1';
 
 import {familyOutlook} from './journey-rules.mjs';
 import {CRESTS,damCenter} from './dam-placement.mjs';
@@ -141,7 +141,12 @@ export function createExploreScene(container){
   for(let x=Math.min(c.start,c.end)+.25;x<Math.max(c.start,c.end);x+=.65)log([x,groundHeight(x,c.z)+.05,c.z-.16],[x,groundHeight(x,c.z)+.05,c.z+.16],.025,'#d3bb7b',route);
   markers.push({c,root,route});
  }
- const entrance=mesh(new THREE.TorusGeometry(.32,.055,5,14),'#c6b58b',-2.2,groundHeight(-2.2,6)+.08,6);entrance.rotation.x=-Math.PI/2;
+ // Creek-facing mouth at the very same probe used for household access.
+ const entrance=new THREE.Group();entrance.userData.kind='lodge-entrance';world.add(entrance);
+ const mouth=mesh(new THREE.CircleGeometry(.26,20),'#302b21',.015,.15,0,entrance);mouth.rotation.y=Math.PI/2;mouth.scale.y=.48;
+ const rim=mesh(new THREE.TorusGeometry(.28,.035,6,20),'#8b704c',0,.15,0,entrance);rim.rotation.y=Math.PI/2;rim.scale.y=.48;
+ mouth.material=mouth.material.clone();mouth.material.side=THREE.DoubleSide;rim.material=rim.material.clone();rim.material.side=THREE.DoubleSide;
+
  const beaver=new THREE.Group();world.add(beaver);
  const body=mesh(new THREE.SphereGeometry(.35,12,8),'#795437',0,.36,0,beaver);body.scale.set(1,1,1.55);
  const head=mesh(new THREE.SphereGeometry(.25,10,8),'#8b6342',0,.5,-.48,beaver);head.scale.z=1.1;
@@ -289,7 +294,7 @@ export function createExploreScene(container){
   for(const stand of stands){stand.root.visible=s.version===2&&Math.hypot(stand.p.x-s.x,stand.p.z-s.z)<16;stand.root.position.y=groundHeight(stand.p.x,stand.p.z,s);if(s.version===2){const stock=s.patches[stand.p.id].stock;stand.shoots.forEach((o,i)=>o.visible=i<stock);stand.stump.visible=stock===0;}}
   damGroup.visible=s.version===2;damGroup.position.y=s.version===2?[-.28,0,.2][s.dam]:0;damGroup.children.forEach((o,i)=>{if(o!==crest&&o!==familyPackingFace)o.visible=(s.familyFrame??s.dam)>0||i%5!==2;});crest.visible=(s.familyFrame??s.dam)===2;damPile.visible=s.version===2;familyPackingFace.visible=!!s.construction&&s.dam>0;familyPackingFace.scale.y=s.dam===2?1.18:.9;familyPackingFace.position.y=(CRESTS[s.dam]??0)+mudCapClearance-familyPackingFace.scale.y/2-damGroup.position.y;
   for(const m of markers){m.root.visible=s.version===2&&Math.hypot(m.c.x-s.x,m.c.z-s.z)<14;m.root.position.y=groundHeight(m.c.x,m.c.z,s);m.route.visible=m.root.visible&&!(s.channels?.[m.c.id]);}
-  entrance.visible=s.version===2;entrance.position.y=groundHeight(-2.2,6,s)+.08;
+  entrance.visible=s.version===2;entrance.position.set(LODGE_APPROACH.x,groundHeight(LODGE_APPROACH.x,LODGE_APPROACH.z,s),LODGE_APPROACH.z);
   for(const tree of trees)tree.visible=Math.hypot(tree.position.x-s.x,tree.position.z-s.z)<16;
   for(const plant of plants)plant.visible=Math.hypot(plant.position.x-s.x,plant.position.z-s.z)<14;
   grove.visible=s.version!==2&&Math.hypot(GROVE.x-s.x,GROVE.z-s.z)<15;

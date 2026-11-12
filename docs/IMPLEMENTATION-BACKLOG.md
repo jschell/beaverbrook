@@ -8,7 +8,7 @@ This is the current status index. GitHub issues track actionable work; linked de
 
 [Roadmap](ROADMAP.md) maps the issue queue to M0 stabilization, M1 established-family play, M2 founding, M3 settlement networks and M4 environmental scenarios, with separate behavior/player/device gates. [Environment and resource parameters](design/environment-and-resource-parameters.md) records candidate procedural variation and construction-material roles with wildlife sources. These additions are planning, not implemented features; the 39-document inventory below remains the original audit snapshot.
 
-Starting-lodge placement and its visually disconnected entrance are now explicitly open under [PROG-01 / #8](https://github.com/jschell/beaverbrook/issues/8), coordinated with UX-01/SENSE-01/ART-01. Pond-edge integration is an option, not a committed relocation.
+Starting-lodge placement and its visually disconnected entrance were explicitly opened under [PROG-01 / #8](https://github.com/jschell/beaverbrook/issues/8), coordinated with UX-01/SENSE-01/ART-01. Pond-edge integration remains an option. The bounded [bank-lodge clarity slice](../playtest/LODGE-ACCESS.md) now retains the current placement, identifies its type, and explains the entrance relationship under [#21](https://github.com/jschell/beaverbrook/issues/21); native/player acceptance remains open.
 
 ## Completed planning package
 
@@ -41,6 +41,10 @@ The [roadmap](ROADMAP.md), [procedural generation plan](design/procedural-genera
 ## Elevation readability slice
 
 [#20](https://github.com/jschell/beaverbrook/issues/20) and [implementation record](../playtest/ELEVATION-READABILITY.md): half-unit terrain sampling, slope/exposed-soil cues, current wet shoreline and more transparent shallows. Existing simulation/save rules remain. 121 tests/build pass; compatibility-browser evidence only. Native iPad readability and performance remain open. Next: lodge entrance connection, then optional survey overlays.
+
+## Bank lodge access clarity
+
+[#21](https://github.com/jschell/beaverbrook/issues/21) and [implementation record](../playtest/LODGE-ACCESS.md): creek-facing mouth anchored to the shared depth/excavation probe, plus optional live section of chamber, bank, schematic passage and actual entrance water. Current placement/access/save rules remain. 123 tests/build pass; compatibility and three tablet viewport checks only. Native/player acceptance remains open; this does not close broad #8 progression.
 
 ## Status and maintenance
 

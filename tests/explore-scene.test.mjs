@@ -228,3 +228,16 @@ test('elevation cues follow actual excavation and water while dry-bank geometry 
  const alphas=new Set();scene.traverse(o=>{if(o.isMesh&&o.visible&&o.material.roughness===.3)alphas.add(o.material.opacity);});assert.ok(alphas.has(.48)&&alphas.has(.85),'shallow water reveals more bed than deep water');
  s.day=1;assert.equal(JSON.stringify(s),before,'appearance does not spend resources or alter state');view.dispose();
 });
+
+test('creek-facing lodge mouth follows the shared access probe and excavated bed without relocating the lodge',async()=>{
+ let scene;
+ class Renderer{constructor(){this.domElement={};}setPixelRatio(){}setSize(){}render(s){scene=s;}dispose(){}}
+ const context=vm.createContext({THREE:{...Three,WebGLRenderer:Renderer},...rules,...habitat,...placement,...journey,...construction,devicePixelRatio:1,window:{matchMedia:()=>({matches:true})},ResizeObserver:class{observe(){}}});
+ const code=(await readFile(new URL('../playtest/explore-scene.mjs',import.meta.url),'utf8')).replace(/^import .*;\n/gm,'').replace('export function createExploreScene','function createExploreScene');
+ vm.runInContext(code,context);const view=context.createExploreScene({clientWidth:1024,clientHeight:620,append(){}}),s=habitat.freshHabitat();let time=0;
+ view.update(s,{yaw:0,distance:6.5},time+=17);let entrance;scene.traverse(o=>{if(o.userData.kind==='lodge-entrance')entrance=o;});assert.ok(entrance.visible);
+ assert.equal(entrance.position.x,rules.LODGE_APPROACH.x);assert.equal(entrance.position.z,rules.LODGE_APPROACH.z);const dryHeight=entrance.position.y;
+ s.entrance=1;const before=JSON.stringify(s);view.update(s,{yaw:0,distance:6.5},time+=17);scene.updateMatrixWorld(true);
+ assert.ok(entrance.position.y<dryHeight);assert.equal(entrance.position.y,rules.groundHeight(rules.LODGE_APPROACH.x,rules.LODGE_APPROACH.z,s));
+ const bounds=new Three.Box3().setFromObject(entrance);assert.ok(bounds.max.y<rules.waterLevel(rules.LODGE_APPROACH.x,rules.LODGE_APPROACH.z,s),'protected entrance mouth is submerged');assert.equal(JSON.stringify(s),before);view.dispose();
+});

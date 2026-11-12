@@ -1,5 +1,7 @@
 # Creekside — living creek test
 
+> Lodge access update: [bank lodge, entrance mouth and live section](LODGE-ACCESS.md). Expand Home and creek → How the lodge connects to the creek. Placement and access rules remain unchanged; native/player acceptance is open in #21.
+
 > Elevation update: [terrain, shore and shallow-water readability](ELEVATION-READABILITY.md) is implemented as a first visual slice. Native iPad readability/performance remains open under #20.
 
 > Tablet update (2026-11-12): [hint and overlay layout review](IPAD-LAYOUT-REVIEW.md). Compact home/work disclosures, pinned dismissible nudges and bounded dialogs are implemented; physical iPad Safari validation remains open in #17/#15.
