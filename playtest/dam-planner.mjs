@@ -3,7 +3,9 @@ import {makeDamPlan,previewDam,commitDam,extendDam,CRESTS} from './dam-placement
 export function createDamPlanner({getState,setState,notify,onToggle}){
  const el=id=>document.getElementById(id),canvas=el('dam-map'),ctx=canvas.getContext('2d');
  let open=false,preview=null,candidate=null,active='a';
- const fail=text=>{el('dam-error').textContent=text;notify(text);};
+ function clearFeedback(){for(const id of ['dam-status','dam-error']){el(id).textContent='';el(id).hidden=true;}}
+ function report(text,error=false){clearFeedback();const target=el(error?'dam-error':'dam-status');target.textContent=text;target.hidden=false;}
+ const fail=text=>report(text,true);
  const value=id=>Number(el(id).value);
  function point(prefix){return {x:value(prefix+'-x'),z:value(prefix+'-z')};}
  function draw(){
@@ -39,19 +41,19 @@ export function createDamPlanner({getState,setState,notify,onToggle}){
    const row=document.createElement('label');row.textContent=`${i+1}: built ${p.level?CRESTS[p.level].toFixed(2):'gap'} · ${p.wood} wood${s.construction?' + '+p.mud+' mud · '+(p.frame>p.level?'unpacked frame':'packed crest'):''} here · target `;
    const select=document.createElement('select');select.setAttribute('aria-label','Section '+(i+1)+' target height');
    for(let level=1;level<=3;level++){const o=document.createElement('option');o.value=level;o.textContent=CRESTS[level].toFixed(2);select.append(o);}select.value=p.target;
-   select.onchange=()=>{const next=structuredClone(getState());next.placedDam.sections[i].target=Number(select.value);setState(next);refresh();};row.append(select);el('dam-section-settings').append(row);
+   select.onchange=()=>{const next=structuredClone(getState());next.placedDam.sections[i].target=Number(select.value);setState(next);refresh();report('Section '+(i+1)+' target updated. Deliver materials and build nearby to change the actual crest.');};row.append(select);el('dam-section-settings').append(row);
   });
   draw();
  }
- function toggle(value=!open){open=value;el('dam-planner').hidden=!open;onToggle(open);if(open){el('dam-error').textContent='';const s=getState(),z=Math.max(-16,Math.min(6,Math.round(s.z)));el('dam-a-x').value=-6;el('dam-b-x').value=6;el('dam-a-z').value=z;el('dam-b-z').value=z;refresh();el('dam-close').focus();}}
- for(const id of ['dam-a-x','dam-a-z','dam-b-x','dam-b-z','dam-height'])el(id).addEventListener('input',()=>{el('dam-error').textContent='';refresh();});
- for(const end of ['a','b'])el('dam-set-'+end).onclick=()=>{active=end;el('dam-pick-note').textContent='Click the map to move bank '+end.toUpperCase()+'.';};
+ function toggle(value=!open){open=value;el('dam-planner').hidden=!open;onToggle(open);if(open){clearFeedback();const s=getState(),z=Math.max(-16,Math.min(6,Math.round(s.z)));el('dam-a-x').value=-6;el('dam-b-x').value=6;el('dam-a-z').value=z;el('dam-b-z').value=z;refresh();el('dam-close').focus();}}
+ for(const id of ['dam-a-x','dam-a-z','dam-b-x','dam-b-z','dam-height'])el(id).addEventListener('input',()=>{clearFeedback();refresh();});
+ for(const end of ['a','b'])el('dam-set-'+end).onclick=()=>{active=end;el('dam-pick-note').textContent='Tap the map to move bank '+end.toUpperCase()+'.';report('Tap the survey to set bank '+end.toUpperCase()+'.');};
  canvas.addEventListener('pointerdown',event=>{
-  if(getState().placedDam)return;const bounds=canvas.getBoundingClientRect();el('dam-'+active+'-x').value=Math.round((event.clientX-bounds.left)/bounds.width*48-24);el('dam-'+active+'-z').value=Math.round((event.clientY-bounds.top)/bounds.height*48-24);active=active==='a'?'b':'a';el('dam-pick-note').textContent='Next map click moves bank '+active.toUpperCase()+'.';refresh();
+  if(getState().placedDam)return;clearFeedback();const bounds=canvas.getBoundingClientRect();el('dam-'+active+'-x').value=Math.round((event.clientX-bounds.left)/bounds.width*48-24);el('dam-'+active+'-z').value=Math.round((event.clientY-bounds.top)/bounds.height*48-24);active=active==='a'?'b':'a';el('dam-pick-note').textContent='Next map click moves bank '+active.toUpperCase()+'.';refresh();
  });
- el('dam-commit').onclick=()=>{if(!candidate)return;const result=commitDam(getState(),candidate);if(result.error){fail(result.error);return;}setState(result.state);toggle(false);notify(getState().construction?'Stakes placed. Deliver wood and build a framework; then deliver sealing mud and pack it. Follow the section markers.':'Stakes placed — construction has not begun. Pick up wood, approach an amber section marker, then press E to deliver and E again to build.');};
- for(const end of ['a','b'])el('dam-extend-'+end).onclick=()=>{const result=extendDam(getState(),end);if(result.error)fail(result.error);else{el('dam-error').textContent='';setState(result.state);notify('Span extended with an unbuilt section. Existing construction stays in place.');}refresh();};
- el('dam-remove-plan').onclick=()=>{const s=getState();if(s.placedDam.sections.some(p=>p.level||p.wood||p.frame||p.mud)){fail('Remove built sections and recover unspent materials locally before clearing the project.');return;}const next=structuredClone(s);next.placedDam=null;setState(next);notify('Empty project removed. Previously spent wood is not refunded.');refresh();};
+ el('dam-commit').onclick=()=>{if(!candidate)return;const result=commitDam(getState(),candidate);if(result.error){fail(result.error);return;}setState(result.state);toggle(false);notify(getState().construction?'Stakes placed. Deliver wood and build a framework; then deliver sealing mud and pack it. Follow the section markers.':'Stakes placed — construction has not begun. Pick up wood, approach an amber section marker, then press E to deliver and E again to build.',{persistent:true});};
+ for(const end of ['a','b'])el('dam-extend-'+end).onclick=()=>{const result=extendDam(getState(),end);if(result.error)fail(result.error);else{setState(result.state);report('Span extended with an unbuilt section. Existing construction stays in place.');}refresh();};
+ el('dam-remove-plan').onclick=()=>{const s=getState();if(s.placedDam.sections.some(p=>p.level||p.wood||p.frame||p.mud)){fail('Remove built sections and recover unspent materials locally before clearing the project.');return;}const next=structuredClone(s);next.placedDam=null;setState(next);report('Empty project removed. Previously spent wood is not refunded.');refresh();};
  el('dam-close').onclick=()=>toggle(false);
  el('dam-planner').addEventListener('keydown',event=>{if(event.key==='Escape'){event.stopPropagation();toggle(false);return;}if(event.key==='Tab'){const controls=[...el('dam-planner').querySelectorAll('button,input,select')].filter(e=>!e.disabled&&!e.closest('[hidden]'));if(event.shiftKey&&document.activeElement===controls[0]){event.preventDefault();controls.at(-1).focus();}else if(!event.shiftKey&&document.activeElement===controls.at(-1)){event.preventDefault();controls[0].focus();}}});
  return {toggle,get open(){return open;},get previewState(){return open&&el('dam-show-preview').checked?preview?.state:null;},refresh};

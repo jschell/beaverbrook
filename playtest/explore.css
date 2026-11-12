@@ -54,3 +54,12 @@ footer{padding:8px var(--edge);padding-bottom:max(8px,env(safe-area-inset-bottom
 #home-panel>summary small{display:block;font-size:11px;font-weight:400;color:#52634b}#home-panel>summary #chapter-title{display:inline;margin:0;font-weight:400;font-size:20px}
 /* Auto margins center short menus and keep the top reachable when content is tall. */
 #menu{display:flex;align-items:flex-start;justify-content:center}.menu-card{flex:0 1 520px;min-width:0;margin:auto 0}
+
+/* Planner feedback belongs to the active dialog, above its scrolling work area. */
+#dam-planner{display:flex;flex-direction:column;overflow:hidden;gap:8px}
+#dam-planner>.dam-heading{position:static;flex:0 0 auto}
+#dam-feedback{flex:0 1 auto;min-height:0;max-height:32%;overflow:auto;overscroll-behavior:contain;padding:8px 12px;background:#eef0df;border-radius:8px}
+#dam-feedback p{margin:3px 0;overflow-wrap:anywhere}#dam-status{font-weight:650;color:#244b3c}#dam-error{font-weight:650;color:#853719}
+.dam-scroll{flex:1 1 auto;min-height:0;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:0 3px 12px;scroll-padding:12px}
+#dam-section-settings>label{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px;border:1px solid #c5ccb5;border-radius:6px;overflow-wrap:anywhere}
+#dam-section-settings select{margin-left:auto;flex-shrink:0}

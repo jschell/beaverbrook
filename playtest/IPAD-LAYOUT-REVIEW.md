@@ -40,3 +40,13 @@ At all 15 sizes, expanded home/family/supply/work details remained bounded; nudg
 5. Include a smaller iPad, a standard 10–11-inch configuration and a large iPad, plus split view where supported. Record iPadOS/Safari version and actual content viewport with results.
 
 Issue #17 remains open for this device evidence; this review does not close the broader platform gate.
+
+## Dam planner follow-up (2026-11-12)
+
+The first layout pass checked planner bounds and dismissal, but missed feedback routing during project management. Extension successes and removal errors also notified the background HUD, which is inert while planning. Errors had a local copy, but it could be below the visible scroll position. This is a coverage correction to the earlier review, not a claim that the entire construction journey had been validated.
+
+The planner now owns a persistent feedback area directly below its heading, containing operation results, errors and the target-water/material summary. Work controls scroll independently below it. Extension, removal and target-height feedback stay inside the active dialog. Staking closes the dialog and sends persistent instructions to the normal nudge area. Section labels wrap with 44px target selectors. Planning results clear on reopening; input changes clear stale operation feedback.
+
+Verified with an existing six-section project containing a paid, packed first section: refused removal displays an accessible local error; extension adds a seventh section and local success; changing section 2 target updates both result and summary. At all 15 CSS viewports above, the feedback and close button fit, the work area retained >100px height, and no planner horizontal overflow occurred. At 1024×560, section controls scroll while feedback remains visible. Regression assertions cover extension, refused and successful clearing, feedback reset and persistent post-staking instructions. All 116 tests pass and static build succeeds.
+
+Evidence is Chrome compatibility-renderer layout and interaction testing. Native Safari touch scrolling, soft keyboard, safe areas, WebGL and a full material delivery/build walkthrough on an iPad remain open under #17/#15.

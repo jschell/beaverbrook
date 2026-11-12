@@ -24,7 +24,7 @@ The [roadmap](ROADMAP.md), [procedural generation plan](design/procedural-genera
 
 ## Tablet layout update
 
-[Tablet layout review](../playtest/IPAD-LAYOUT-REVIEW.md) addresses hint clipping and overlay bounds under [#17](https://github.com/jschell/beaverbrook/issues/17), linked to PLATFORM-01/#15. Nudge/hint have reserved space above controls; home/work details scroll independently; map/planner/menu remain reachable. Fifteen representative usable CSS viewports pass layout checks. Native iPad Safari touch, safe areas and WebGL remain unverified; #17 stays open for those checks.
+[Tablet layout review](../playtest/IPAD-LAYOUT-REVIEW.md) addresses hint clipping and overlay bounds under [#17](https://github.com/jschell/beaverbrook/issues/17), linked to PLATFORM-01/#15. Nudge/hint have reserved space above controls; home/work details scroll independently; map/planner/menu remain reachable. Fifteen representative usable CSS viewports pass layout checks. Dam-planner follow-up keeps operation results/errors and preview summary inside the active dialog above independently scrolling controls; post-staking instructions persist. Existing-project extension, target change and refused removal were browser-checked, with routing regression assertions. Native iPad Safari touch, safe areas and WebGL remain unverified; #17 stays open for those checks.
 
 ## Status and maintenance
 
