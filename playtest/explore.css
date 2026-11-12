@@ -65,3 +65,5 @@ footer{padding:8px var(--edge);padding-bottom:max(8px,env(safe-area-inset-bottom
 #dam-section-settings select{margin-left:auto;flex-shrink:0}
 
 #lodge-section svg{width:100%;height:auto;display:block;margin:8px 0}#lodge-notes{font-size:12px;color:#344e3c}#lodge-notes summary{min-height:44px}#creek-hud #lodge-access{line-height:1.5}
+
+.survey-toggle{display:flex;align-items:center;gap:8px;min-height:44px;font-size:13px;font-weight:650}#dam-survey-legend{background:#eef0df;border-left:3px solid #526b48;padding:10px;line-height:1.5}#dam-planner .survey-toggle input{min-height:24px;width:24px;height:24px;flex:0 0 auto}

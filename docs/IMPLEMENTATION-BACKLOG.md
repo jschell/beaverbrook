@@ -46,6 +46,10 @@ The [roadmap](ROADMAP.md), [procedural generation plan](design/procedural-genera
 
 [#21](https://github.com/jschell/beaverbrook/issues/21) and [implementation record](../playtest/LODGE-ACCESS.md): creek-facing mouth anchored to the shared depth/excavation probe, plus optional live section of chamber, bank, schematic passage and actual entrance water. Current placement/access/save rules remain. 123 tests/build pass; compatibility and three tablet viewport checks only. Native/player acceptance remains open; this does not close broad #8 progression.
 
+## Optional survey slice
+
+[#22](https://github.com/jschell/beaverbrook/issues/22) and [implementation record](../playtest/SURVEY-VIEW.md): Plan dam now offers explored-ground contours, solid current/dashed completed-target shorelines and a lodge water comparison. Default off; no state/cost/camera changes. 126 tests/build and 15 rendered tablet viewport bounds checks pass. Native iPad and player comprehension remain open. Next: validate planning with hauling/building choices, then M1 collision/route feedback.
+
 ## Status and maintenance
 
 - **Resolved — implemented:** the bounded request exists with code/test evidence. This does not establish enjoyment, biological accuracy or device performance.

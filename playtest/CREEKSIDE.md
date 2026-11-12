@@ -1,5 +1,7 @@
 # Creekside — living creek test
 
+> Survey update: open Plan dam → Survey contours & shorelines for the [optional survey view](SURVEY-VIEW.md). It compares current and completed-target water on explored terrain without spending supplies.
+
 > Lodge access update: [bank lodge, entrance mouth and live section](LODGE-ACCESS.md). Expand Home and creek → How the lodge connects to the creek. Placement and access rules remain unchanged; native/player acceptance is open in #21.
 
 > Elevation update: [terrain, shore and shallow-water readability](ELEVATION-READABILITY.md) is implemented as a first visual slice. Native iPad readability/performance remains open under #20.

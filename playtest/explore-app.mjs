@@ -2,7 +2,7 @@ import {lodgeSection} from './lodge-section.mjs?v=lodge-access-1';
 import {MUD_BANKS,enableConstruction,sectionStep} from './construction-rules.mjs';
 import {familyOutlook,familyActivity,journeyStatus,journeyHint,journeyFeedback} from './journey-rules.mjs';
 import {damWorkSites,nextDamWork} from './dam-work.mjs';
-import {createDamPlanner} from './dam-planner.mjs?v=dam-feedback-2';
+import {createDamPlanner} from './dam-planner.mjs?v=survey-1';
 import {CRESTS} from './dam-placement.mjs';
 import {createExploreScene} from './explore-scene.mjs?v=lodge-access-1';
 import {BOUNDS,LODGE,CHANNELS,movementMode,groundHeight,waterDepth} from './explore-rules.mjs';
