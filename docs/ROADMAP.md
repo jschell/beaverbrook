@@ -40,7 +40,7 @@ Recorded baseline: 103 automated tests and compatibility-renderer browser checks
 | Milestone | Player experience | Status | Gate |
 |---|---|---|---|
 | M0: Trust the world | Movement, water, home and family communicate consistent state | In progress | Investigate white flash; clarify lodge/entrance and family; verify essential camera/controls on target devices |
-| M1: Help the family | Choose how to gather, transport and build through low water | Implemented foundation; depth/validation open | Two meaningful approaches, understandable physical feedback and observed player comprehension/appeal |
+| M1: Help the family | Choose how to gather, transport and build through low water | Construction slice implemented; collision/balance/validation open | Two meaningful approaches, understandable physical feedback and observed player comprehension/appeal |
 | M2: Found a home | Explore, assess and establish another suitable home | Proposed integration | One persistent main-mode founding/recovery path, with viable alternatives and an explicit control model |
 | M3: Develop settlements | Link homes, water and supplies at larger scale | Deferred design | Adopt household/control scope; demonstrate useful network choices without overwhelming repetitive labor |
 | M4: Varied environmental scenarios | Apply familiar rules in different reaches and conditions | Proposal; research can start now | Supported parameterized content with discoverable clues, legal solution witnesses and recovery |
@@ -60,6 +60,8 @@ Work:
 Gate: a player can identify the home and entrance and understand why depth matters; reported rendering faults have a recorded disposition; essential movement/work controls have actual target-device evidence. An unreproduced bug remains open, not silently closed.
 
 ## M1 — make gathering and building rewarding
+
+First bounded implementation: [wood, framework and sealing mud](../playtest/M1-CONSTRUCTION.md). New sections have depth/span costs, local mud supply and separate visible framework/packing stages. Existing saves migrate without retroactive charges. Collision, actual flow/storage, broader route balance and human/device gates remain open; M1 is not complete.
 
 The [building materials and realism plan](design/building-materials-and-realism-plan.md) specifies the candidate resource/stage/cost/accounting contract and staged implementation.
 

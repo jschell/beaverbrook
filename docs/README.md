@@ -10,6 +10,10 @@ Start with the [roadmap](ROADMAP.md) for staged scope and completion gates. [Env
 
 [Discussion and implementation backlog](IMPLEMENTATION-BACKLOG.md) reconciles prior discussions, all G01–G21 findings, resolved requests and superseded assumptions. [GitHub issues](https://github.com/jschell/beaverbrook/issues) hold the actionable queue and acceptance criteria. Use that register for current status; older review prose below describes its original baseline.
 
+## M1 construction implementation
+
+[Wood, framework and sealing mud](../playtest/M1-CONSTRUCTION.md) records the first bounded M1 slice: finite mud banks, local material delivery, depth/span costs, framework versus packed crest, natural-bank support and save upgrades. 116 tests pass. Collision, true filling/flow, broader hauling balance and human/native-device validation remain open.
+
 ## Flexible dam placement demo
 
 [Flexible dams](../playtest/FLEXIBLE-DAMS.md) implements one player-placed span alongside the family dam, local section construction, per-section heights, extension, notching and a terrain-edge water model. Terrain changes only through excavation. The surveyed placement lab supplies finite nearby timber for quick testing.

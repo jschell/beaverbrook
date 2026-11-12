@@ -18,6 +18,10 @@ The [roadmap](ROADMAP.md), [procedural generation plan](design/procedural-genera
 
 [Terrain fading and family clarity](../playtest/M0-STABILIZATION.md): corrected false terrain occlusion from sloped tile bounding boxes; added family introduction and state-based optional notes. BUG-01 remains open for confirmation of the exact native white flash. UX-01 explanation is implemented, with fresh-player validation still open. 105 tests pass; compatibility-browser verification only. This update does not close all of M0.
 
+## M1 construction update
+
+[Wood, framework and sealing mud](../playtest/M1-CONSTRUCTION.md) implements a bounded #3/#6 slice and discrete packed-crest behavior for #5. New section costs depend on surveyed depth/span; mud sources, local transfers and visible stages are accounted and saved. Existing completed structures remain paid. 116 tests pass; compatibility-browser evidence only. #3/#5/#6 remain partial; #4 collision, full flow/storage and player/device validation remain open. M0 white-flash confirmation is still pending independently.
+
 ## Status and maintenance
 
 - **Resolved — implemented:** the bounded request exists with code/test evidence. This does not establish enjoyment, biological accuracy or device performance.
@@ -40,7 +44,7 @@ Current implementation evidence includes `playtest/explore-*.mjs`, `habitat-rule
 |---|---|---|
 | BUG-01 | P1 / partial: false terrain fade corrected; native flash confirmation open | [#1 White ground flash](https://github.com/jschell/beaverbrook/issues/1) |
 | UX-01 | P1 / partial | [#2 Explain adult and kit](https://github.com/jschell/beaverbrook/issues/2) |
-| DAM-01 | P1 / proposed | [#3 Foundations, depth-aware costs, reinforcement options](https://github.com/jschell/beaverbrook/issues/3) |
+| DAM-01 | P1 / partial: depth-aware wood/packing implemented; strength deferred | [#3 Foundations, depth-aware costs, reinforcement options](https://github.com/jschell/beaverbrook/issues/3) |
 | DAM-02 | P1 / open | [#4 Dam collision and crossings](https://github.com/jschell/beaverbrook/issues/4) |
 | WATER-01 | P1 / partial | [#5 Filling, leakage and overflow feedback](https://github.com/jschell/beaverbrook/issues/5) |
 | LOOP-01 | P1 / partial | [#6 Source choice and hauling](https://github.com/jschell/beaverbrook/issues/6) |

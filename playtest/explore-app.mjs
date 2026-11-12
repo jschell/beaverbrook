@@ -1,3 +1,4 @@
+import {MUD_BANKS,enableConstruction,sectionStep} from './construction-rules.mjs';
 import {familyOutlook,familyActivity,journeyStatus,journeyHint,journeyFeedback} from './journey-rules.mjs';
 import {damWorkSites,nextDamWork} from './dam-work.mjs';
 import {createDamPlanner} from './dam-planner.mjs';
@@ -7,10 +8,10 @@ import {BOUNDS,LODGE,CHANNELS,movementMode,groundHeight,waterDepth} from './expl
 import {freshHabitat,freshDamLab,habitatMove,habitatOptions,primaryHabitatAction,habitatAction,loadHabitat,PATCHES,DAM,localPlace,homeStatus,channelStatus,weather,DAY_WORK} from './habitat-rules.mjs';
 
 const el=id=>document.getElementById(id),lab=new URLSearchParams(location.search).get('mode')==='dam-lab',saveKey=lab?'beaverbrook-dam-lab-v1':'beaverbrook-creekside-habitat-v2';
-const newRun=()=>lab?freshDamLab():freshHabitat({flexible:true});
+const newRun=()=>lab?freshDamLab({construction:true}):freshHabitat({flexible:true,construction:true});
 let state,storage=true;
 try{state=loadHabitat(localStorage.getItem(saveKey))||newRun();}catch{state=newRun();storage=false;}
-state.flexible=true;state.placedDam??=null;
+state=enableConstruction(state);state.flexible=true;state.placedDam??=null;
 let messageExpires=Infinity;
 let selectedWork=null,workSites=[],markerButtons=new Map();
 let planning=false,paused=true,mapOpen=false,yaw=0,distance=6.5,lastTime=0,lastSave=0,lastHud=0,mapDirty=true;
@@ -53,6 +54,7 @@ function drawMap(){
  mark(DAM,'#d6b585','Family dam');
  if(state.placedDam)for(const p of state.placedDam.sections){ctx.strokeStyle=p.level?'#e6c191':'#d18970';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo((p.a.x+24)*scale,(p.a.z+24)*scale);ctx.lineTo((p.b.x+24)*scale,(p.b.z+24)*scale);ctx.stroke();}
  for(const p of PATCHES)if(state.known[p.id])mark(p,'#e6d6a3',p.name.replace('Bank ','').replace(' stand',''));
+ for(const p of MUD_BANKS)if(state.known[p.id])mark(p,'#bd9474',p.name);
  for(const p of CHANNELS)if(state.known[p.id])mark(p,'#bde2e0',p.name,10,24);
  for(const point of state.loose)if(Math.hypot(point.x-state.x,point.z-state.z)<7)mark(point,'#d9b080','Branch');
  mark(state,'#ffffff','You');
@@ -67,9 +69,9 @@ function updateHud(){
  el('family-activity').textContent=familyActivity(state);
  el('energy').value=DAY_WORK-state.effort;el('energy').setAttribute('aria-valuetext',(DAY_WORK-state.effort)+' of '+DAY_WORK+' energy remaining');
  el('mode').textContent=mode[0].toUpperCase()+mode.slice(1);
- el('load').textContent=state.cargo?`${state.cargo.wood} wood + ${state.cargo.food} food in tow`:'Free paws';
+ el('load').textContent=state.cargo?[state.cargo.wood?state.cargo.wood+' wood':'',state.cargo.mud?state.cargo.mud+' mud':'',state.cargo.food?state.cargo.food+' food':''].filter(Boolean).join(' + ')+' in tow':'Free paws';
  el('stock').textContent=`Day ${state.day} · ${weather(state)==='dry'?'low water':'steady flow'}`;
- el('colony').textContent=`Lodge: ${state.food} food (${home.foodNights} nights), ${state.wood} wood · Dam: ${state.damWood} wood delivered`;
+ el('colony').textContent=`Lodge: ${state.food} food (${home.foodNights} nights), ${state.wood} wood, ${state.mud} mud · Dam: ${state.damWood} wood + ${state.damMud} mud delivered`;
  el('home-state').textContent=home.protected?'Lodge approach submerged':'Shallow approach · costs 2 effort after rest';
  workSites=damWorkSites(state);const workHere=workSites.find(p=>p.local),target=workSites.find(p=>p.id===selectedWork);
  el('play').classList.toggle('has-work-goal',!!target);el('face-new').hidden=!state.placedDam;el('face-new').textContent=workSites.some(p=>p.id!=='family'&&p.needsWork)?'Find next section':'Inspect new dam';el('work-direction').hidden=!target;el('work-direction').textContent=target?target.name+' · '+Math.ceil(target.distance)+' units away · '+target.prompt:'';
@@ -88,16 +90,18 @@ function updateHud(){
  el('nearby').hidden=!place&&!options.some(a=>a.id==='pickup')||mapOpen;
  el('place-name').textContent=place?.point.name||'Supplies on the bank';
  let detail='';
+ if(place?.type==='mud')detail=state.mudBanks[place.point.id]+' sealing mud available. Gather a load, haul it to a framework and pack it. This is a finite deposit.';
  if(place?.type==='patch'){const p=place.point;detail=`${state.patches[p.id].stock}/${p.max} growth · ${p.description}${waterDepth(p.x,p.z,state)>.25?' Roots submerged: regrowth pauses.':''}`;}
  if(place?.type==='lodge')detail='Store mixed loads, carry stored wood onward, or rest to advance growth and weather. Rest consumes 2 food. A shortage uses 4 effort tomorrow; feeding the next rest restores recovery.';
  if(place?.type==='dam')detail=`${['Leaky established dam','Sealed low dam','Raised dam'][state.dam]}. Retaining water can turn shallow cuts into swimming routes. Opening a notch returns no wood.`;
- if(place?.type==='customDam'){const section=state.placedDam.sections[place.index];detail=`Built: ${section.level?CRESTS[section.level].toFixed(2):'open gap'} · target ${CRESTS[section.target].toFixed(2)} · ${section.wood} wood delivered here. Plan dam opens heights and extension controls. Work affects only this nearby section.`;}
+ if(place?.type==='customDam'){const section=state.placedDam.sections[place.index];detail=sectionStep(section).natural?'The natural bank already contains water to this target; no construction is needed here.':`Packed crest: ${section.level?CRESTS[section.level].toFixed(2):'open gap'} · frame ${section.frame?CRESTS[section.frame].toFixed(2):'stakes'} · next ${sectionStep(section).packing?sectionStep(section).mud+' mud to pack':sectionStep(section).wood+' wood for framework'} · target ${CRESTS[section.target].toFixed(2)} · ${section.wood} wood delivered here. Plan dam opens heights and extension controls. Work affects only this nearby section.`;}
  if(place?.type==='channel'){const c=channelStatus(state,place.point.id);detail=`Depth ${c.depth.toFixed(2)} · ${c.swimmable?'swimmable with a load':'too shallow for swimming'}. Digging changes this route; dry flow can expose a shallow cut.`;}
  let story='';
+ if(place?.type==='mud')story='Soft sealing material is exposed here. Mud packs the gaps in a wooden framework; it does not replace structural wood.';
  if(place?.type==='patch'){const p=place.point;story=state.patches[p.id].stock===0?'Only cut stems remain here. Leave time for new growth, or try another stand.':p.description;}
  if(place?.type==='lodge')story='Rest here when you are ready for tomorrow. The family eats from your supply, and the creek can change overnight.';
  if(place?.type==='dam')story=state.dam===0?'Water slips through the gaps. Holding more water could help the lodge and your hauling routes.':'The pond reaches farther along the banks. Consider what a higher or lower pond would change.';
- if(place?.type==='customDam')story='These stakes mark your chosen crossing. Build nearby sections with delivered wood; open gaps let water through.';
+ if(place?.type==='customDam')story='Wood builds the framework; mud packs it. Only a packed crest holds the target water. Low sections and bank bypasses still matter.';
  if(place?.type==='channel')story=channelStatus(state,place.point.id).swimmable?'This cut now floats a load. Try it on your next supply trip.':state.channels[place.point.id]?'The cut is too shallow to float a load now. You could deepen it or retain more water.':'A low strip leads toward useful growth. Digging here could bring water closer to it.';
  el('place-story').textContent=story;
  const reason=options.filter(a=>!a.enabled&&a.reason).map(a=>a.reason);el('place-detail').textContent=detail+(reason.length?' '+[...new Set(reason)].join(' '):'');
@@ -181,7 +185,7 @@ function frame(time){
    const steps=Math.max(1,Math.ceil(dt/.05));
    for(let step=0;step<steps;step++)state=habitatMove(state,{x:x*Math.cos(yaw)-forward*Math.sin(yaw),z:-x*Math.sin(yaw)-forward*Math.cos(yaw)},dt/steps);
    moving=Math.hypot(state.x-old.x,state.z-old.z)>.001;mapDirty=true;
-   const found=[...PATCHES,...CHANNELS].find(p=>!old.known[p.id]&&state.known[p.id]);
+   const found=[...PATCHES,...CHANNELS,...MUD_BANKS].find(p=>!old.known[p.id]&&state.known[p.id]);
    if(found)message(found.name+' is nearby. Approach to inspect its possibilities.');
    else if(oldMode!=='swimming'&&movementMode(state.x,state.z,state)==='swimming'&&!state.known.swimming){state.known.swimming=true;message('You are swimming. Hauling is faster here than over land.');}
   }
@@ -192,7 +196,7 @@ function frame(time){
  if(time-lastSave>2000){persist();lastSave=time;}
  requestAnimationFrame(frame);
 }
-if(state.cargo)message('Your load is still in tow. Deliver wood at the dam or bring supplies to the lodge.');
+if(state.cargo)message(state.cargo.mud?'Your sealing mud is still in tow. Deliver it at a framework and pack it, or store it at the lodge.':'Your load is still in tow. Deliver wood at the dam or bring supplies to the lodge.');
 else message(lab?'Pick up the timber beside you, or open Plan dam to experiment.':journeyHint(state));
-if(lab){el('lab-link').href='explore.html';el('lab-link').textContent='Return to the living creek sandbox';el('menu-note').textContent='Placement lab: the terrain is surveyed and 24 wood are in piles beside you. Open Plan dam, choose two bank endpoints and a target crest, then place stakes. Pick up timber and deliver it to nearby sections. Compare the completed preview with gaps, notches and different heights.';}
+if(lab){el('lab-link').href='explore.html';el('lab-link').textContent='Return to the living creek sandbox';el('menu-note').textContent='Placement lab: the terrain is surveyed and 48 wood and 12 sealing mud are in piles beside you. Open Plan dam, choose two bank endpoints and a target crest, then place stakes. Deliver wood and build a framework, then deliver mud and pack it. Deep sections need more material. Compare the completed preview with gaps, notches and different heights.';}
 setPause(true);updateHud();requestAnimationFrame(frame);

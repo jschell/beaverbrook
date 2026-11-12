@@ -1,5 +1,7 @@
 # Building materials and physical realism plan
 
+> Implementation update (2026-11-12): [M1 construction slice](../../playtest/M1-CONSTRUCTION.md) adopts the candidate depth/span cost model, local structural wood and sealing mud, framework/packing and save migration. These bounded rules now exist; collision, lodge recipes, strength, stones/bedding and actual flow/storage remain proposed. M1 and human/device validation are not complete.
+
 Planning deliverable: complete for review, 2026-11-11 (Pacific). Implementation remains open in [#3](https://github.com/jschell/beaverbrook/issues/3), [#4](https://github.com/jschell/beaverbrook/issues/4), [#5](https://github.com/jschell/beaverbrook/issues/5) and [#6](https://github.com/jschell/beaverbrook/issues/6). Maps to roadmap M0–M2. This plan defines a bounded candidate, not a claim that new recipes or physics already exist.
 
 ## Experience and guardrails

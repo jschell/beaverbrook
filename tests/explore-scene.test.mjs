@@ -1,3 +1,4 @@
+import * as construction from '../playtest/construction-rules.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
@@ -11,7 +12,7 @@ import * as journey from '../playtest/journey-rules.mjs';
 test('occluding lodge fades independently, camera stays put, and scenery recovers',async()=>{
  let scene,camera;
  class Renderer{constructor(){this.domElement={};}setPixelRatio(){}setSize(){}render(s,c){scene=s;camera=c;}dispose(){}}
- const context=vm.createContext({THREE:{...Three,WebGLRenderer:Renderer},...rules,...habitat,...placement,...journey,devicePixelRatio:1,window:{matchMedia:()=>({matches:true})},ResizeObserver:class{observe(){}}});
+ const context=vm.createContext({THREE:{...Three,WebGLRenderer:Renderer},...rules,...habitat,...placement,...journey,...construction,devicePixelRatio:1,window:{matchMedia:()=>({matches:true})},ResizeObserver:class{observe(){}}});
  const code=(await readFile(new URL('../playtest/explore-scene.mjs',import.meta.url),'utf8')).replace(/^import .*;\n/gm,'').replace('export function createExploreScene','function createExploreScene');
  vm.runInContext(code,context);
  const view=context.createExploreScene({clientWidth:900,clientHeight:760,append(){}}),s={...rules.freshExplore(),z:4.5};
@@ -35,7 +36,7 @@ test('occluding lodge fades independently, camera stays put, and scenery recover
 test('empty air inside a sloped terrain bounding box never fades ground, while real terrain obstruction still fades',async()=>{
  let scene,camera;
  class Renderer{constructor(){this.domElement={};}setPixelRatio(){}setSize(){}render(s,c){scene=s;camera=c;}dispose(){}}
- const context=vm.createContext({THREE:{...Three,WebGLRenderer:Renderer},...rules,...habitat,...placement,...journey,devicePixelRatio:1,window:{matchMedia:()=>({matches:true})},ResizeObserver:class{observe(){}}});
+ const context=vm.createContext({THREE:{...Three,WebGLRenderer:Renderer},...rules,...habitat,...placement,...journey,...construction,devicePixelRatio:1,window:{matchMedia:()=>({matches:true})},ResizeObserver:class{observe(){}}});
  const code=(await readFile(new URL('../playtest/explore-scene.mjs',import.meta.url),'utf8')).replace(/^import .*;\n/gm,'').replace('export function createExploreScene','function createExploreScene');
  vm.runInContext(code,context);const view=context.createExploreScene({clientWidth:900,clientHeight:760,append(){}});
  let time=0;const s={...habitat.freshHabitat(),x:12,z:5};
@@ -58,7 +59,7 @@ test('empty air inside a sloped terrain bounding box never fades ground, while r
 test('habitat renderer uses the same changing pond and cut bed as movement rules',async()=>{
  let scene;
  class Renderer{constructor(){this.domElement={};}setPixelRatio(){}setSize(){}render(s){scene=s;}dispose(){}}
- const context=vm.createContext({THREE:{...Three,WebGLRenderer:Renderer},...rules,...habitat,...placement,...journey,devicePixelRatio:1,window:{matchMedia:()=>({matches:true})},ResizeObserver:class{observe(){}}});
+ const context=vm.createContext({THREE:{...Three,WebGLRenderer:Renderer},...rules,...habitat,...placement,...journey,...construction,devicePixelRatio:1,window:{matchMedia:()=>({matches:true})},ResizeObserver:class{observe(){}}});
  const code=(await readFile(new URL('../playtest/explore-scene.mjs',import.meta.url),'utf8')).replace(/^import .*;\n/gm,'').replace('export function createExploreScene','function createExploreScene');
  vm.runInContext(code,context);const view=context.createExploreScene({clientWidth:900,clientHeight:760,append(){}});
  let s=habitat.freshHabitat();s.x=-4;s.z=0;view.update(s,{yaw:0,distance:6.5},10);
@@ -76,7 +77,7 @@ test('habitat renderer uses the same changing pond and cut bed as movement rules
 test('placed dam meshes and preview water reflect arbitrary geometry without committing the preview',async()=>{
  let scene;
  class Renderer{constructor(){this.domElement={};}setPixelRatio(){}setSize(){}render(s){scene=s;}dispose(){}}
- const context=vm.createContext({THREE:{...Three,WebGLRenderer:Renderer},...rules,...habitat,...placement,...journey,devicePixelRatio:1,window:{matchMedia:()=>({matches:true})},ResizeObserver:class{observe(){}}});
+ const context=vm.createContext({THREE:{...Three,WebGLRenderer:Renderer},...rules,...habitat,...placement,...journey,...construction,devicePixelRatio:1,window:{matchMedia:()=>({matches:true})},ResizeObserver:class{observe(){}}});
  const code=(await readFile(new URL('../playtest/explore-scene.mjs',import.meta.url),'utf8')).replace(/^import .*;\n/gm,'').replace('export function createExploreScene','function createExploreScene');
  vm.runInContext(code,context);const view=context.createExploreScene({clientWidth:900,clientHeight:760,append(){}});
  let s=habitat.freshDamLab();s=placement.commitDam(s,placement.makeDamPlan(s,{x:-6,z:-3},{x:6,z:0},2).dam).state;s.x=0;s.z=-5;
@@ -92,7 +93,7 @@ test('placed dam meshes and preview water reflect arbitrary geometry without com
 test('family uses improved water access, pauses with play, and the old water mark reflects a witnessed drop',async()=>{
  let scene;
  class Renderer{constructor(){this.domElement={};}setPixelRatio(){}setSize(){}render(s){scene=s;}dispose(){}}
- const context=vm.createContext({THREE:{...Three,WebGLRenderer:Renderer},...rules,...habitat,...placement,...journey,devicePixelRatio:1,window:{matchMedia:()=>({matches:false})},ResizeObserver:class{observe(){}}});
+ const context=vm.createContext({THREE:{...Three,WebGLRenderer:Renderer},...rules,...habitat,...placement,...journey,...construction,devicePixelRatio:1,window:{matchMedia:()=>({matches:false})},ResizeObserver:class{observe(){}}});
  const code=(await readFile(new URL('../playtest/explore-scene.mjs',import.meta.url),'utf8')).replace(/^import .*;\n/gm,'').replace('export function createExploreScene','function createExploreScene');
  vm.runInContext(code,context);const view=context.createExploreScene({clientWidth:900,clientHeight:760,append(){}}),s=habitat.freshHabitat({flexible:true});
  view.update(s,{yaw:0,distance:6.5,active:true},10);let family,memory;scene.traverse(o=>{if(o.userData.kind==='family-response')family=o;if(o.userData.kind==='water-memory')memory=o;});
@@ -102,4 +103,17 @@ test('family uses improved water access, pauses with play, and the old water mar
  const position=family.children[0].position.clone();view.update(s,{yaw:0,distance:6.5,active:false},4110);assert.ok(family.children[0].position.equals(position),'ambient activity pauses');assert.equal(JSON.stringify(s),snapshot,'family visuals never generate/consume supplies');
  s.day=4;s.journey.normalWater=.12;view.update(s,{yaw:0,distance:6.5,active:true},4210);assert.ok(memory.visible);assert.equal(memory.children[1].position.y,.12);
  s.food=0;view.update(s,{yaw:0,distance:6.5},4310);assert.equal(family.userData.mood,'hungry');view.dispose();
+});
+
+test('M1 renderer distinguishes stakes, open framework, packed faces and sealing mud without changing water rules',async()=>{
+ let scene;
+ class Renderer{constructor(){this.domElement={};}setPixelRatio(){}setSize(){}render(s){scene=s;}dispose(){}}
+ const context=vm.createContext({THREE:{...Three,WebGLRenderer:Renderer},...rules,...habitat,...placement,...journey,...construction,devicePixelRatio:1,window:{matchMedia:()=>({matches:true})},ResizeObserver:class{observe(){}}});
+ const code=(await readFile(new URL('../playtest/explore-scene.mjs',import.meta.url),'utf8')).replace(/^import .*;\n/gm,'').replace('export function createExploreScene','function createExploreScene');
+ vm.runInContext(code,context);const view=context.createExploreScene({clientWidth:900,clientHeight:760,append(){}});
+ let s=habitat.freshDamLab({construction:true});s=placement.commitDam(s,placement.makeDamPlan(s,{x:-6,z:-3},{x:6,z:-3},1).dam).state;
+ const update=()=>view.update(s,{yaw:0,distance:6.5,active:true},100);update();let group;scene.traverse(o=>{if(o.userData.kind==='placed-dam')group=o;});assert.equal(group.children[2].userData.stage,'stakes');
+ const water=()=>{const out=[];scene.traverse(o=>{if(o.isMesh&&o.visible&&o.material.color.getHexString()==='448f9f')out.push([o.position.x,o.position.y,o.position.z]);});return out;};const initial=water();
+ s.placedDam.sections[2].frame=1;s.cargo={wood:0,food:0,mud:2};update();assert.equal(group.children[2].userData.stage,'framework');assert.equal(group.children[2].children.some(o=>o.userData.kind==='packed-face'),false);assert.deepEqual(water(),initial);let cargo;scene.traverse(o=>{if(o.name==='carried-mud'&&o.parent?.parent?.type==='Group')cargo??=o;});assert.ok(cargo);assert.equal(cargo.visible,true);
+ s.placedDam.sections[2].level=1;s.cargo=null;const before=JSON.stringify(s);update();assert.equal(group.children[2].userData.stage,'packed');assert.ok(group.children[2].children.some(o=>o.userData.kind==='packed-face'));assert.equal(JSON.stringify(s),before,'rendering cannot consume sealing stock');view.dispose();
 });

@@ -1,3 +1,4 @@
+import {MUD_BANKS} from './construction-rules.mjs';
 import * as THREE from './vendor/three.module.js';
 import {BOUNDS,TREES,LODGE,GROVE,LANDING,groundHeight,movementMode,cameraBoom,dampCamera,creekWater,waterLevel,CHANNELS} from './explore-rules.mjs';
 
@@ -42,6 +43,7 @@ export function createExploreScene(container){
   terrain.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));terrain.computeVertexNormals();
   const bank=new THREE.Mesh(terrain,new THREE.MeshStandardMaterial({vertexColors:true,roughness:1}));world.add(bank);register(bank,true);terrainBanks.push(bank);
  }
+ const mudBanks=MUD_BANKS.map(p=>{const root=new THREE.Group();root.userData.kind='mud-bank';root.position.set(p.x,groundHeight(p.x,p.z),p.z);world.add(root);mesh(new THREE.CylinderGeometry(.7,.8,.06,12),'#876546',0,.04,0,root);for(let i=0;i<3;i++)mesh(new THREE.IcosahedronGeometry(.16,0),'#715138',i*.22-.22,.15,0,root);return {p,root};});
  const waterTiles=[];
  const waterMaterial=new THREE.MeshStandardMaterial({color:'#448f9f',transparent:true,opacity:.85,roughness:.3});
 
@@ -98,16 +100,20 @@ export function createExploreScene(container){
  for(let i=0;i<9;i++)log([-3.8+i*.85,.55,9.8],[-2.8+i*.85,.75,10.2],.15,'#b0925e',crest);
  register(damGroup);
  const damPile=new THREE.Group();world.add(damPile);damPile.position.set(-2,groundHeight(-2,8.5),8.5);
+ const familyPackingFace=mesh(new THREE.BoxGeometry(8,1,.25),'#715039',0,0,9.7);familyPackingFace.userData.kind='family-packed-face';register(familyPackingFace);
  const placedGroup=new THREE.Group();placedGroup.userData.kind='placed-dam';world.add(placedGroup);register(placedGroup);let lastPlaced='';
  function drawPlaced(s,preview){
   const dam=preview?.placedDam||s.placedDam,key=JSON.stringify([dam,!!preview]);if(key===lastPlaced)return;lastPlaced=key;clear(placedGroup);placedGroup.visible=!!dam;
   if(!dam)return;for(const [i,p]of dam.sections.entries()){
-   const center=damCenter(p),bed=Math.min(groundHeight(center.x,center.z,s),groundHeight(p.a.x,p.a.z,s),groundHeight(p.b.x,p.b.z,s)),level=preview?p.target:p.level,crest=level?CRESTS[level]:bed+.3;
-   const section=new THREE.Group();section.userData.section=i;placedGroup.add(section);
+   const center=damCenter(p),bed=Math.min(groundHeight(center.x,center.z,s),groundHeight(p.a.x,p.a.z,s),groundHeight(p.b.x,p.b.z,s)),level=preview?p.target:(p.frame??p.level),crest=level?CRESTS[level]:bed+.3;
+   const section=new THREE.Group();section.userData.section=i;section.userData.stage=level>(p.level||0)&&!preview?'framework':level?'packed':'stakes';placedGroup.add(section);
    if(level){
     for(let y=bed+.1;y<crest+.06;y+=.17)log([p.a.x,y,p.a.z],[p.b.x,y,p.b.z],.105,preview?'#d3b667':'#977149',section);
     for(const t of [.15,.65]){const x=p.a.x+(p.b.x-p.a.x)*t,z=p.a.z+(p.b.z-p.a.z)*t;log([x,bed,z],[x,crest+.12,z],.07,'#b29968',section);}
    }else for(const v of [p.a,p.b])log([v.x,groundHeight(v.x,v.z,s),v.z],[v.x,Math.max(groundHeight(v.x,v.z,s)+.5,.55),v.z],.045,'#d9c497',section);
+   const packed=preview?p.target:p.level;
+   if(s.construction&&packed&&CRESTS[packed]>bed){const face=mesh(new THREE.BoxGeometry(Math.hypot(p.b.x-p.a.x,p.b.z-p.a.z),CRESTS[packed]-bed,.25),'#715039',center.x,(bed+CRESTS[packed])/2,center.z,section);face.rotation.y=-Math.atan2(p.b.z-p.a.z,p.b.x-p.a.x);face.userData.kind='packed-face';}
+   if(p.mud)mesh(new THREE.IcosahedronGeometry(.18,0),'#715138',center.x+.25,Math.max(bed,.15)+.15,center.z+.3,section);
    for(let j=0;j<Math.min(5,p.wood);j++)log([center.x-.4,Math.max(bed,.15)+.15+j*.1,center.z-.4],[center.x+.4,Math.max(bed,.15)+.15+j*.1,center.z-.25],.06,'#c09b65',section);
   }
   refresh(occluders.find(r=>r.root===placedGroup));
@@ -138,10 +144,11 @@ export function createExploreScene(container){
  cargo.name='carried-wood';body.name='beaver-body';
  const foodCargo=mesh(new THREE.IcosahedronGeometry(.24,0),'#b3c075',0,.4,-.8,beaver);
  foodCargo.name='carried-food';
+ const mudCargo=mesh(new THREE.IcosahedronGeometry(.23,0),'#715138',0,.38,-.8,beaver);mudCargo.name='carried-mud';
  const wake=mesh(new THREE.TorusGeometry(.55,.018,3,28),'#bfddcc',0,.02,0);wake.rotation.x=-Math.PI/2;wake.scale.set(.75,1.7,1);
  // Authored family response, not autonomous gathering or extra resource production.
  const family=new THREE.Group();family.userData.kind='family-response';world.add(family);
- function relative(scale,tint){const animal=beaver.clone(true);animal.scale.setScalar(scale);animal.traverse(o=>{if(o.isMesh&&['795437','8b6342'].includes(o.material.color.getHexString())){o.material=o.material.clone();o.material.color.set(tint);}});animal.getObjectByName('carried-wood').visible=false;animal.getObjectByName('carried-food').visible=false;family.add(animal);return animal;}
+ function relative(scale,tint){const animal=beaver.clone(true);animal.scale.setScalar(scale);animal.traverse(o=>{if(o.isMesh&&['795437','8b6342'].includes(o.material.color.getHexString())){o.material=o.material.clone();o.material.color.set(tint);}});animal.getObjectByName('carried-wood').visible=false;animal.getObjectByName('carried-food').visible=false;animal.getObjectByName('carried-mud').visible=false;family.add(animal);return animal;}
  const adult=relative(.8,'#806048'),kit=relative(.52,'#9b7755');adult.userData.kind='family-adult';kit.userData.kind='family-kit';let familyClock=0;
  const waterMemory=new THREE.Group();waterMemory.userData.kind='water-memory';world.add(waterMemory);
  log([0,-.8,6],[0,1.35,6],.045,'#b4a57c',waterMemory);
@@ -185,12 +192,13 @@ export function createExploreScene(container){
  const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
  function clear(group){while(group.children.length){const child=group.children.pop();child.traverse(o=>{o.geometry?.dispose();for(const record of occluders)if(record.materials.delete(o.material))o.material.dispose();});child.parent=null;}}
  function inventory(s){
-  const signature=JSON.stringify([s.groveStock,s.stored,s.dropped,s.loose,s.damWood,s.food]);if(signature===lastInventory)return;lastInventory=signature;
+  const signature=JSON.stringify([s.groveStock,s.stored,s.dropped,s.loose,s.damWood,s.food,s.mud,s.damMud]);if(signature===lastInventory)return;lastInventory=signature;
   for(const group of [branchPile,storedPile,dropped,damPile])clear(group);
   if(s.version!==2)for(let i=0;i<s.groveStock;i++)branch(branchPile,.1+i*.11);
   for(let i=0;i<Math.min(12,s.damWood||0);i++)branch(damPile,.1+i*.13);
   for(let i=0;i<Math.min(12,s.stored);i++){const stack=new THREE.Group();stack.position.set(1.1,.1+i*.13,0);storedPile.add(stack);branch(stack);}
-  for(const point of (s.version===2?s.loose:s.dropped)){const stack=new THREE.Group();stack.position.set(point.x,Math.max(waterLevel(point.x,point.z,s)??-1,groundHeight(point.x,point.z,s))+.05,point.z);dropped.add(stack);if(point.wood===undefined||point.wood>0)branch(stack);if(point.food>0)mesh(new THREE.IcosahedronGeometry(.2,0),'#acb96c',.2,.2,0,stack);}
+  for(const point of (s.version===2?s.loose:s.dropped)){const stack=new THREE.Group();stack.position.set(point.x,Math.max(waterLevel(point.x,point.z,s)??-1,groundHeight(point.x,point.z,s))+.05,point.z);dropped.add(stack);if(point.wood===undefined||point.wood>0)branch(stack);if(point.mud>0)mesh(new THREE.IcosahedronGeometry(.23,0),'#715138',0,.15,0,stack);if(point.food>0)mesh(new THREE.IcosahedronGeometry(.2,0),'#acb96c',.2,.2,0,stack);}
+  if(s.construction){for(const [group,n,x]of [[damPile,s.damMud,.6],[storedPile,s.mud,1.4]])for(let i=0;i<Math.min(6,n);i++)mesh(new THREE.IcosahedronGeometry(.17,0),'#715138',x,.12+Math.floor(i/3)*.18,(i%3)*.22,group);}
   if(s.version===2)for(let i=0;i<Math.min(10,s.food);i++)mesh(new THREE.IcosahedronGeometry(.13,0),'#a4b66d',-.8+(i%3)*.2,.08+Math.floor(i/3)*.15,.7,storedPile);
   for(const record of occluders)if(record.root===lodge||record.root===grove)refresh(record);
  }
@@ -233,13 +241,14 @@ export function createExploreScene(container){
   if(!reduced&&moving)body.position.y=.36+Math.sin(time*.012)*.025;
   else body.position.y=.36;
   legs.forEach((leg,i)=>{leg.position.y=.11+(moving&&!reduced?Math.sin(time*.015+i*Math.PI)*.06:0);});
-  foodCargo.visible=s.version===2&&s.cargo?.food>0;
+  foodCargo.visible=s.version===2&&s.cargo?.food>0;mudCargo.visible=s.version===2&&s.cargo?.mud>0;
+  for(const {p,root}of mudBanks){root.visible=!!s.construction&&Math.hypot(s.x-p.x,s.z-p.z)<14;root.position.y=groundHeight(p.x,p.z,s);root.children.forEach((o,i)=>{if(i)o.visible=s.construction&&s.mudBanks[p.id]>0;});}
   cargo.visible=s.carrying;cargo.children.forEach(o=>o.visible=s.version!==2||s.cargo?.wood>0);cargo.rotation.y=swim?-.15:.15;
   wake.visible=swim&&moving;wake.position.set(s.x,surface+.025,s.z);wake.rotation.z=s.yaw;
   const hydrology=creekWater(view.previewState||s);waterMaterial.color.set(view.previewState?'#a2bda5':'#448f9f');waterMaterial.opacity=view.previewState?.6:.85;
   for(const tile of waterTiles){const x=tile.position.x,z=tile.position.z,level=hydrology?hydrology.wet.get(Math.floor(x)+','+Math.floor(z)):groundHeight(x,z)<.35?0:undefined;tile.visible=level!==undefined&&Math.hypot(x-s.x,z-s.z)<20;tile.position.y=level??0;}
   for(const stand of stands){stand.root.visible=s.version===2&&Math.hypot(stand.p.x-s.x,stand.p.z-s.z)<16;stand.root.position.y=groundHeight(stand.p.x,stand.p.z,s);if(s.version===2){const stock=s.patches[stand.p.id].stock;stand.shoots.forEach((o,i)=>o.visible=i<stock);stand.stump.visible=stock===0;}}
-  damGroup.visible=s.version===2;damGroup.position.y=s.version===2?[-.28,0,.2][s.dam]:0;damGroup.children.forEach((o,i)=>{if(o!==crest)o.visible=s.dam>0||i%5!==2;});crest.visible=s.dam===2;damPile.visible=s.version===2;
+  damGroup.visible=s.version===2;damGroup.position.y=s.version===2?[-.28,0,.2][s.dam]:0;damGroup.children.forEach((o,i)=>{if(o!==crest)o.visible=(s.familyFrame??s.dam)>0||i%5!==2;});crest.visible=(s.familyFrame??s.dam)===2;damPile.visible=s.version===2;familyPackingFace.visible=!!s.construction&&s.dam>0;familyPackingFace.scale.y=s.dam===2?1.18:.9;familyPackingFace.position.y=s.dam===2?.09:-.05;
   for(const m of markers){m.root.visible=s.version===2&&Math.hypot(m.c.x-s.x,m.c.z-s.z)<14;m.root.position.y=groundHeight(m.c.x,m.c.z,s);m.route.visible=m.root.visible&&!(s.channels?.[m.c.id]);}
   entrance.visible=s.version===2;entrance.position.y=groundHeight(-2.2,6,s)+.08;
   for(const tree of trees)tree.visible=Math.hypot(tree.position.x-s.x,tree.position.z-s.z)<16;

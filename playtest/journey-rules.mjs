@@ -39,6 +39,7 @@ export function journeyStatus(s){
 }
 export function journeyHint(s){
  const j=s.journey||initialJourney(s),family=familyOutlook(s);
+ if(s.cargo?.mud)return 'Carry this sealing mud to a dam framework and pack it, or store it at the lodge. Wood builds the framework; mud seals it.';
  if(s.cargo)return 'Bring this load to the lodge to feed the family and store wood, or deliver its wood directly at a dam. Find home on your map.';
  if(!j.broughtHome)return 'Try bringing a leafy branch home. The light-leaved willow nearby gives food and wood. Approach it and press E, then return to the lodge.';
  if(dry(s)&&!family.accessible)return 'The water fell below the lodge approach. You can deepen that approach or retain more water with a dam. Choose the change that helps your creek.';

@@ -1,5 +1,7 @@
 # Creekside — living creek test
 
+> M1 update: [wood, framework and sealing mud](M1-CONSTRUCTION.md) now governs production Creekside/lab construction. Wood builds a frame; mud packs the effective crest. Older one-wood-per-level costs below describe the preceding experiment. Saves retain paid structures and inventories; ordinary play receives no free stored materials. See the new record for current costs, sources, evidence and limits.
+
 > Tracking audit (2026-11-11): [current discussion dispositions and issue queue](../docs/IMPLEMENTATION-BACKLOG.md). This record describes its named experiment; historical verification counts do not claim current human/device validation.
 
 See the [flexible dam placement demo](FLEXIBLE-DAMS.md) and [quick placement lab](explore.html?mode=dam-lab) for player-chosen spans, section heights and the new stable-terrain water model.

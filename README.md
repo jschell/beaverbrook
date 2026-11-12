@@ -16,6 +16,8 @@ Completed planning package: [roadmap](docs/ROADMAP.md), [procedural generation](
 
 ## Start here
 
+- [M1 construction slice](playtest/M1-CONSTRUCTION.md) — structural wood, sealing mud, depth-aware section costs and visible framework/packing; existing saves retain completed work. M1 collision and playtest gates remain open.
+
 - [Play Willow Cove](playtest/explore.html) — help the family through a low-water night, choose how to protect access and gather food, then keep exploring; [implemented opening and remaining gaps](playtest/WILLOW-COVE.md). This is the default Pages entry.
 
 - [Flexible dam placement lab](playtest/explore.html?mode=dam-lab) — choose bank endpoints, span and section heights; preview water, haul nearby timber and build locally. Stable terrain with no erosion; [controls, rules and limits](playtest/FLEXIBLE-DAMS.md).
