@@ -20,7 +20,7 @@ The [roadmap](ROADMAP.md), [procedural generation plan](design/procedural-genera
 
 ## Camera-dependent terrain follow-up
 
-[Deep Willow cut reproduction and correction](../playtest/M0-STABILIZATION.md#follow-up-camera-dependent-pale-tiles-at-the-deep-willow-cut) records native screenshot/camera-motion evidence and a real-Three geometry reproduction: legitimate bank intersections faded an entire tile. Ground now stays opaque; terrain occlusion shows a local beaver outline instead. Trees/lodge retain fading. 118 tests and build pass; compatibility-browser evidence only. #1 remains open for affected-iPad confirmation, coordinated with #15.
+[Deep Willow cut reproduction and correction](../playtest/M0-STABILIZATION.md#follow-up-camera-dependent-pale-tiles-at-the-deep-willow-cut) records native screenshot/camera-motion evidence and a real-Three geometry reproduction: legitimate bank intersections faded an entire tile. Ground now stays opaque; the initially added wireframe duplicate has been removed after native-device feedback. Terrain occlusion shows only a thin player-feet ring; normal character materials stay solid. Trees/lodge retain fading. 118 tests and build pass; compatibility-browser evidence only. #1 remains open for affected-iPad confirmation, coordinated with #15.
 
 ## M1 construction update
 
@@ -50,7 +50,7 @@ Current implementation evidence includes `playtest/explore-*.mjs`, `habitat-rule
 
 | ID | Priority/status | Issue |
 |---|---|---|
-| BUG-01 | P1 / partial: deep-cut camera trigger reproduced; terrain made opaque with player outline; native acceptance open | [#1 White ground flash](https://github.com/jschell/beaverbrook/issues/1) |
+| BUG-01 | P1 / partial: deep-cut camera trigger reproduced; terrain made opaque; wireframe overlay replaced with feet marker; native acceptance open | [#1 White ground flash](https://github.com/jschell/beaverbrook/issues/1) |
 | UX-01 | P1 / partial | [#2 Explain adult and kit](https://github.com/jschell/beaverbrook/issues/2) |
 | DAM-01 | P1 / partial: depth-aware wood/packing implemented; strength deferred | [#3 Foundations, depth-aware costs, reinforcement options](https://github.com/jschell/beaverbrook/issues/3) |
 | DAM-02 | P1 / open | [#4 Dam collision and crossings](https://github.com/jschell/beaverbrook/issues/4) |

@@ -33,7 +33,7 @@ test('occluding lodge fades independently, camera stays put, and scenery recover
  view.dispose();
 });
 
-test('terrain stays opaque through false bounding-box and real hillside obstruction; player outline follows visibility',async()=>{
+test('terrain stays opaque through false bounding-box and real hillside obstruction; player marker follows visibility',async()=>{
  let scene,camera;
  class Renderer{constructor(){this.domElement={};}setPixelRatio(){}setSize(){}render(s,c){scene=s;camera=c;}dispose(){}}
  const context=vm.createContext({THREE:{...Three,WebGLRenderer:Renderer},...rules,...habitat,...placement,...journey,...construction,devicePixelRatio:1,window:{matchMedia:()=>({matches:true})},ResizeObserver:class{observe(){}}});
@@ -50,10 +50,10 @@ test('terrain stays opaque through false bounding-box and real hillside obstruct
  const obstructed={...s,x:10,z:8};for(let i=0;i<100;i++)frame(obstructed,Math.PI/2);
  assert.ok(camera.position.y<rules.groundHeight(camera.position.x,camera.position.z,obstructed),'camera lies inside a real hillside');
  assert.ok(banks.every(o=>o.material.opacity===1&&!o.material.transparent&&o.material.depthWrite),'even real intersecting terrain remains solid');
- let outline;scene.traverse(o=>{if(o.userData.kind==='terrain-visibility-outline')outline=o;});assert.ok(outline.visible,'player outline supplies visibility through the hillside');
+ let outline;scene.traverse(o=>{if(o.userData.kind==='terrain-player-marker')outline=o;});assert.ok(outline.visible,'player marker supplies visibility through the hillside');
  for(let i=0;i<140;i++)frame(s,0);
  assert.ok(banks.every(o=>o.material.opacity===1&&o.material.depthWrite),'terrain restores after the real obstruction');
- assert.equal(outline.visible,false,'outline disappears with clear terrain sightlines');
+ assert.equal(outline.visible,false,'marker disappears with clear terrain sightlines');
  assert.deepEqual(banks.map(o=>Array.from(o.geometry.getAttribute('color').array)),colors,'orbit does not recolor ground');
  view.dispose();
 });
@@ -129,13 +129,20 @@ test('deep Willow cut camera reproduction never fades whole ground tiles or chan
  vm.runInContext(code,context);const view=context.createExploreScene({clientWidth:1024,clientHeight:620,append(){}});
  const s={...habitat.freshHabitat(),x:-7,z:1,channels:{west:2,east:0}},before=JSON.stringify(s);let time=0;
  for(let i=0;i<50;i++)view.update(s,{yaw:0,distance:6.5},time+=17);
- let outline;const banks=[];scene.traverse(o=>{if(o.userData.kind==='terrain-visibility-outline')outline=o;if(o.isMesh&&o.material.vertexColors)banks.push(o);});
+ let outline;const banks=[];scene.traverse(o=>{if(o.userData.kind==='terrain-player-marker')outline=o;if(o.isMesh&&o.material.vertexColors)banks.push(o);});
  assert.ok(outline.visible,'reproduces the bank intersecting camera sightlines at the deep cut');
+ const bodies=[];scene.traverse(o=>{if(o.name==='beaver-body')bodies.push(o);if(o.isMesh)assert.notEqual(o.material.wireframe,true,'no player, cargo or family wireframe overlay');});
+ assert.equal(bodies.length,3,'only player, adult and kit exist; no duplicate character');
+ assert.ok(bodies.every(o=>o.material.opacity===1&&!o.material.transparent),'character bodies retain solid shaded materials');
+ const playerBody=bodies.find(o=>!o.parent.userData.kind),player=playerBody.parent;
+ assert.equal(outline.position.x,player.position.x);assert.equal(outline.position.z,player.position.z);assert.ok(Math.abs(outline.position.y-player.position.y-.04)<1e-9,'ring follows player feet instead of a floating duplicate');
+ assert.equal(outline.geometry.type,'RingGeometry');
+
  assert.ok(banks.every(o=>o.material.opacity===1&&!o.material.transparent&&o.material.depthWrite),'no pale 8×8 patch or transparent terrain/water sorting');
  outline.traverse(o=>{if(o.isMesh){assert.equal(o.material.depthTest,false);assert.equal(o.material.depthWrite,false);}});
  const colors=banks.map(o=>Array.from(o.geometry.getAttribute('color').array));
  for(let i=0;i<60;i++)view.update(s,{yaw:Math.PI,distance:6.5},time+=17);
- assert.equal(outline.visible,false,'rotating away from the bank clears the outline');
+ assert.equal(outline.visible,false,'rotating away from the bank clears the marker');
  assert.deepEqual(banks.map(o=>Array.from(o.geometry.getAttribute('color').array)),colors);
  assert.equal(JSON.stringify(s),before,'camera movement does not modify water, resources or terrain state');view.dispose();
 });

@@ -2,7 +2,7 @@
 
 Implemented 2026-11-11 (Pacific). Tracks [#1](https://github.com/jschell/beaverbrook/issues/1) and [#2](https://github.com/jschell/beaverbrook/issues/2). This is the first bounded roadmap M0 change, not completion of M0.
 
-> 2026-11-12 follow-up below supersedes terrain fading: ground stays opaque and a local player outline handles terrain occlusion. Tree/lodge fading remains.
+> 2026-11-12 follow-up below supersedes terrain fading: ground stays opaque and a small location ring handles terrain occlusion (the initial wireframe overlay was removed after device feedback). Tree/lodge fading remains.
 
 ## Reproduction and terrain correction
 
@@ -49,3 +49,11 @@ This deliberately replaces whole-tile ground fading. A hillside can still cover 
 118 tests pass, including the precise deep-cut reproduction, solid terrain/depth writing, outline visibility and clearing after camera rotation, stable vertex colors, unchanged state, real hillside obstruction, and existing tree/lodge fade recovery. The production build passes. A rendered compatibility-browser check shows solid ground at the deep-cut camera angle; it cannot certify WebGL wireframe pixels or iPad GPU behavior. Compatibility terrain uses a coarser mesh, so exact occlusion boundaries differ.
 
 Versioned app/scene URLs ensure a reload requests the correction. #1 remains open for the affected iPad: revisit the deep Willow cut, orbit the camera, walk while carrying wood, and inspect water/terrain edges. Report whether any broad pale rectangle remains. This is a reproduced mechanism and implemented correction, with native device acceptance pending.
+
+## Follow-up: remove the wireframe duplicate
+
+The next native WebGL screenshot (92E9B940-DA8B-4146-B2B3-290D1844D61F.jpeg) shows the added wireframe overlay looking like a second beaver above the shaded model. That overlay was introduced by the preceding mitigation; it was not acceptable character presentation.
+
+Removed the cloned player/load mesh and all wireframe rendering. The player retains its ordinary shaded materials. Terrain stays opaque; if bank sightlines are blocked, a thin amber ring of radius 0.46 units appears at the player's feet. The compatibility renderer uses a small flattened ellipse at the same feet reference. Clear sightlines remove the marker after the short hold. Trees/lodge still fade independently. The earlier wireframe design in this record is superseded.
+
+118 tests and build pass. Regression assertions require exactly the player/adult/kit bodies, no wireframe material anywhere in the scene, solid body materials, marker position aligned with player feet, marker clearing after orbit, and opaque terrain at the deep-cut reproduction. Versioned app and scene URLs request the correction on reload. Native iPad verification remains open in #1/#15; developer geometry/material assertions are separate from GPU pixel confirmation.
