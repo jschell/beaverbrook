@@ -63,3 +63,12 @@ Compatibility-browser checks exercised ordinary mud gathering, lab quote (defaul
 ## Next M1 work
 
 Review whether depth-aware costs and separate packing create useful decisions rather than extra trips. Then add committed collision/crossings, clearer limiting-outlet feedback and targeted source/route tuning. Do not call this complete M1 or a verified fun/realistic ecosystem.
+
+
+## Loose supply support after excavation (2026-11-12)
+
+[#18](https://github.com/jschell/beaverbrook/issues/18): A user WebGL screenshot shows loose timber at its old elevation beside the newly dug Willow cut. Cause: `inventory()` cached meshes by stock and placed them only when that stock changed. Channels, water stage and dam crest were absent from the cache key. Excavating an unchanged pile therefore left its previous y position cached.
+
+Supply positioning now runs independently of inventory mesh rebuilding. Wood/food loads rest at the higher of their current ground and actual water surface, plus 0.05 visual clearance. Mud-only loads rest on the current bed rather than floating. The family-dam loose supply pile also updates its ground/water support. Mixed wood/food loads keep their contents together. Lodge storage and constructed dam sections remain attached to their structures; no gravity/drifting simulation or material consumption was added. Preview water does not lift actual loose stock.
+
+119 tests and build pass. Regression uses unchanged loads at (-6,0), (-5,0) and (-6,1), deepens the west channel, changes to a low-water day and raises the actual family dam. It checks lower wood placement, water support, sunken mud, unchanged geometry, stable identical frames and unchanged inventory/accounting. A compatibility-browser fixture exercised two real dig actions and a low-water switch with three unchanged loads; timber resettled at the cut water surface. Native iPad WebGL visual acceptance remains open; no source counts or saved coordinates are rewritten by rendering.

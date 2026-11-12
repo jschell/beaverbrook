@@ -158,3 +158,25 @@ test('compatibility terrain obstruction uses a local player marker rather than t
  for(let i=0;i<60;i++)view.update({...s,x:12,z:5},{yaw:0,distance:9,force:true},time+=17);
  assert.doesNotMatch(container.innerHTML,/<ellipse/,'clear terrain sightline removes fallback marker');view.dispose();
 });
+
+
+test('unchanged loose supplies resettle after excavation and water changes without rebuilding or spending stock',async()=>{
+ let scene;
+ class Renderer{constructor(){this.domElement={};}setPixelRatio(){}setSize(){}render(s){scene=s;}dispose(){}}
+ const context=vm.createContext({THREE:{...Three,WebGLRenderer:Renderer},...rules,...habitat,...placement,...journey,...construction,devicePixelRatio:1,window:{matchMedia:()=>({matches:true})},ResizeObserver:class{observe(){}}});
+ const code=(await readFile(new URL('../playtest/explore-scene.mjs',import.meta.url),'utf8')).replace(/^import .*;\n/gm,'').replace('export function createExploreScene','function createExploreScene');
+ vm.runInContext(code,context);const view=context.createExploreScene({clientWidth:1024,clientHeight:620,append(){}});
+ const s=habitat.freshHabitat({construction:true});s.loose=[{x:-6,z:0,wood:2,food:0,mud:0},{x:-5,z:0,wood:0,food:0,mud:2},{x:-6,z:1,wood:1,food:1,mud:0}];
+ let time=0;const update=()=>view.update(s,{yaw:0,distance:6.5},time+=17);update();
+ const piles=[];scene.traverse(o=>{if(o.userData.kind==='loose-supplies')piles.push(o);});assert.equal(piles.length,3);
+ const wood=piles[0],mud=piles[1],oldY=wood.position.y,geometry=wood.children[0].geometry,inventory=JSON.stringify([s.loose,s.ledger]);
+ s.channels.west=2;update();
+ assert.ok(wood.position.y<oldY-.3,'wood drops from its old bank height after digging');
+ assert.equal(wood.position.y,Math.max(rules.groundHeight(-6,0,s),rules.waterLevel(-6,0,s))+.05,'wood floats at the actual water surface');
+ assert.equal(mud.position.y,rules.groundHeight(-5,0,s)+.05,'mud-only loads settle on the excavated bed');
+ assert.equal(wood.children[0].geometry,geometry,'surface updates do not rebuild inventory geometry');
+ const normalY=wood.position.y;s.day=4;update();assert.ok(wood.position.y<normalY,'unchanged wood follows a low-water day');
+ s.day=1;s.dam=2;update();assert.equal(wood.position.y,Math.max(rules.groundHeight(-6,0,s),rules.waterLevel(-6,0,s))+.05);
+ const positions=piles.map(p=>p.position.clone());update();assert.ok(piles.every((p,i)=>p.position.equals(positions[i])),'support is stable across identical frames');
+ assert.equal(JSON.stringify([s.loose,s.ledger]),inventory,'visual settling never changes counts or accounting');view.dispose();
+});

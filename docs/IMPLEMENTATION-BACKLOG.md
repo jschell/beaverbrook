@@ -30,6 +30,10 @@ The [roadmap](ROADMAP.md), [procedural generation plan](design/procedural-genera
 
 [Tablet layout review](../playtest/IPAD-LAYOUT-REVIEW.md) addresses hint clipping and overlay bounds under [#17](https://github.com/jschell/beaverbrook/issues/17), linked to PLATFORM-01/#15. Nudge/hint have reserved space above controls; home/work details scroll independently; map/planner/menu remain reachable. Fifteen representative usable CSS viewports pass layout checks. Dam-planner follow-up keeps operation results/errors and preview summary inside the active dialog above independently scrolling controls; post-staking instructions persist. Existing-project extension, target change and refused removal were browser-checked, with routing regression assertions. Native iPad Safari touch, safe areas and WebGL remain unverified; #17 stays open for those checks.
 
+## Loose supply support correction
+
+[Supply support follow-up](../playtest/M1-CONSTRUCTION.md#loose-supply-support-after-excavation-2026-11-12) tracks [#18](https://github.com/jschell/beaverbrook/issues/18) and fixes unchanged loose logs hanging at their cached height after digging. Support follows current terrain and actual water independently of inventory geometry; mud-only loads settle on the bed. 119 tests and build pass; affected-device visual acceptance remains open.
+
 ## Status and maintenance
 
 - **Resolved — implemented:** the bounded request exists with code/test evidence. This does not establish enjoyment, biological accuracy or device performance.

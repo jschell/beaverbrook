@@ -99,7 +99,7 @@ export function createExploreScene(container){
  const crest=new THREE.Group();damGroup.add(crest);
  for(let i=0;i<9;i++)log([-3.8+i*.85,.55,9.8],[-2.8+i*.85,.75,10.2],.15,'#b0925e',crest);
  register(damGroup);
- const damPile=new THREE.Group();world.add(damPile);damPile.position.set(-2,groundHeight(-2,8.5),8.5);
+ const damPile=new THREE.Group();damPile.userData.kind='family-dam-supplies';world.add(damPile);damPile.position.set(-2,groundHeight(-2,8.5),8.5);
  const familyPackingFace=mesh(new THREE.BoxGeometry(8,1,.25),'#715039',0,0,9.7);familyPackingFace.userData.kind='family-packed-face';register(familyPackingFace);
  const placedGroup=new THREE.Group();placedGroup.userData.kind='placed-dam';world.add(placedGroup);register(placedGroup);let lastPlaced='';
  function drawPlaced(s,preview){
@@ -208,10 +208,16 @@ export function createExploreScene(container){
   if(s.version!==2)for(let i=0;i<s.groveStock;i++)branch(branchPile,.1+i*.11);
   for(let i=0;i<Math.min(12,s.damWood||0);i++)branch(damPile,.1+i*.13);
   for(let i=0;i<Math.min(12,s.stored);i++){const stack=new THREE.Group();stack.position.set(1.1,.1+i*.13,0);storedPile.add(stack);branch(stack);}
-  for(const point of (s.version===2?s.loose:s.dropped)){const stack=new THREE.Group();stack.position.set(point.x,Math.max(waterLevel(point.x,point.z,s)??-1,groundHeight(point.x,point.z,s))+.05,point.z);dropped.add(stack);if(point.wood===undefined||point.wood>0)branch(stack);if(point.mud>0)mesh(new THREE.IcosahedronGeometry(.23,0),'#715138',0,.15,0,stack);if(point.food>0)mesh(new THREE.IcosahedronGeometry(.2,0),'#acb96c',.2,.2,0,stack);}
+  for(const point of (s.version===2?s.loose:s.dropped)){const stack=new THREE.Group();stack.userData.kind='loose-supplies';stack.userData.floats=point.wood===undefined||point.wood>0||point.food>0;stack.position.set(point.x,0,point.z);dropped.add(stack);if(point.wood===undefined||point.wood>0)branch(stack);if(point.mud>0)mesh(new THREE.IcosahedronGeometry(.23,0),'#715138',0,.15,0,stack);if(point.food>0)mesh(new THREE.IcosahedronGeometry(.2,0),'#acb96c',.2,.2,0,stack);}
   if(s.construction){for(const [group,n,x]of [[damPile,s.damMud,.6],[storedPile,s.mud,1.4]])for(let i=0;i<Math.min(6,n);i++)mesh(new THREE.IcosahedronGeometry(.17,0),'#715138',x,.12+Math.floor(i/3)*.18,(i%3)*.22,group);}
   if(s.version===2)for(let i=0;i<Math.min(10,s.food);i++)mesh(new THREE.IcosahedronGeometry(.13,0),'#a4b66d',-.8+(i%3)*.2,.08+Math.floor(i/3)*.15,.7,storedPile);
   for(const record of occluders)if(record.root===lodge||record.root===grove)refresh(record);
+ }
+ // Counts/geometry can be cached; support heights cannot. Excavation, weather
+ // and completed dams can change the surface beneath an unchanged inventory.
+ function positionSupplies(s){
+  for(const stack of dropped.children){const {x,z}=stack.position,ground=groundHeight(x,z,s),water=stack.userData.floats?waterLevel(x,z,s):undefined;stack.position.y=Math.max(ground,water??ground)+.05;}
+  damPile.position.y=Math.max(groundHeight(-2,8.5,s),waterLevel(-2,8.5,s)??-Infinity);
  }
  function resize(){const w=container.clientWidth,h=container.clientHeight;if(!w||!h)return;camera.aspect=w/h;camera.updateProjectionMatrix();renderer?.setSize(w,h,false);}
  new ResizeObserver(resize).observe(container);resize();
@@ -244,7 +250,7 @@ export function createExploreScene(container){
  }
  return {mode:renderer?'WebGL':'Compatibility renderer',update(s,view,time){
   const dt=lastFrame?Math.min(.1,Math.max(0,(time-lastFrame)/1000)):1/60;
-  landscape(s);inventory(s);drawPlaced(s,view.previewState);
+  landscape(s);inventory(s);positionSupplies(s);drawPlaced(s,view.previewState);
   const mode=movementMode(s.x,s.z,s),swim=mode==='swimming',moving=view.moving;
   const surface=waterLevel(s.x,s.z,s)??0;
   beaver.position.set(s.x,swim?surface-.12:groundHeight(s.x,s.z,s),s.z);

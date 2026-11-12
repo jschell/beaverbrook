@@ -3,7 +3,7 @@ import {familyOutlook,familyActivity,journeyStatus,journeyHint,journeyFeedback} 
 import {damWorkSites,nextDamWork} from './dam-work.mjs';
 import {createDamPlanner} from './dam-planner.mjs?v=dam-feedback-2';
 import {CRESTS} from './dam-placement.mjs';
-import {createExploreScene} from './explore-scene.mjs?v=player-marker-1';
+import {createExploreScene} from './explore-scene.mjs?v=supply-support-1';
 import {BOUNDS,LODGE,CHANNELS,movementMode,groundHeight,waterDepth} from './explore-rules.mjs';
 import {freshHabitat,freshDamLab,habitatMove,habitatOptions,primaryHabitatAction,habitatAction,loadHabitat,PATCHES,DAM,localPlace,homeStatus,channelStatus,weather,DAY_WORK} from './habitat-rules.mjs';
 
